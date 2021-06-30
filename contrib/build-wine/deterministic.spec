@@ -10,8 +10,6 @@ for i, x in enumerate(sys.argv):
 else:
     raise Exception('no name')
 
-PYHOME = 'c:/python3'
-
 home = 'C:\\electrum\\'
 
 # see https://github.com/pyinstaller/pyinstaller/issues/2005
@@ -94,7 +92,7 @@ for x in a.binaries.copy():
             a.binaries.remove(x)
             print('----> Removed x =', x)
 
-qt_data2remove=(r'pyqt5\qt\translations\qtwebengine_locales', )
+qt_data2remove=(r'pyqt5\qt\translations\qtwebengine_locales',)
 print("Removing Qt datas:", *qt_data2remove)
 for x in a.datas.copy():
     for r in qt_data2remove:
@@ -128,7 +126,7 @@ exe_portable = EXE(
     pyz,
     a.scripts,
     a.binaries,
-    a.datas + [ ('is_portable', 'README.md', 'DATA' ) ],
+    a.datas + [('is_portable', 'README.md', 'DATA')],
     name=os.path.join('build\\pyi.win32\\electrum', cmdline_name + "-portable.exe"),
     debug=False,
     strip=None,
@@ -139,7 +137,7 @@ exe_portable = EXE(
 #####
 # exe and separate files that NSIS uses to build installer "setup" exe
 
-exe_dependent = EXE(
+exe_inside_setup_noconsole = EXE(
     pyz,
     a.scripts,
     exclude_binaries=True,
@@ -150,8 +148,20 @@ exe_dependent = EXE(
     icon=home+'electrum/gui/icons/electrum.ico',
     console=False)
 
+exe_inside_setup_console = EXE(
+    pyz,
+    a.scripts,
+    exclude_binaries=True,
+    name=os.path.join('build\\pyi.win32\\electrum', cmdline_name+"-debug"),
+    debug=False,
+    strip=None,
+    upx=False,
+    icon=home+'electrum/gui/icons/electrum.ico',
+    console=True)
+
 coll = COLLECT(
-    exe_dependent,
+    exe_inside_setup_noconsole,
+    exe_inside_setup_console,
     a.binaries,
     a.zipfiles,
     a.datas,

@@ -17,11 +17,7 @@ bin/
 .mypy_cache
 .vscode
 electrum_data
-
-# icons
-electrum/gui/kivy/theming/light-0.png
-electrum/gui/kivy/theming/light-1.png
-electrum/gui/kivy/theming/light.atlas
+.DS_Store
 
 # tests/tox
 .tox/
@@ -35,13 +31,15 @@ contrib/build-wine/fresh_clone/
 contrib/build-linux/sdist/fresh_clone/
 contrib/build-linux/appimage/build/
 contrib/build-linux/appimage/.cache/
-contrib/android_debug.keystore
+contrib/android/fresh_clone
 contrib/android/android_debug.keystore
 contrib/secp256k1/
 contrib/zbar/
+contrib/osx/build-venv/
 
 # shared objects
 electrum/*.so
 electrum/*.so.0
 electrum/*.dll
 electrum/*.dylib
+contrib/osx/*.dylib

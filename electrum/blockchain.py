@@ -29,7 +29,7 @@ from . import util
 from .bitcoin import hash_encode, int_to_hex, rev_hex
 from .crypto import sha256d
 from . import constants
-from .util import bfh, bh2u
+from .util import bfh, bh2u, with_lock
 from .simple_config import SimpleConfig
 from .logging import get_logger, Logger
 
@@ -110,7 +110,7 @@ def hash_raw_header(header: str) -> str:
 # key: blockhash hex at forkpoint
 # the chain at some key is the best chain that includes the given hash
 blockchains = {}  # type: Dict[str, Blockchain]
-blockchains_lock = threading.RLock()
+blockchains_lock = threading.RLock()  # lock order: take this last; so after Blockchain.lock
 
 
 def read_blockchains(config: 'SimpleConfig'):
@@ -219,12 +219,6 @@ class Blockchain(Logger):
         self.lock = threading.RLock()
         self.update_size()
 
-    def with_lock(func):
-        def func_wrapper(self, *args, **kwargs):
-            with self.lock:
-                return func(self, *args, **kwargs)
-        return func_wrapper
-
     @property
     def checkpoints(self):
         return constants.net.CHECKPOINTS
@@ -246,7 +240,7 @@ class Blockchain(Logger):
 
     def get_parent_heights(self) -> Mapping['Blockchain', int]:
         """Returns map: (parent chain -> height of last common block)"""
-        with blockchains_lock:
+        with self.lock, blockchains_lock:
             result = {self: self.height()}
             chain = self
             while True:
@@ -330,8 +324,8 @@ class Blockchain(Logger):
         if constants.net.TESTNET:
             return
         bits = cls.target_to_bits(target)
-        if bits != header.get('bits'):
-            raise Exception("bits mismatch: %s vs %s" % (bits, header.get('bits')))
+        #if bits != header.get('bits'):
+        #    raise Exception("bits mismatch: %s vs %s" % (bits, header.get('bits')))
         # Don't verify AuxPoW when covered by a checkpoint
         if header.get('block_height') <= constants.net.max_checkpoint():
             skip_auxpow = True
@@ -585,7 +579,7 @@ class Blockchain(Logger):
     @classmethod
     def bits_to_target(cls, bits: int) -> int:
         bitsN = (bits >> 24) & 0xff
-        if not (0x03 <= bitsN <= 0x1d):
+        if not (0x03 <= bitsN <= 0x1f): #Doichain
             raise Exception("First part of bits should be in [0x03, 0x1d]")
         bitsBase = bits & 0xffffff
         if not (0x8000 <= bitsBase <= 0x7fffff):

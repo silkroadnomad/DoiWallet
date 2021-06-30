@@ -42,6 +42,7 @@ def read_json(filename, default):
 
 GIT_REPO_URL = "https://github.com/spesmilo/electrum"
 GIT_REPO_ISSUES_URL = "https://github.com/spesmilo/electrum/issues"
+BIP39_WALLET_FORMATS = read_json('bip39_wallet_formats.json', [])
 
 
 class AbstractNet:
@@ -61,14 +62,14 @@ class BitcoinMainnet(AbstractNet):
 
     TESTNET = False
     WIF_PREFIX = 0x80
-    ADDRTYPE_P2PKH = 0
-    ADDRTYPE_P2SH = 5
-    SEGWIT_HRP = "bc"
-    GENESIS = "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"
+    ADDRTYPE_P2PKH = 52 #34 hex
+    ADDRTYPE_P2SH = 13 #D hex
+    SEGWIT_HRP = "dc"
+    GENESIS = "000006fdd8b4d786fd9bdde5bae9486c464e3aa4336c5f8415dfdd3fc1679134"
     DEFAULT_PORTS = {'t': '50001', 's': '50002'}
     DEFAULT_SERVERS = read_json('servers.json', {})
     CHECKPOINTS = read_json('checkpoints.json', [])
-    BLOCK_HEIGHT_FIRST_LIGHTNING_CHANNELS = 497000
+    #BLOCK_HEIGHT_FIRST_LIGHTNING_CHANNELS = 497000
 
     XPRV_HEADERS = {
         'standard':    0x0488ade4,  # xprv
@@ -89,12 +90,10 @@ class BitcoinMainnet(AbstractNet):
     BIP44_COIN_TYPE = 0
     LN_REALM_BYTE = 0
     LN_DNS_SEEDS = [
-        'nodes.lightning.directory.',
-        'lseed.bitcoinstats.com.',
     ]
 
-    AUXPOW_CHAIN_ID = 0x0001
-    AUXPOW_START_HEIGHT = 19200
+    AUXPOW_CHAIN_ID = 0x0002
+    AUXPOW_START_HEIGHT = 1
 
 
 class BitcoinTestnet(AbstractNet):
