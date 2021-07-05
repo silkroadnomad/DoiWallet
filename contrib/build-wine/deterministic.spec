@@ -10,7 +10,7 @@ for i, x in enumerate(sys.argv):
 else:
     raise Exception('no name')
 
-home = 'C:\\electrum\\'
+home = 'C:\\electrum-doi\\'
 
 # see https://github.com/pyinstaller/pyinstaller/issues/2005
 hiddenimports = []
