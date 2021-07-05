@@ -10,7 +10,7 @@ set -e
 
 . "$CONTRIB"/build_tools_util.sh
 
-pushd $WINEPREFIX/drive_c/electrum-doi
+pushd $WINEPREFIX/drive_c/electrum-doi/electrum
 
 VERSION=`git describe --tags --dirty --always`
 info "Last commit: $VERSION"
