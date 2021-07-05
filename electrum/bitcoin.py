@@ -354,7 +354,7 @@ DUST_LIMIT_DEFAULT_SAT_SEGWIT = 294
 
 
 def dust_threshold(network: 'Network' = None) -> int:
-    """Returns the dust limit in satoshis."""
+    """Returns the dust limit in swartzs."""
     # Change <= dust threshold is added to the tx fee
     dust_lim = 182 * 3 * relayfee(network)  # in msat
     # convert to sat, but round up:

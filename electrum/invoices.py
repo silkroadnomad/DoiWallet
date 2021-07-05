@@ -99,7 +99,7 @@ class Invoice(StoredObject):
         return status_str
 
     def get_amount_sat(self) -> Union[int, Decimal, str, None]:
-        """Returns a decimal satoshi amount, or '!' or None."""
+        """Returns a decimal swartz amount, or '!' or None."""
         raise NotImplementedError()
 
     @classmethod
@@ -114,7 +114,7 @@ class Invoice(StoredObject):
 @attr.s
 class OnchainInvoice(Invoice):
     message = attr.ib(type=str, kw_only=True)
-    amount_sat = attr.ib(kw_only=True)  # type: Union[int, str]  # in satoshis. can be '!'
+    amount_sat = attr.ib(kw_only=True)  # type: Union[int, str]  # in swartzs. can be '!'
     exp = attr.ib(type=int, kw_only=True, validator=attr.validators.instance_of(int))
     time = attr.ib(type=int, kw_only=True, validator=attr.validators.instance_of(int))
     id = attr.ib(type=str, kw_only=True)

@@ -925,7 +925,7 @@ class Network(Logger, NetworkRetryManager[ServerAddr]):
             r"bare-multisig": None,
             r"dust":
                 (_("Transaction could not be broadcast due to dust outputs.\n"
-                   "Some of the outputs are too small in value, probably lower than 1000 satoshis.\n"
+                   "Some of the outputs are too small in value, probably lower than 1000 swartzs.\n"
                    "Check the units, make sure you haven't confused e.g. mDOI and DOI.")),
             r"multi-op-return": _("The transaction was rejected because it contains multiple OP_RETURN outputs."),
         }

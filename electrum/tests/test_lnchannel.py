@@ -409,16 +409,16 @@ class TestChannel(ElectrumTestCase):
         self.assertTrue(bob_channel.signature_fits(bob_channel.get_latest_commitment(LOCAL)))
         bob_channel.receive_revocation(aliceRevocation)
 
-        # At this point, both sides should have the proper number of satoshis
+        # At this point, both sides should have the proper number of swartzs
         # sent, and commitment height updated within their local channel
         # state.
         aliceSent = 0
         bobSent = 0
 
-        self.assertEqual(alice_channel.total_msat(SENT), aliceSent, "alice has incorrect milli-satoshis sent")
-        self.assertEqual(alice_channel.total_msat(RECEIVED), bobSent, "alice has incorrect milli-satoshis received")
-        self.assertEqual(bob_channel.total_msat(SENT), bobSent, "bob has incorrect milli-satoshis sent")
-        self.assertEqual(bob_channel.total_msat(RECEIVED), aliceSent, "bob has incorrect milli-satoshis received")
+        self.assertEqual(alice_channel.total_msat(SENT), aliceSent, "alice has incorrect milli-swartzs sent")
+        self.assertEqual(alice_channel.total_msat(RECEIVED), bobSent, "alice has incorrect milli-swartzs received")
+        self.assertEqual(bob_channel.total_msat(SENT), bobSent, "bob has incorrect milli-swartzs sent")
+        self.assertEqual(bob_channel.total_msat(RECEIVED), aliceSent, "bob has incorrect milli-swartzs received")
         self.assertEqual(bob_channel.get_oldest_unrevoked_ctn(LOCAL), 1, "bob has incorrect commitment height")
         self.assertEqual(alice_channel.get_oldest_unrevoked_ctn(LOCAL), 1, "alice has incorrect commitment height")
 
@@ -490,10 +490,10 @@ class TestChannel(ElectrumTestCase):
         # should show 1 DOI received. They should also be at commitment height
         # two, with the revocation window extended by 1 (5).
         mSatTransferred = one_bitcoin_in_msat
-        self.assertEqual(alice_channel.total_msat(SENT), mSatTransferred, "alice satoshis sent incorrect")
-        self.assertEqual(alice_channel.total_msat(RECEIVED), 0, "alice satoshis received incorrect")
-        self.assertEqual(bob_channel.total_msat(RECEIVED), mSatTransferred, "bob satoshis received incorrect")
-        self.assertEqual(bob_channel.total_msat(SENT), 0, "bob satoshis sent incorrect")
+        self.assertEqual(alice_channel.total_msat(SENT), mSatTransferred, "alice swartzs sent incorrect")
+        self.assertEqual(alice_channel.total_msat(RECEIVED), 0, "alice swartzs received incorrect")
+        self.assertEqual(bob_channel.total_msat(RECEIVED), mSatTransferred, "bob swartzs received incorrect")
+        self.assertEqual(bob_channel.total_msat(SENT), 0, "bob swartzs sent incorrect")
         self.assertEqual(bob_channel.get_latest_ctn(LOCAL), 2, "bob has incorrect commitment height")
         self.assertEqual(alice_channel.get_latest_ctn(LOCAL), 2, "alice has incorrect commitment height")
 
@@ -524,10 +524,10 @@ class TestChannel(ElectrumTestCase):
         bob_channel.receive_htlc_settle(self.paymentPreimage, bob_index)
 
         force_state_transition(alice_channel, bob_channel)
-        self.assertEqual(alice_channel.total_msat(SENT), one_bitcoin_in_msat, "alice satoshis sent incorrect")
-        self.assertEqual(alice_channel.total_msat(RECEIVED), 5 * one_bitcoin_in_msat, "alice satoshis received incorrect")
-        self.assertEqual(bob_channel.total_msat(RECEIVED), one_bitcoin_in_msat, "bob satoshis received incorrect")
-        self.assertEqual(bob_channel.total_msat(SENT), 5 * one_bitcoin_in_msat, "bob satoshis sent incorrect")
+        self.assertEqual(alice_channel.total_msat(SENT), one_bitcoin_in_msat, "alice swartzs sent incorrect")
+        self.assertEqual(alice_channel.total_msat(RECEIVED), 5 * one_bitcoin_in_msat, "alice swartzs received incorrect")
+        self.assertEqual(bob_channel.total_msat(RECEIVED), one_bitcoin_in_msat, "bob swartzs received incorrect")
+        self.assertEqual(bob_channel.total_msat(SENT), 5 * one_bitcoin_in_msat, "bob swartzs sent incorrect")
 
 
     def alice_to_bob_fee_update(self, fee=111):
