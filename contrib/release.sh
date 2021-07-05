@@ -92,9 +92,9 @@ else
     git checkout "${COMMIT}^{commit}"
     sudo docker run -it \
         --name electrum-wine-builder-cont \
-        -v $PWD:/opt/wine64/drive_c/electrum \
+        -v $PWD:/opt/wine64/drive_c/electrum-doi \
         --rm \
-        --workdir /opt/wine64/drive_c/electrum/contrib/build-wine \
+        --workdir /opt/wine64/drive_c/electrum-doi/contrib/build-wine \
         electrum-wine-builder-img \
         ./build.sh
     # do this in the fresh clone directory!
