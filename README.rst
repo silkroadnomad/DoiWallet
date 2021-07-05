@@ -1,4 +1,4 @@
-Electrum - Lightweight Bitcoin client (AuxPoW fork)
+Electrum - Lightweight Doichain client (AuxPoW fork)
 ===================================================
 
 ::

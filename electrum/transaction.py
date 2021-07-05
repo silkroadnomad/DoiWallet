@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2011 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -273,7 +273,7 @@ class BCDataStream(object):
         # 0 to 252 :  1-byte-length followed by bytes (if any)
         # 253 to 65,535 : byte'253' 2-byte-length followed by bytes
         # 65,536 to 4,294,967,295 : byte '254' 4-byte-length followed by bytes
-        # ... and the Bitcoin client is coded to understand:
+        # ... and the Doichain client is coded to understand:
         # greater than 4,294,967,295 : byte '255' 8-byte-length followed by bytes of string
         # ... but I don't think it actually handles any strings that big.
         if self.input is None:
@@ -669,7 +669,7 @@ class Transaction:
             # we guess that signatures will be 72 bytes long
             # note: DER-encoded ECDSA signatures are 71 or 72 bytes in practice
             #       See https://bitcoin.stackexchange.com/questions/77191/what-is-the-maximum-size-of-a-der-encoded-ecdsa-signature
-            #       We assume low S (as that is a bitcoin standardness rule).
+            #       We assume low S (as that is a Doichain standardness rule).
             #       We do not assume low R (even though the sigs we create conform), as external sigs,
             #       e.g. from a hw signer cannot be expected to have a low R.
             sig_list = ["00" * 72] * num_sig
@@ -835,7 +835,7 @@ class Transaction:
         return self._cached_network_ser_bytes
 
     def serialize_to_network(self, *, estimate_size=False, include_sigs=True, force_legacy=False) -> str:
-        """Serialize the transaction as used on the Bitcoin network, into hex.
+        """Serialize the transaction as used on the Doichain network, into hex.
         `include_sigs` signals whether to include scriptSigs and witnesses.
         `force_legacy` signals to use the pre-segwit format
         note: (not include_sigs) implies force_legacy

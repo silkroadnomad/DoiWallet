@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2011 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -258,8 +258,8 @@ class Commands:
     @command('')
     async def restore(self, text, passphrase=None, password=None, encrypt_file=True, wallet_path=None):
         """Restore a wallet from text. Text can be a seed phrase, a master
-        public key, a master private key, a list of bitcoin addresses
-        or bitcoin private keys.
+        public key, a master private key, a list of Doichain addresses
+        or Doichain private keys.
         If you want to be prompted for an argument, type '?' or ':' (concealed)
         """
         # TODO create a separate command that blocks until wallet is synced
@@ -715,7 +715,7 @@ class Commands:
 
     @command('w')
     async def setlabel(self, key, label, wallet: Abstract_Wallet = None):
-        """Assign a label to an item. Item may be a bitcoin address or a
+        """Assign a label to an item. Item may be a Doichain address or a
         transaction ID"""
         wallet.set_label(key, label)
 

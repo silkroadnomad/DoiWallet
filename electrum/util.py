@@ -1,4 +1,4 @@
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2011 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -75,11 +75,11 @@ def inv_dict(d):
 ca_path = certifi.where()
 
 
-base_units = {'BTC':8, 'mBTC':5, 'bits':2, 'sat':0}
+base_units = {'BTC':8, 'mDOI':5, 'bits':2, 'sat':0}
 base_units_inverse = inv_dict(base_units)
-base_units_list = ['BTC', 'mBTC', 'bits', 'sat']  # list(dict) does not guarantee order
+base_units_list = ['BTC', 'mDOI', 'bits', 'sat']  # list(dict) does not guarantee order
 
-DECIMAL_POINT_DEFAULT = 5  # mBTC
+DECIMAL_POINT_DEFAULT = 5  # mDOI
 
 
 class UnknownBaseUnit(Exception): pass
@@ -879,12 +879,12 @@ def parse_URI(uri: str, on_pr: Callable = None, *, loop=None) -> dict:
 
     if ':' not in uri:
         if not bitcoin.is_address(uri):
-            raise InvalidBitcoinURI("Not a bitcoin address")
+            raise InvalidBitcoinURI("Not a Doichain address")
         return {'address': uri}
 
     u = urllib.parse.urlparse(uri)
     if u.scheme.lower() != BITCOIN_BIP21_URI_SCHEME:
-        raise InvalidBitcoinURI("Not a bitcoin URI")
+        raise InvalidBitcoinURI("Not a Doichain URI")
     address = u.path
 
     # python for android fails to parse query
@@ -901,7 +901,7 @@ def parse_URI(uri: str, on_pr: Callable = None, *, loop=None) -> dict:
     out = {k: v[0] for k, v in pq.items()}
     if address:
         if not bitcoin.is_address(address):
-            raise InvalidBitcoinURI(f"Invalid bitcoin address: {address}")
+            raise InvalidBitcoinURI(f"Invalid Doichain address: {address}")
         out['address'] = address
     if 'amount' in out:
         am = out['amount']

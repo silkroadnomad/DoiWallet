@@ -1,4 +1,4 @@
-# Electrum - Lightweight Bitcoin Client
+# Electrum - Lightweight Doichain Client
 # Copyright (c) 2011-2016 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -926,7 +926,7 @@ class Network(Logger, NetworkRetryManager[ServerAddr]):
             r"dust":
                 (_("Transaction could not be broadcast due to dust outputs.\n"
                    "Some of the outputs are too small in value, probably lower than 1000 satoshis.\n"
-                   "Check the units, make sure you haven't confused e.g. mBTC and BTC.")),
+                   "Check the units, make sure you haven't confused e.g. mDOI and BTC.")),
             r"multi-op-return": _("The transaction was rejected because it contains multiple OP_RETURN outputs."),
         }
         for substring in policy_error_messages:
@@ -1008,7 +1008,7 @@ class Network(Logger, NetworkRetryManager[ServerAddr]):
             r"bad-txns-too-many-sigops": None,
             r"mempool min fee not met":
                 ("mempool min fee not met\n" +
-                 _("Your transaction is paying a fee that is so low that the bitcoin node cannot "
+                 _("Your transaction is paying a fee that is so low that the Doichain node cannot "
                    "fit it into its mempool. The mempool is already full of hundreds of megabytes "
                    "of transactions that all pay higher fees. Try to increase the fee.")),
             r"min relay fee not met": None,

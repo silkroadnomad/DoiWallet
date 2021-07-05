@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2011 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -69,7 +69,7 @@ ca_path = certifi.where()
 
 BUCKET_NAME_OF_ONION_SERVERS = 'onion'
 
-# The default Bitcoin frame size limit of 1 MB doesn't work for AuxPoW-based
+# The default Doichain frame size limit of 1 MB doesn't work for AuxPoW-based
 # chains, because those chains' block headers have extra AuxPoW data.  A limit
 # of 10 MB works fine for Namecoin as of block height 418744 (5 MB fails after
 # height 155232); we set a limit of 20 MB so that we have extra wiggle room.
@@ -1067,7 +1067,7 @@ class Interface(Logger):
             return ''
         if not bitcoin.is_address(res):
             # note: do not hard-fail -- allow server to use future-type
-            #       bitcoin address we do not recognize
+            #       Doichain address we do not recognize
             self.logger.info(f"invalid donation address from server: {repr(res)}")
             res = ''
         return res

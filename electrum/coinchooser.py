@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2015 kyuupichan@gmail
 #
 # Permission is hereby granted, free of charge, to any person
@@ -307,7 +307,7 @@ class CoinChooserBase(Logger):
             total_input = input_value + bucket_value_sum
             if total_input < spent_amount:  # shortcut for performance
                 return False
-            # any bitcoin tx must have at least 1 input by consensus
+            # any Doichain tx must have at least 1 input by consensus
             # (check we add some new UTXOs now or already have some fixed inputs)
             if not buckets and not inputs:
                 return False
@@ -464,7 +464,7 @@ class CoinChooserPrivacy(CoinChooserRandom):
                 pass  # no change is great!
             elif change < min_change:
                 badness += (min_change - change) / (min_change + 10000)
-                # Penalize really small change; under 1 mBTC ~= using 1 more input
+                # Penalize really small change; under 1 mDOI ~= using 1 more input
                 if change < COIN / 1000:
                     badness += 1
             elif change > max_change:

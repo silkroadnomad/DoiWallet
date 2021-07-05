@@ -1,4 +1,4 @@
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2015 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person
@@ -427,7 +427,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
             addr = str(addrs[0])
             if not bitcoin.is_address(addr):
                 neutered_addr = addr[:5] + '..' + addr[-2:]
-                raise WalletFileException(f'The addresses in this wallet are not bitcoin addresses.\n'
+                raise WalletFileException(f'The addresses in this wallet are not Doichain addresses.\n'
                                           f'e.g. {neutered_addr} (length: {len(addr)})')
 
     def check_returned_address_for_corruption(func):
@@ -566,7 +566,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
         if self.is_watching_only():
             raise Exception(_("This is a watching-only wallet"))
         if not is_address(address):
-            raise Exception(f"Invalid bitcoin address: {address}")
+            raise Exception(f"Invalid Doichain address: {address}")
         if not self.is_mine(address):
             raise Exception(_('Address not in wallet.') + f' {address}')
         index = self.get_address_index(address)
@@ -1281,7 +1281,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
                 addrs = self.get_change_addresses(slice_start=-self.gap_limit_for_change)
                 change_addrs = [random.choice(addrs)] if addrs else []
         for addr in change_addrs:
-            assert is_address(addr), f"not valid bitcoin address: {addr}"
+            assert is_address(addr), f"not valid Doichain address: {addr}"
             # note that change addresses are not necessarily ismine
             # in which case this is a no-op
             self.check_address_for_corruption(addr)
@@ -1312,7 +1312,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
                 selected_addr = random.choice(addrs)
             else:  # fallback for e.g. imported wallets
                 selected_addr = self.get_receiving_address()
-        assert is_address(selected_addr), f"not valid bitcoin address: {selected_addr}"
+        assert is_address(selected_addr), f"not valid Doichain address: {selected_addr}"
         return selected_addr
 
     def make_unsigned_transaction(
@@ -1324,7 +1324,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
             is_sweep=False,
             rbf=False) -> PartialTransaction:
 
-        if not coins:  # any bitcoin tx must have at least 1 input by consensus
+        if not coins:  # any Doichain tx must have at least 1 input by consensus
             raise NotEnoughFunds()
         if any([c.already_has_some_signatures() for c in coins]):
             raise Exception("Some inputs already contain signatures!")
@@ -2286,7 +2286,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
             addr = req.get_address()
             if sanity_checks:
                 if not bitcoin.is_address(addr):
-                    raise Exception(_('Invalid Bitcoin address.'))
+                    raise Exception(_('Invalid Doichain address.'))
                 if not self.is_mine(addr):
                     raise Exception(_('Address not in wallet.'))
             key = addr
@@ -2433,7 +2433,7 @@ class Abstract_Wallet(AddressSynchronizer, ABC):
         pass
 
     def price_at_timestamp(self, txid, price_func):
-        """Returns fiat price of bitcoin at the time tx got confirmed."""
+        """Returns fiat price of Doichain at the time tx got confirmed."""
         timestamp = self.get_tx_height(txid).timestamp
         return price_func(timestamp if timestamp else time.time())
 
@@ -3269,8 +3269,8 @@ def restore_wallet_from_text(text, *, path, config: SimpleConfig,
                              passphrase=None, password=None, encrypt_file=True,
                              gap_limit=None) -> dict:
     """Restore a wallet from text. Text can be a seed phrase, a master
-    public key, a master private key, a list of bitcoin addresses
-    or bitcoin private keys."""
+    public key, a master private key, a list of Doichain addresses
+    or Doichain private keys."""
     storage = WalletStorage(path)
     if storage.file_exists():
         raise Exception("Remove the existing wallet first!")

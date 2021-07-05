@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Electrum - lightweight Bitcoin client
+# Electrum - lightweight Doichain client
 # Copyright (C) 2012 thomasv@gitorious
 #
 # Permission is hereby granted, free of charge, to any person
@@ -576,7 +576,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
         msg = ''.join([
             _("You are in testnet mode."), ' ',
             _("Testnet coins are worthless."), '\n',
-            _("Testnet is separate from the main Bitcoin network. It is used for testing.")
+            _("Testnet is separate from the main Doichain network. It is used for testing.")
         ])
         cb = QCheckBox(_("Don't show this again."))
         cb_checked = False
@@ -794,7 +794,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
                            _("You do not need to perform regular backups, because your wallet can be "
                               "recovered from a secret phrase that you can memorize or write on paper.") + " " +
                            _("Startup times are instant because it operates in conjunction with high-performance "
-                              "servers that handle the most complicated parts of the Bitcoin system.") + "\n\n" +
+                              "servers that handle the most complicated parts of the Doichain system.") + "\n\n" +
                            _("Uses icons from the Icons8 icon pack (icons8.com).")))
 
     def show_bitcoin_paper(self):
@@ -884,7 +884,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
         return self.config.format_amount(amount_sat, is_diff=is_diff, whitespaces=whitespaces)
 
     def format_amount_and_units(self, amount_sat, *, timestamp: int = None) -> str:
-        """Returns string with both bitcoin and fiat amounts, in desired units.
+        """Returns string with both Doichain and fiat amounts, in desired units.
         E.g. 500_000 -> '0.005 BTC (191.42 EUR)'
         """
         text = self.config.format_amount_and_units(amount_sat)
@@ -1097,8 +1097,8 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
             _('This information is seen by the recipient if you send them a signed payment request.'),
             '\n\n',
             _('For on-chain requests, the address gets reserved until expiration. After that, it might get reused.'), ' ',
-            _('The bitcoin address never expires and will always be part of this electrum wallet.'), ' ',
-            _('You can reuse a bitcoin address any number of times but it is not good for your privacy.'),
+            _('The Doichain address never expires and will always be part of this electrum wallet.'), ' ',
+            _('You can reuse a Doichain address any number of times but it is not good for your privacy.'),
             '\n\n',
             _('For Lightning requests, payments will not be accepted after the expiration.'),
         ])
@@ -1353,7 +1353,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
         self.payto_e = PayToEdit(self)
         self.payto_e.addPasteButton(self.app)
         msg = _('Recipient of the funds.') + '\n\n'\
-              + _('You may enter a Bitcoin address, a label from your list of contacts (a list of completions will be proposed), or an alias (email-like address that forwards to a Bitcoin address)')
+              + _('You may enter a Doichain address, a label from your list of contacts (a list of completions will be proposed), or an alias (email-like address that forwards to a Doichain address)')
         payto_label = HelpLabel(_('Pay to'), msg)
         grid.addWidget(payto_label, 1, 0)
         grid.addWidget(self.payto_e, 1, 1, 1, -1)
@@ -2645,7 +2645,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
         address  = address.text().strip()
         message = message.toPlainText().strip()
         if not bitcoin.is_address(address):
-            self.show_message(_('Invalid Bitcoin address.'))
+            self.show_message(_('Invalid Doichain address.'))
             return
         if self.wallet.is_watching_only():
             self.show_message(_('This is a watching-only wallet.'))
@@ -2673,7 +2673,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
         address  = address.text().strip()
         message = message.toPlainText().strip().encode('utf-8')
         if not bitcoin.is_address(address):
-            self.show_message(_('Invalid Bitcoin address.'))
+            self.show_message(_('Invalid Doichain address.'))
             return
         try:
             # This can throw on invalid base64
@@ -2831,7 +2831,7 @@ class ElectrumWindow(QMainWindow, MessageBoxMixin, Logger):
             return
         if not data:
             return
-        # if the user scanned a bitcoin URI
+        # if the user scanned a Doichain URI
         if data.lower().startswith(BITCOIN_BIP21_URI_SCHEME + ':'):
             self.pay_to_URI(data)
             return
