@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Electrum - lightweight Doichain client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2016 Thomas Voegtlin
 #
 # Permission is hereby granted, free of charge, to any person

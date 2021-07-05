@@ -1,4 +1,4 @@
-# Electrum - lightweight Doichain client
+# Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2012 thomasv@ecdsa.org
 #
 # Permission is hereby granted, free of charge, to any person

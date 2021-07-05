@@ -1,5 +1,5 @@
-# Electrum - lightweight Doichain client
-# Copyright (C) 2018 The Electrum Developers
+# Electrum-DOI -lightweight Doichain client
+# Copyright (C) 2018 The Electrum-DOI Developers
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
