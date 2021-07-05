@@ -47,7 +47,7 @@ $WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location \
 
 pushd $WINEPREFIX/drive_c/electrum-doi
 # see https://github.com/pypa/pip/issues/2195 -- pip makes a copy of the entire directory
-info "Pip installing Electrum. This might take a long time if the project folder is large."
+info "Pip installing Electrum-DOI. This might take a long time if the project folder is large."
 $WINE_PYTHON -m pip install --no-dependencies --no-warn-script-location .
 popd
 
@@ -65,7 +65,7 @@ popd
 
 info "building NSIS installer"
 # $VERSION could be passed to the electrum.nsi script, but this would require some rewriting in the script itself.
-wine "$WINEPREFIX/drive_c/Program Files (x86)/NSIS/makensis.exe" /DPRODUCT_VERSION=$VERSION electrum.nsi
+wine "$WINEPREFIX/drive_c/Program Files (x86)/NSIS/makensis.exe" /DPRODUCT_VERSION=$VERSION electrum-doi.nsi
 
 cd dist
 mv electrum-setup.exe $NAME_ROOT-$VERSION-setup.exe

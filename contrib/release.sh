@@ -31,7 +31,7 @@ fi
 set -ex
 
 # create tarball
-target=Electrum-$VERSION.tar.gz
+target=Electrum-DOI-$VERSION.tar.gz
 if test -f dist/$target; then
     echo "file exists: $target"
 else
@@ -105,8 +105,8 @@ else
 fi
 
 # android
-target1=Electrum-$VERSION.0-armeabi-v7a-release.apk
-target2=Electrum-$VERSION.0-arm64-v8a-release.apk
+target1=Electrum-DOI-$VERSION.0-armeabi-v7a-release.apk
+target2=Electrum-DOI-$VERSION.0-arm64-v8a-release.apk
 
 if test -f dist/$target1; then
     echo "file exists: $target1"

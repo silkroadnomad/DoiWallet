@@ -543,7 +543,7 @@ class Commands:
 
     @command('')
     async def version(self):
-        """Return the version of Electrum."""
+        """Return the version of Electrum-DOI."""
         from .version import ELECTRUM_VERSION
         return ELECTRUM_VERSION
 

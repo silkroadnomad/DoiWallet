@@ -30,15 +30,15 @@ string = string.replace("##VERSION_ANDROID##", version_android)
 string = string.replace("##VERSION_APK##", APK_VERSION)
 
 files = {
-    'tgz': "Electrum-%s.tar.gz" % version,
-    'appimage': "electrum-%s-x86_64.AppImage" % version,
-    'zip': "Electrum-%s.zip" % version,
-    'mac': "electrum-%s.dmg" % version_mac,
-    'win': "electrum-%s.exe" % version_win,
-    'win_setup': "electrum-%s-setup.exe" % version_win,
-    'win_portable': "electrum-%s-portable.exe" % version_win,
-    'apk_arm64': "Electrum-%s-arm64-v8a-release.apk" % APK_VERSION,
-    'apk_armeabi': "Electrum-%s-armeabi-v7a-release.apk" % APK_VERSION,
+    'tgz': "Electrum-DOI-%s.tar.gz" % version,
+    'appimage': "electrum-doi-%s-x86_64.AppImage" % version,
+    'zip': "Electrum-DOI-%s.zip" % version,
+    'mac': "electrum-doi-%s.dmg" % version_mac,
+    'win': "electrum-doi-%s.exe" % version_win,
+    'win_setup': "electrum-doi-%s-setup.exe" % version_win,
+    'win_portable': "electrum-doi-%s-portable.exe" % version_win,
+    'apk_arm64': "Electrum-DOI-%s-arm64-v8a-release.apk" % APK_VERSION,
+    'apk_armeabi': "Electrum-DOI-%s-armeabi-v7a-release.apk" % APK_VERSION,
 }
 
 for k, n in files.items():
