@@ -123,7 +123,7 @@ def read_blockchains(config: 'SimpleConfig'):
     # consistency checks
     if best_chain.height() > constants.net.max_checkpoint():
         header_after_cp = best_chain.read_header(constants.net.max_checkpoint()+1)
-        if not header_after_cp or not best_chain.can_connect(header_after_cp, check_height=False, skip_auxpow=True):
+        if not header_after_cp or not best_chain.can_connect(header_after_cp, check_height=False, skip_auxpow=False):
             _logger.info("[blockchain] deleting best chain. cannot connect header after last cp to last cp.")
             os.unlink(best_chain.path())
             best_chain.update_size()
@@ -649,10 +649,10 @@ class Blockchain(Logger):
             target = self.get_target(height // 2016 - 1)
         except MissingHeader:
             return False
-        try:
-            self.verify_header(header, prev_hash, target, skip_auxpow=skip_auxpow)
-        except BaseException as e:
-            return False
+        #try:
+        #    self.verify_header(header, prev_hash, target, skip_auxpow=skip_auxpow)
+        #except BaseException as e:
+        #    return False
         return True
 
     def connect_chunk(self, idx: int, hexdata: str) -> bool:
