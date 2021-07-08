@@ -33,6 +33,7 @@ contrib/build-linux/appimage/build/
 contrib/build-linux/appimage/.cache/
 contrib/android/fresh_clone
 contrib/android/android_debug.keystore
+contrib/libusb/
 contrib/secp256k1/
 contrib/zbar/
 contrib/osx/build-venv/
