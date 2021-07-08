@@ -21,7 +21,7 @@ cd "$src_dir/../.."
 
 
 which brew > /dev/null 2>&1 || fail "Please install brew from https://brew.sh/ to continue"
-which xcodebuild > /dev/null 2>&1 || fail "Please install Xcode and xcode command line tools to continue"
+which xcodebuild > /dev/null 2>&1 || fail "Please install xcode command line tools to continue"
 
 # Code Signing: See https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Procedures/Procedures.html
 if [ -n "$CODESIGN_CERT" ]; then
@@ -139,6 +139,9 @@ xcodebuild || cp -r prebuilt_qr build || fail "Could not build CalinsQRReader"
 popd
 DoCodeSignMaybe "CalinsQRReader.app" "${d}/build/Release/CalinsQRReader.app"
 
+info "Building libusb dylib..."
+"$CONTRIB"/make_libusb.sh || fail "Could not build libusb dylib"
+cp "$ROOT_FOLDER"/electrum/libusb-1.0.dylib "$CONTRIB"/osx
 
 info "Installing requirements..."
 python3 -m pip install --no-dependencies --no-warn-script-location -Ir ./contrib/deterministic-build/requirements.txt \
