@@ -813,7 +813,7 @@ def block_explorer_info():
 
 
 def block_explorer(config: 'SimpleConfig') -> Optional[str]:
-    """Returns name of selected block explorer,
+    """Returns name of selected Doichain Explorer,
     or None if a custom one (not among hardcoded ones) is configured.
     """
     if config.get('block_explorer_custom') is not None:
@@ -838,7 +838,7 @@ def block_explorer_tuple(config: 'SimpleConfig') -> Optional[Tuple[str, dict]]:
                         f"expected a str or a pair but got {custom_be!r}")
         return None
     else:
-        # using one of the hardcoded block explorers
+        # using one of the hardcoded Doichain Explorers
         return block_explorer_info().get(block_explorer(config))
 
 

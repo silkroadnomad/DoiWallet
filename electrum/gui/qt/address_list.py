@@ -257,7 +257,7 @@ class AddressList(MyTreeView):
                 menu.addAction(_("Remove from wallet"), lambda: self.parent.remove_address(addr))
             addr_URL = block_explorer_URL(self.config, 'addr', addr)
             if addr_URL:
-                menu.addAction(_("View on block explorer"), lambda: webopen(addr_URL))
+                menu.addAction(_("View on Doichain Explorer"), lambda: webopen(addr_URL))
 
             if not self.wallet.is_frozen_address(addr):
                 menu.addAction(_("Freeze"), lambda: self.parent.set_frozen_state_of_addresses([addr], True))

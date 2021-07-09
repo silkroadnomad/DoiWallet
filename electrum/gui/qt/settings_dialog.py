@@ -343,8 +343,8 @@ class SettingsDialog(WindowModalDialog):
         if BLOCK_EX_CUSTOM_ITEM in block_explorers:  # malicious translation?
             block_explorers.remove(BLOCK_EX_CUSTOM_ITEM)
         block_explorers.append(BLOCK_EX_CUSTOM_ITEM)
-        msg = _('Choose which online block explorer to use for functions that open a web browser')
-        block_ex_label = HelpLabel(_('Online Block Explorer') + ':', msg)
+        msg = _('Choose which online Doichain Explorer to use for functions that open a web browser')
+        block_ex_label = HelpLabel(_('Online Doichain Explorer') + ':', msg)
         block_ex_combo = QComboBox()
         block_ex_custom_e = QLineEdit(self.config.get('block_explorer_custom') or '')
         block_ex_combo.addItems(block_explorers)

@@ -754,7 +754,7 @@ class HistoryList(MyTreeView, AcceptFileDragDrop):
             for inv in invoices:
                 menu_invs.addAction(_("View invoice"), lambda inv=inv: self.parent.show_onchain_invoice(inv))
         if tx_URL:
-            menu.addAction(_("View on block explorer"), lambda: webopen(tx_URL))
+            menu.addAction(_("View on Doichain Explorer"), lambda: webopen(tx_URL))
         menu.exec_(self.viewport().mapToGlobal(position))
 
     def remove_local_tx(self, tx_hash: str):
