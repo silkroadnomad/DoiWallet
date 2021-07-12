@@ -4,7 +4,7 @@
 PYTHON_VERSION=3.9.0
 BUILDDIR=/tmp/electrum-build
 PACKAGE=Electrum-DOI
-GIT_REPO=https://github.com/spesmilo/electrum
+GIT_REPO=https://github.com/Doichain/electrum-doi
 
 export GCC_STRIP_BINARIES="1"
 

@@ -39,7 +39,7 @@ folder.
         sudo rm -rf $FRESH_CLONE && \
         mkdir -p $FRESH_CLONE && \
         cd $FRESH_CLONE  && \
-        git clone https://github.com/spesmilo/electrum.git && \
+        git clone https://github.com/Doichain/electrum-doi.git && \
         cd electrum
     ```
 
