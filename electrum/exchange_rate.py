@@ -24,8 +24,8 @@ from .logging import Logger
 
 
 DEFAULT_ENABLED = False
-DEFAULT_CURRENCY = "EUR"
-DEFAULT_EXCHANGE = "CoinGecko"  # default exchange should ideally provide historical rates
+DEFAULT_CURRENCY = "USD"
+DEFAULT_EXCHANGE = "CoinPaprika"  # default exchange should ideally provide historical rates
 
 
 # See https://en.wikipedia.org/wiki/ISO_4217
@@ -303,12 +303,20 @@ class CoinDesk(ExchangeBase):
         return json['bpi']
 
 
-class CoinGecko(ExchangeBase):
+class CoinPaprika(ExchangeBase):
 
     async def get_rates(self, ccy):
-        json = await self.get_json('api.coingecko.com', '/api/v3/exchange_rates')
-        return dict([(ccy.upper(), Decimal(d['value']))
-                     for ccy, d in json['rates'].items()])
+        json = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')
+        print(*json, sep = ", ") 
+        exchangeRate = ''
+
+        for di in json:
+            for k in di.keys():
+                if k =='close': exchangeRate = di[k]
+
+        print('exchangeRate ', exchangeRate)
+
+        return float(exchangeRate)
 
     def history_ccys(self):
         # CoinGecko seems to have historical data for all ccys it supports
@@ -609,7 +617,7 @@ class FxThread(ThreadJob):
         """Returns the exchange rate as a Decimal"""
         if not self.is_enabled():
             return Decimal('NaN')
-        rate = self.exchange.quotes.get(self.ccy)
+        rate = self.exchange.quotes
         if rate is None:
             return Decimal('NaN')
         return Decimal(rate)
