@@ -306,17 +306,22 @@ class CoinDesk(ExchangeBase):
 class CoinPaprika(ExchangeBase):
 
     async def get_rates(self, ccy):
-        json = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')
-        print(*json, sep = ", ") 
+        # Get latest price
         exchangeRate = ''
-
-        for di in json:
-            for k in di.keys():
-                if k =='close': exchangeRate = di[k]
-
-        print('exchangeRate ', exchangeRate)
-
-        return float(exchangeRate)
+        json = await self.get_json('api.coinpaprika.com','/v1/coins/doi-doicoin/ohlcv/latest/?quote=usd')
+        if len(json) != 0:
+            for pair in json:
+                for key in pair.keys():
+                    if key =='close': exchangeRate = pair[key]
+            print('exchangeRate ', exchangeRate)
+        else:
+            print('No current data available')
+            json = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
+            for pair in json:
+                for key in pair.keys():
+                    if key =='close': exchangeRate = pair[key]
+            print('exchangeRate ', exchangeRate)
+        return exchangeRate
 
     def history_ccys(self):
         # CoinGecko seems to have historical data for all ccys it supports
