@@ -306,7 +306,7 @@ class CoinDesk(ExchangeBase):
 class CoinPaprika(ExchangeBase):
 
     async def get_rates(self, ccy):
-        # Get latest price
+        # Get latest exchange rate if available
         exchangeRate = ''
         json = await self.get_json('api.coinpaprika.com','/v1/coins/doi-doicoin/ohlcv/latest/?quote=usd')
         if len(json) != 0:
@@ -328,11 +328,19 @@ class CoinPaprika(ExchangeBase):
         return CURRENCIES[self.name()]
 
     async def request_history(self, ccy):
-        history = await self.get_json('api.coingecko.com',
-                                      '/api/v3/coins/bitcoin/market_chart?vs_currency=%s&days=max' % ccy)
-
-        return dict([(datetime.utcfromtimestamp(h[0]/1000).strftime('%Y-%m-%d'), h[1])
-                     for h in history['prices']])
+        historicRate = ''
+        time_close = ''
+                        
+        history = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
+        for pair in history:
+            for key in pair.keys():
+                if key =='close': historicRate = pair[key]
+                if key =='time_close': time_close = pair[key]
+        print('historicRate ', historicRate)
+        print('Time Close of historic rate ', time_close)
+        return dict([time_close, historicRate])
+        #return dict([(datetime.utcfromtimestamp(h[0]/1000).strftime('%Y-%m-%d'), h[1])
+        #             for h in history['prices']])
 
 
 class CointraderMonitor(ExchangeBase):
@@ -664,7 +672,7 @@ class FxThread(ThreadJob):
         # Frequently there is no rate for today, until tomorrow :)
         # Use spot quotes in that case
         if rate in ('NaN', None) and (datetime.today().date() - d_t.date()).days <= 2:
-            rate = self.exchange.quotes.get(self.ccy, 'NaN')
+            rate = self.exchange.quotes
             self.history_used_spot = True
         if rate is None:
             rate = 'NaN'
