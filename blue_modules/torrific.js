@@ -1,4 +1,4 @@
-import Tor from 'react-native-tor';
+//import Tor from 'react-native-tor';
 const tor = Tor({
   bootstrapTimeoutMs: 35000,
   numberConcurrentRequests: 1,
