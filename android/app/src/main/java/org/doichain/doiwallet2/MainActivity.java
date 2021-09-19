@@ -1,11 +1,9 @@
-package org.doichain.doiwallet;
+package org.doichain.doiwallet2;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
-
-import org.doichain.doiwallet.R;
 
 public class MainActivity extends ReactActivity {
 

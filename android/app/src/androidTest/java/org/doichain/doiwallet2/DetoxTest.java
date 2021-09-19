@@ -1,4 +1,4 @@
-package org.doichain.doiwallet;
+package org.doichain.doiwallet2;
 
 import com.wix.detox.Detox;
 

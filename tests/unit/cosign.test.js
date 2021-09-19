@@ -67,7 +67,7 @@ describe('AbstractHDElectrumWallet.cosign', () => {
 
     const sequence = HDSegwitBech32Wallet.defaultRBFSequence;
     const masterFingerprintBuffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
-    const psbt = new bitcoin.Psbt();
+    const psbt = new bitcoin.Psbt({ network: DOICHAIN });
 
     // add one input from each wallet
     {
@@ -97,7 +97,7 @@ describe('AbstractHDElectrumWallet.cosign', () => {
       const input = w2Utxo[0];
       const pubkey = w2._getPubkeyByAddress(input.address);
       const path = w2._getDerivationPathByAddress(input.address);
-      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: pubkey, network: DOICHAIN});
 
       psbt.addInput({
         hash: input.txid,
@@ -122,7 +122,7 @@ describe('AbstractHDElectrumWallet.cosign', () => {
       const input = w3Utxo[0];
       const pubkey = w3._getPubkeyByAddress(input.address);
       const path = w3._getDerivationPathByAddress(input.address, 49);
-      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: pubkey, network: DOICHAIN});
       const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
 
       psbt.addInput({

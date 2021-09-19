@@ -100,7 +100,7 @@ const PsbtWithHardwareWallet = () => {
     }
 
     if (deepLinkPSBT) {
-      const psbt = bitcoin.Psbt.fromBase64(deepLinkPSBT);
+      const psbt = bitcoin.Psbt.fromBase64(deepLinkPSBT, { network: DOICHAIN });
       try {
         const Tx = fromWallet.combinePsbt(routeParamsPSBT.current, psbt);
         setTxHex(Tx.toHex());
