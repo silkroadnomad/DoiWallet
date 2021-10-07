@@ -131,8 +131,8 @@ class BitcoinTestnet(AbstractNet):
         #'lseed.bitcoinstats.com.',  # ignores REALM byte and returns mainnet peers...
     ]
 
-    AUXPOW_CHAIN_ID = 0x0001
-    AUXPOW_START_HEIGHT = 0
+    AUXPOW_CHAIN_ID = 0x0003
+    AUXPOW_START_HEIGHT = 1
 
 
 class BitcoinRegtest(BitcoinTestnet):
