@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 #
 # Electrum-DOI -lightweight Doichain client
 # Copyright (C) 2011 Thomas Voegtlin
