@@ -328,19 +328,20 @@ class CoinPaprika(ExchangeBase):
         return CURRENCIES[self.name()]
 
     async def request_history(self, ccy):
+        today = datetime.today().strftime("%Y-%m-%d")
+
         historicRate = ''
-        time_close = ''
+        time_close = ''                               
+        history = {}
                         
-        history = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
-        for pair in history:
+        res = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
+        for pair in res:
             for key in pair.keys():
                 if key =='close': historicRate = pair[key]
                 if key =='time_close': time_close = pair[key]
-        print('historicRate ', historicRate)
-        print('Time Close of historic rate ', time_close)
-        return dict([time_close, historicRate])
-        #return dict([(datetime.utcfromtimestamp(h[0]/1000).strftime('%Y-%m-%d'), h[1])
-        #             for h in history['prices']])
+            history[time_close.split("T")[0]] = historicRate
+
+        return history
 
 
 class CointraderMonitor(ExchangeBase):
