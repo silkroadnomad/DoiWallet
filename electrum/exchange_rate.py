@@ -308,7 +308,8 @@ class CoinPaprika(ExchangeBase):
     async def get_rates(self, ccy):
         # Get latest exchange rate if available
         exchangeRate = ''
-        json = await self.get_json('api.coinpaprika.com','/v1/coins/doi-doicoin/ohlcv/latest/?quote=usd')
+  
+        json = await self.get_json('api.coinpaprika.com','/v1/coins/doi-doicoin/ohlcv/latest?quote=usd')
         if len(json) != 0:
             for pair in json:
                 for key in pair.keys():
@@ -316,7 +317,7 @@ class CoinPaprika(ExchangeBase):
             print('exchangeRate ', exchangeRate)
         else:
             print('No current data available')
-            json = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
+            json = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-12-19&quote=usd')  
             for pair in json:
                 for key in pair.keys():
                     if key =='close': exchangeRate = pair[key]
@@ -334,7 +335,7 @@ class CoinPaprika(ExchangeBase):
         time_close = ''                               
         history = {}
                         
-        res = await self.get_json('api.coinpaprika.com', '/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd')  
+        res = await self.get_json('api.coinpaprika.com', f'/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&end={today}&quote=usd')  
         for pair in res:
             for key in pair.keys():
                 if key =='close': historicRate = pair[key]
