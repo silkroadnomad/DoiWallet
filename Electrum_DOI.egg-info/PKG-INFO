@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: Electrum-DOI
-Version: 4.1.4.2
+Version: 4.1.4
 Summary: Lightweight Doichain Wallet (AuxPoW fork)
 Home-page: https://www.namecoin.org/
 Author: The Namecoin developers; based on Electrum by Thomas Voegtlin and Electrum-DOGE by The Electrum-DOGE contributors
