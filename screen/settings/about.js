@@ -83,7 +83,7 @@ const About = () => {
   };
 
   const handleOnGithubPress = () => {
-    Linking.openURL("https://github.com/BlueWallet/BlueWallet");
+    Linking.openURL("https://github.com/Doichain/DoiWallet");
   };
   const handleOnRatePress = () => {
     const options = {
@@ -92,7 +92,7 @@ const About = () => {
       preferredAndroidMarket: AndroidMarket.Google,
       preferInApp: true,
       openAppStoreIfInAppFails: true,
-      fallbackPlatformURL: "https://bluewallet.io",
+      fallbackPlatformURL: "https://www.doichain.org",
     };
     Rate.rate(options, (success) => {
       if (success) {
