@@ -17,17 +17,17 @@ const About = () => {
   const { width, height } = useWindowDimensions();
   const styles = StyleSheet.create({
     copyToClipboard: {
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     },
     copyToClipboardText: {
       fontSize: 13,
-      fontWeight: '400',
-      color: '#68bbe1',
+      fontWeight: "400",
+      color: "#68bbe1",
     },
     center: {
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       marginTop: 54,
     },
     logo: {
@@ -37,18 +37,18 @@ const About = () => {
     textFree: {
       maxWidth: 260,
       marginVertical: 24,
-      color: '#9AA0AA',
+      color: "#9AA0AA",
       fontSize: 15,
-      textAlign: 'center',
-      fontWeight: '500',
+      textAlign: "center",
+      fontWeight: "500",
     },
     textBackup: {
       maxWidth: 260,
       marginBottom: 40,
       color: colors.foregroundColor,
       fontSize: 15,
-      textAlign: 'center',
-      fontWeight: '500',
+      textAlign: "center",
+      fontWeight: "500",
     },
     buildWith: {
       backgroundColor: colors.inputBackgroundColor,
@@ -59,69 +59,63 @@ const About = () => {
     buttonLink: {
       backgroundColor: colors.lightButton,
       borderRadius: 12,
-      justifyContent: 'center',
+      justifyContent: "center",
       padding: 8,
-      flexDirection: 'row',
+      flexDirection: "row",
     },
     textLink: {
       color: colors.foregroundColor,
       marginLeft: 8,
-      fontWeight: '600',
+      fontWeight: "600",
     },
   });
 
   const handleOnReleaseNotesPress = () => {
-    navigate('ReleaseNotes');
+    navigate("ReleaseNotes");
   };
 
   const handleOnSelfTestPress = () => {
-    navigate('Selftest');
+    navigate("Selftest");
   };
 
   const handleOnLicensingPress = () => {
-    navigate('Licensing');
+    navigate("Licensing");
   };
 
-  const handleOnTwitterPress = () => {
-    Linking.openURL('https://twitter.com/bluewalletio');
-  };
-
-  const handleOnDiscordPress = () => {
-    Linking.openURL('https://discord.gg/btWq2Aby2z');
-  };
-
-  const handleOnTelegramPress = () => {
-    Linking.openURL('https://t.me/bluewallethat');
-  };
   const handleOnGithubPress = () => {
-    Linking.openURL('https://github.com/BlueWallet/BlueWallet');
+    Linking.openURL("https://github.com/BlueWallet/BlueWallet");
   };
   const handleOnRatePress = () => {
     const options = {
-      AppleAppID: '1376878040',
-      GooglePackageName: 'org.doichain.doiwallet',
+      AppleAppID: "1376878040",
+      GooglePackageName: "org.doichain.doiwallet",
       preferredAndroidMarket: AndroidMarket.Google,
       preferInApp: true,
       openAppStoreIfInAppFails: true,
-      fallbackPlatformURL: 'https://bluewallet.io',
+      fallbackPlatformURL: "https://bluewallet.io",
     };
-    Rate.rate(options, success => {
+    Rate.rate(options, (success) => {
       if (success) {
-        console.log('User Rated.');
+        console.log("User Rated.");
       }
     });
   };
 
-  return (
-    <ScrollView testID="AboutScrollView" contentInsetAdjustmentBehavior="automatic">
-      <BlueCard>
-        <View style={styles.center}>
-          <Image style={styles.logo} source={require('../../img/bluebeast.png')} />
-          <Text style={styles.textFree}>{loc.settings.about_free}</Text>
-          <Text style={styles.textBackup}>{formatStringAddTwoWhiteSpaces(loc.settings.about_backup)}</Text>
-          <BlueButton onPress={handleOnRatePress} title={loc.settings.about_review + ' ⭐🙏'} />
-        </View>
-      </BlueCard>
+  /*
+
+  const handleOnTwitterPress = () => {
+    Linking.openURL("https://twitter.com/bluewalletio");
+  };
+
+  const handleOnDiscordPress = () => {
+    Linking.openURL("https://discord.gg/btWq2Aby2z");
+  };
+
+  const handleOnTelegramPress = () => {
+    Linking.openURL("https://t.me/bluewallethat");
+  };
+
+
       <BlueListItem
         leftIcon={{
           name: 'twitter',
@@ -140,15 +134,40 @@ const About = () => {
         onPress={handleOnTelegramPress}
         title={loc.settings.about_sm_telegram}
       />
-      <BlueListItem
+     <BlueListItem
         leftIcon={{
-          name: 'discord',
-          type: 'font-awesome-5',
-          color: '#7289da',
+          name: "discord",
+          type: "font-awesome-5",
+          color: "#7289da",
         }}
         onPress={handleOnDiscordPress}
         title={loc.settings.about_sm_discord}
       />
+
+  */
+
+  return (
+    <ScrollView
+      testID="AboutScrollView"
+      contentInsetAdjustmentBehavior="automatic"
+    >
+      <BlueCard>
+        <View style={styles.center}>
+          <Image
+            style={styles.logo}
+            source={require("../../img/bluebeast.png")}
+          />
+          <Text style={styles.textFree}>{loc.settings.about_free}</Text>
+          <Text style={styles.textBackup}>
+            {formatStringAddTwoWhiteSpaces(loc.settings.about_backup)}
+          </Text>
+          <BlueButton
+            onPress={handleOnRatePress}
+            title={loc.settings.about_review + " ⭐🙏"}
+          />
+        </View>
+      </BlueCard>
+
       <BlueCard>
         <View style={styles.buildWith}>
           <BlueSpacing20 />
@@ -161,17 +180,28 @@ const About = () => {
           <BlueTextCentered>Electrum server</BlueTextCentered>
           <BlueSpacing20 />
 
-          <TouchableOpacity accessibilityRole="button" onPress={handleOnGithubPress} style={styles.buttonLink}>
-            <Icon size={22} name="github" type="font-awesome-5" color={colors.foregroundColor} />
-            <Text style={styles.textLink}>{formatStringAddTwoWhiteSpaces(loc.settings.about_sm_github)}</Text>
+          <TouchableOpacity
+            accessibilityRole="button"
+            onPress={handleOnGithubPress}
+            style={styles.buttonLink}
+          >
+            <Icon
+              size={22}
+              name="github"
+              type="font-awesome-5"
+              color={colors.foregroundColor}
+            />
+            <Text style={styles.textLink}>
+              {formatStringAddTwoWhiteSpaces(loc.settings.about_sm_github)}
+            </Text>
           </TouchableOpacity>
         </View>
       </BlueCard>
       <BlueListItem
         leftIcon={{
-          name: 'book',
-          type: 'font-awesome',
-          color: '#9AA0AA',
+          name: "book",
+          type: "font-awesome",
+          color: "#9AA0AA",
         }}
         chevron
         onPress={handleOnReleaseNotesPress}
@@ -179,8 +209,8 @@ const About = () => {
       />
       <BlueListItem
         leftIcon={{
-          name: 'law',
-          type: 'octicon',
+          name: "law",
+          type: "octicon",
           color: colors.foregroundColor,
         }}
         chevron
@@ -189,9 +219,9 @@ const About = () => {
       />
       <BlueListItem
         leftIcon={{
-          name: 'flask',
-          type: 'font-awesome',
-          color: '#FC0D44',
+          name: "flask",
+          type: "font-awesome",
+          color: "#FC0D44",
         }}
         chevron
         onPress={handleOnSelfTestPress}
@@ -203,7 +233,9 @@ const About = () => {
       <BlueTextCentered>
         {getApplicationName()} ver {getVersion()} (build {getBuildNumber()})
       </BlueTextCentered>
-      <BlueTextCentered>{new Date(getBuildNumber() * 1000).toGMTString()}</BlueTextCentered>
+      <BlueTextCentered>
+        {new Date(getBuildNumber() * 1000).toGMTString()}
+      </BlueTextCentered>
       <BlueTextCentered>{getBundleId()}</BlueTextCentered>
       <BlueTextCentered>
         w, h = {width}, {height}
@@ -213,12 +245,14 @@ const About = () => {
         <TouchableOpacity
           accessibilityRole="button"
           onPress={() => {
-            const stringToCopy = 'user.id:' + getUniqueId();
-            Sentry.captureMessage('copied unique id');
+            const stringToCopy = "user.id:" + getUniqueId();
+            Sentry.captureMessage("copied unique id");
             Clipboard.setString(stringToCopy);
           }}
         >
-          <Text style={styles.copyToClipboardText}>{loc.transactions.details_copy}</Text>
+          <Text style={styles.copyToClipboardText}>
+            {loc.transactions.details_copy}
+          </Text>
         </TouchableOpacity>
       </View>
       <BlueSpacing20 />
