@@ -136,6 +136,8 @@ Thanks!
 
 ## How to make a release
 
-[Apple](https://github.com/BlueWallet/BlueWallet/blob/master/RELEASE.md)
+[Apple](https://github.com/Doichain/DoiWallet/blob/master/RELEASE.md)
 
-[Android](https://github.com/BlueWallet/BlueWallet/blob/master/RELEASE.md)
+
+
+[Android](https://github.com/Doichain/DoiWallet/blob/master/RELEASE.md)
