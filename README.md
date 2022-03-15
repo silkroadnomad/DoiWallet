@@ -133,3 +133,9 @@ Builds automated and tested with BrowserStack
 
 Found critical bugs/vulnerabilities? Please email them bluewallet@bluewallet.io
 Thanks!
+
+## How to make a release
+
+[Apple](https://github.com/BlueWallet/BlueWallet/blob/master/RELEASE.md)
+
+[Android](https://github.com/BlueWallet/BlueWallet/blob/master/RELEASE.md)
