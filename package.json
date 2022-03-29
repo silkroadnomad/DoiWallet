@@ -125,6 +125,7 @@
     "bolt11": "1.3.2",
     "buffer": "6.0.3",
     "buffer-reverse": "1.0.1",
+    "caniuse-lite": "^1.0.30001317",
     "coinselect": "3.1.12",
     "crypto-js": "4.1.1",
     "dayjs": "1.10.6",
