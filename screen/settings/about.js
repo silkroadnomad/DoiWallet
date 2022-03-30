@@ -101,7 +101,7 @@ const About = () => {
     });
   };
 
- const buildNumber = getBuildNumber();
+const buildNumber = getBuildNumber();
   /*
 
   const handleOnTwitterPress = () => {
@@ -144,12 +144,6 @@ const About = () => {
         onPress={handleOnDiscordPress}
         title={loc.settings.about_sm_discord}
       />
-
-
-      <BlueTextCentered>
-        {new Date(buildNumber * 1000).toGMTString()}
-      </BlueTextCentered>
-
   */
 
   return (
@@ -239,7 +233,9 @@ const About = () => {
       <BlueTextCentered>
         {getApplicationName()} ver {getVersion()} (build {buildNumber})
       </BlueTextCentered>
-      
+      <BlueTextCentered>
+        {new Date(buildNumber * 1000).toGMTString()}
+      </BlueTextCentered>
       <BlueTextCentered>{getBundleId()}</BlueTextCentered>
       <BlueTextCentered>
         w, h = {width}, {height}
