@@ -14,13 +14,13 @@ const RateExtractors = {
     const res = await api.get(`/v1/coins/doi-doicoin/ohlcv/historical?start=2021-03-18&quote=usd`);
     console.log('\n Result of COINPAPRIKA Api is: ', res)    
     
-    let json;
+   /**  let json;
     try {
       json = typeof res.body === 'string' ? JSON.parse(res.body) : res.body;
     } catch (e) {
-      //throw new Error(`Could not update rate for ${ticker}: ${e.message}`);
-    }
-    let rate = res.body.map(p => p.close); // eslint-disable-line// eslint-disable-line
+      // throw new Error(`Could not update rate for ${ticker}: ${e.message}`);
+    } */
+    let rate = res.body.map((p: FiatUnit) => p.close);
     if (!rate) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
 
     rate = Number(rate);

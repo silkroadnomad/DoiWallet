@@ -1,6 +1,6 @@
 {
   "name": "doiwallet",
-  "version": "6.2.3.1",
+  "version": "6.2.3",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -96,7 +96,7 @@
   },
   "dependencies": {
     "@babel/preset-env": "7.12.1",
-    "@keystonehq/bc-ur-registry": "https://github.com/BlueWallet/ur-registry",
+    "@keystonehq/bc-ur-registry": "^0.5.0-alpha.5",
     "@ngraveio/bc-ur": "https://github.com/BlueWallet/bc-ur",
     "@react-native-async-storage/async-storage": "1.15.5",
     "@react-native-clipboard/clipboard": "1.8.4",
@@ -137,6 +137,7 @@
     "junderw-crc32c": "1.2.0",
     "lottie-ios": "3.1.9",
     "lottie-react-native": "4.0.2",
+    "metro": "^0.70.1",
     "metro-react-native-babel-preset": "0.66.2",
     "path-browserify": "1.0.1",
     "payjoin-client": "1.0.0",
@@ -188,11 +189,11 @@
     "react-native-vector-icons": "8.1.0",
     "react-native-watch-connectivity": "1.0.3",
     "react-native-webview": "11.6.5",
-    "react-native-widget-center": "https://github.com/BlueWallet/react-native-widget-center#b1382bbe1ed631b50a8aa03390f64c50775bc9ff",
+    "react-native-widget-center": "https://github.com/BlueWallet/react-native-widget-center#b80630cc8894ce479275d6dd3a5183f41f220237",
     "react-native-windows": "0.64.14",
     "react-test-render": "1.1.2",
     "readable-stream": "3.6.0",
-    "realm": "10.6.1",
+    "realm": "^10.6.1",
     "rn-nodeify": "10.3.0",
     "scryptsy": "2.1.0",
     "secure-random": "1.1.2",

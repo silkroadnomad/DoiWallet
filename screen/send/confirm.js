@@ -9,7 +9,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import PayjoinTransaction from '../../class/payjoin-transaction';
 import { BlueButton, BlueText, SafeBlueArea, BlueCard } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from '../../models/doichainUnits';
 import Biometric from '../../class/biometrics';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../loc';
 import { BlueCurrentTheme } from '../../components/themes';
@@ -120,7 +120,7 @@ export default class Confirm extends Component {
           amount += recipient.value;
         }
 
-        amount = formatBalanceWithoutSuffix(amount, BitcoinUnit.BTC, false);
+        amount = formatBalanceWithoutSuffix(amount, DoichainUnit.DOI, false);
 
         this.props.navigation.navigate('Success', {
           fee: Number(this.state.fee),
@@ -166,7 +166,7 @@ export default class Confirm extends Component {
           <Text testID="TransactionValue" style={styles.valueValue}>
             {currency.satoshiToBTC(item.value)}
           </Text>
-          <Text style={styles.valueUnit}>{' ' + loc.units[BitcoinUnit.BTC]}</Text>
+          <Text style={styles.valueUnit}>{' ' + loc.units[DoichainUnit.DOI]}</Text>
         </View>
         <Text style={styles.transactionAmountFiat}>{currency.satoshiToLocalCurrency(item.value)}</Text>
         <BlueCard>
@@ -218,7 +218,7 @@ export default class Confirm extends Component {
         <View style={styles.cardBottom}>
           <BlueCard>
             <Text style={styles.cardText} testID="TransactionFee">
-              {loc.send.create_fee}: {formatBalance(this.state.feeSatoshi, BitcoinUnit.BTC)} (
+              {loc.send.create_fee}: {formatBalance(this.state.feeSatoshi, DoichainUnit.DOI)} (
               {currency.satoshiToLocalCurrency(this.state.feeSatoshi)})
             </Text>
             {this.state.isLoading ? <ActivityIndicator /> : <BlueButton onPress={() => this.send()} title={loc.send.confirm_sendNow} />}

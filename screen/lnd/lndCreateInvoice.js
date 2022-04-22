@@ -24,7 +24,7 @@ import navigationStyle from '../../components/navigationStyle';
 import AmountInput from '../../components/AmountInput';
 import * as NavigationService from '../../NavigationService';
 import { LightningCustodianWallet } from '../../class/wallets/lightning-custodian-wallet';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import loc, { formatBalanceWithoutSuffix, formatBalancePlain } from '../../loc';
 import Lnurl from '../../class/lnurl';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
@@ -42,7 +42,7 @@ const LNDCreateInvoice = () => {
   const { name } = useRoute();
   const { colors } = useTheme();
   const { navigate, dangerouslyGetParent, goBack, pop, setParams } = useNavigation();
-  const [unit, setUnit] = useState(wallet.current?.getPreferredBalanceUnit() || BitcoinUnit.BTC);
+  const [unit, setUnit] = useState(wallet.current?.getPreferredBalanceUnit() || DoichainUnit.DOI);
   const [amount, setAmount] = useState();
   const [renderWalletSelectionButtonHidden, setRenderWalletSelectionButtonHidden] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -153,13 +153,13 @@ const LNDCreateInvoice = () => {
     try {
       let invoiceAmount = amount;
       switch (unit) {
-        case BitcoinUnit.SATS:
+        case DoichainUnit.SWARTZ:
           invoiceAmount = parseInt(invoiceAmount); // basically nop
           break;
-        case BitcoinUnit.BTC:
+        case DoichainUnit.DOI:
           invoiceAmount = currency.btcToSatoshi(invoiceAmount);
           break;
-        case BitcoinUnit.LOCAL_CURRENCY:
+        case DoichainUnit.LOCAL_CURRENCY:
           // trying to fetch cached schwartz equivalent for this fiat amount
           invoiceAmount = AmountInput.getCachedSatoshis(invoiceAmount) || currency.btcToSatoshi(currency.fiatToBTC(invoiceAmount));
           break;
@@ -268,14 +268,14 @@ const LNDCreateInvoice = () => {
       let amount = (reply.maxWithdrawable / 1000).toString();
       const sats = amount;
       switch (unit) {
-        case BitcoinUnit.SATS:
+        case DoichainUnit.SWARTZ:
           // nop
           break;
-        case BitcoinUnit.BTC:
+        case DoichainUnit.DOI:
           amount = currency.satoshiToBTC(amount);
           break;
-        case BitcoinUnit.LOCAL_CURRENCY:
-          amount = formatBalancePlain(amount, BitcoinUnit.LOCAL_CURRENCY);
+        case DoichainUnit.LOCAL_CURRENCY:
+          amount = formatBalancePlain(amount, DoichainUnit.LOCAL_CURRENCY);
           AmountInput.setCachedSatoshis(amount, sats);
           break;
       }
@@ -356,9 +356,9 @@ const LNDCreateInvoice = () => {
           <TouchableOpacity accessibilityRole="button" style={styles.walletNameTouch} onPress={navigateToSelectWallet}>
             <Text style={[styles.walletNameText, styleHooks.walletNameText]}>{wallet.current.getLabel()}</Text>
             <Text style={[styles.walletNameBalance, styleHooks.walletNameBalance]}>
-              {formatBalanceWithoutSuffix(wallet.current.getBalance(), BitcoinUnit.SATS, false)}
+              {formatBalanceWithoutSuffix(wallet.current.getBalance(), DoichainUnit.SWARTZ, false)}
             </Text>
-            <Text style={[styles.walletNameSats, styleHooks.walletNameSats]}>{BitcoinUnit.SATS}</Text>
+            <Text style={[styles.walletNameSats, styleHooks.walletNameSats]}>{DoichainUnit.SWARTZ}</Text>
           </TouchableOpacity>
         </View>
       </View>

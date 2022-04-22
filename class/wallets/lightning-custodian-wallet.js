@@ -1,7 +1,7 @@
 import { LegacyWallet } from './legacy-wallet';
 import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import { isTorCapable } from '../../blue_modules/environment';
 const torrific = require('../../blue_modules/torrific');
 
@@ -21,7 +21,7 @@ export class LightningCustodianWallet extends LegacyWallet {
     this.pending_transactions_raw = [];
     this.user_invoices_raw = [];
     this.info_raw = false;
-    this.preferredBalanceUnit = BitcoinUnit.SATS;
+    this.preferredBalanceUnit = DoichainUnit.SWARTZ;
     this.chain = Chain.OFFCHAIN;
   }
 
