@@ -3,7 +3,7 @@ import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
 import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import { isTorCapable } from '../../blue_modules/environment';
-const torrific = require('../../blue_modules/torrific');
+//const torrific = require('../../blue_modules/torrific');
 
 export class LightningCustodianWallet extends LegacyWallet {
   static type = 'lightningCustodianWallet';
@@ -72,12 +72,13 @@ export class LightningCustodianWallet extends LegacyWallet {
     this._api = new Frisbee({
       baseURI: this.baseURI,
     });
-
+/*
     if (isTorCapable && this.baseURI && this.baseURI?.indexOf('.onion') !== -1) {
       this._api = new torrific.Torsbee({
         baseURI: this.baseURI,
       });
     }
+    */
   }
 
   accessTokenExpired() {
@@ -582,12 +583,8 @@ export class LightningCustodianWallet extends LegacyWallet {
   }
 
   static async isValidNodeAddress(address) {
-    const isTor = address.indexOf('.onion') !== -1;
-    const apiCall = isTor
-      ? new torrific.Torsbee({
-          baseURI: address,
-        })
-      : new Frisbee({
+   // const isTor =   address.indexOf('.onion') !== -1;
+    const apiCall =  new Frisbee({
           baseURI: address,
         });
     const response = await apiCall.get('/getinfo', {
