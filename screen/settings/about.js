@@ -2,7 +2,14 @@ import React from 'react';
 import { TouchableOpacity, ScrollView, Linking, Image, View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation, useTheme } from '@react-navigation/native';
 import { Icon } from 'react-native-elements';
-import { getApplicationName, getVersion, getBundleId, getBuildNumber, getUniqueId } from 'react-native-device-info';
+import {
+  getApplicationName,
+  getVersion,
+  getBundleId,
+  getBuildNumber,
+  getUniqueId,
+  useFirstInstallTime,  
+} from "react-native-device-info";
 import Rate, { AndroidMarket } from 'react-native-rate';
 
 import { BlueButton, BlueCard, BlueListItem, BlueSpacing20, BlueTextCentered } from '../../BlueComponents';
@@ -101,7 +108,12 @@ const About = () => {
     });
   };
 
+  
+
 const buildNumber = getBuildNumber();
+const firstInstallTime = useFirstInstallTime().result; 
+
+
   /*
 
   const handleOnTwitterPress = () => {
@@ -234,7 +246,7 @@ const buildNumber = getBuildNumber();
         {getApplicationName()} ver {getVersion()} (build {buildNumber})
       </BlueTextCentered>
       <BlueTextCentered>
-        {new Date(buildNumber * 1000).toGMTString()}
+        {new Date(firstInstallTime).toGMTString()}        
       </BlueTextCentered>
       <BlueTextCentered>{getBundleId()}</BlueTextCentered>
       <BlueTextCentered>
