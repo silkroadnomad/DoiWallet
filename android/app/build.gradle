@@ -149,8 +149,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 53
-        versionName "6.2.5.15"
+        versionCode 54
+        versionName "6.2.5.16"
 
         multiDexEnabled true
         missingDimensionStrategy 'react-native-camera', 'general'
