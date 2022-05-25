@@ -149,7 +149,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
 
-        versionCode 51
+        versionCode 52
         versionName "6.2.5.14"
 
         multiDexEnabled true
