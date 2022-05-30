@@ -1,23 +1,12 @@
 version: 2
 jobs:
+  
   build:
     docker:
-      - image: cimg/node:16.14.2
-
-    working_directory: ~/repo
-
+      - image: davidreband/doiwallet-release:latest 
+      
     steps:
-      - checkout
-      - run: yarn install 
-      - restore_cache:
-          key: node_modules-{{ checksum "package-lock.json" }}
-
-      - run: test -d node_modules || npm i
-
-      - save_cache:
-          key: node_modules-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
-
-      # run tests!
-      - run: npm t || npm t || npm t
+      
+      - run: 
+          name: The First step
+          command: docker run --env-file ./keystore_files/env_base64.env davidreband/doiwallet-release  
