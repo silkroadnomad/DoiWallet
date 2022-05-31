@@ -24,9 +24,10 @@ jobs:
           version: 20.10.14
           docker_layer_caching: true  
           
-      - run: echo $JSON_KEY_FILE     
+      - run: echo $JSON_KEY_FILE  
+      - run: RELEASE_KEYSTORE_PROPERTIES   
 
-      - run: docker run  -e KEYSTORE_BASE64=$KEYSTORE_BASE64  -e RELEASE_KEYSTORE_PROPERTIES=$RELEASE_KEYSTORE_PROPERTIES -e JSON_KEY_FILE=$JSON_KEY_FILE davidreband/doiwallet-release        
+      #- run: docker run  -e KEYSTORE_BASE64=$KEYSTORE_BASE64  -e RELEASE_KEYSTORE_PROPERTIES=$RELEASE_KEYSTORE_PROPERTIES -e JSON_KEY_FILE=$JSON_KEY_FILE davidreband/doiwallet-release        
 
       # run tests!
       #- run: npm t || npm t || npm t
