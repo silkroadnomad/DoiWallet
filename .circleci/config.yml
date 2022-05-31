@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: cimg/node:16.14.2
-      - image: davidreband/doiwallet-release:latest 
+      #- image: davidreband/doiwallet-release:latest 
 
     working_directory: ~/repo
 
@@ -25,7 +25,7 @@ jobs:
           docker_layer_caching: true  
           
       - run: echo $JSON_KEY_FILE  
-      - run: RELEASE_KEYSTORE_PROPERTIES   
+      - run: echo $RELEASE_KEYSTORE_PROPERTIES   
 
       #- run: docker run  -e KEYSTORE_BASE64=$KEYSTORE_BASE64  -e RELEASE_KEYSTORE_PROPERTIES=$RELEASE_KEYSTORE_PROPERTIES -e JSON_KEY_FILE=$JSON_KEY_FILE davidreband/doiwallet-release        
 
