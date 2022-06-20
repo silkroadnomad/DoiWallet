@@ -46,9 +46,9 @@ platform :android do
   lane :increment_vc do
 
   previous_build_number = google_play_track_version_codes(
-    package_name: app_id,
+    package_name: org.doichain.doiwallet,
     track: "internal",
-    json_key: json_key_file_path,
+    json_key: "/home/DoiWallet/android/keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
   )[0]
 
   current_build_number = previous_build_number + 1
@@ -59,7 +59,7 @@ platform :android do
 
   )
   end
-  
+
   desc "Deploy a new version to the Google Play"
   lane :deploy do
     gradle(task: "clean assembleRelease")
