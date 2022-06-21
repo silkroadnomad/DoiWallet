@@ -31,6 +31,14 @@ Runs all the tests
 
 Submit a new Beta Build to Crashlytics Beta
 
+### android increment_vc
+
+```sh
+[bundle exec] fastlane android increment_vc
+```
+
+Increment version code
+
 ### android deploy
 
 ```sh
