@@ -150,7 +150,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
 
         versionCode 56
-        versionName "6.2.5.16"
+        versionName "6.2.5.17"
 
         multiDexEnabled true
         missingDimensionStrategy 'react-native-camera', 'general'
