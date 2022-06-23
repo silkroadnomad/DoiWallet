@@ -3,7 +3,7 @@ jobs:
   build:
     docker:
       - image: cimg/node:16.14.2
-      - image: davidreband/doiwallet-release:version1.0 
+      - image: davidreband/doiwallet-release:latest 
 
     working_directory: ~/repo
 
