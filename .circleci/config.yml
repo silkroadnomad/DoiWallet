@@ -22,7 +22,7 @@ jobs:
 
       - setup_remote_docker:
           version: 20.10.14
-          docker_layer_caching: true  
+          docker_layer_caching: false
           
       - run: echo $JSON_KEY_FILE  
       - run: echo $RELEASE_KEYSTORE_PROPERTIES  
