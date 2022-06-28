@@ -51,12 +51,25 @@ platform :android do
     json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
   )[0]
 
+  previous_version_name = google_play_track_version_name(
+    package_name: "org.doichain.doiwallet",
+    track: "internal",
+    json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
+  )[0]
+
   current_build_number = previous_build_number + 1
+
+  current_version_name = previous_version_name + 1
 
   increment_version_code(
         gradle_file_path: "./app/build.gradle",
         version_code: current_build_number
 
+  )
+
+  increment_version_name(
+        gradle_file_path: "./app/build.gradle",
+        version_name: current_version_name
   )
   end
 
