@@ -59,7 +59,7 @@ platform :android do
 
   let current_build_number = previous_build_number + 1
 
-  let current_version_name = previous_version_name.split(.) 
+  let current_version_name = previous_version_name.split('.') 
 
   increment_version_code(
         gradle_file_path: "./app/build.gradle",
