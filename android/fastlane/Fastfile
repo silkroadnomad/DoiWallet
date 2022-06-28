@@ -51,7 +51,7 @@ platform :android do
     json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
   )[0]
 
-  previous_version_name = google_play_track_version_name(
+  previous_version_name = google_play_track_release_name(
     package_name: "org.doichain.doiwallet",
     track: "internal",
     json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
