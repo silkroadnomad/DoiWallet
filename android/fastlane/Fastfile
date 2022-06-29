@@ -75,7 +75,7 @@ platform :android do
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    gradle(task: "clean assembleRelease")
+    #gradle(task: "clean assembleRelease")
     #upload_to_play_store
 
     release_names = google_play_track_release_names(
