@@ -41,15 +41,37 @@ platform :android do
       json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
     )[0]
 
-    add_git_tag(
-      grouping: "fastlane-builds",
-      includes_lane: true,
-      prefix: "dv",      
-      build_number: release_names
-    )
+    build_number = google_play_track_version_codes(
+      package_name: "org.doichain.doiwallet",
+      track: "internal",
+      json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
+    )[0]
 
-    add_git_tag(tag: "my_custom_tag")
-    push_git_tags(tag: last_git_tag)
+    gitUserMail = "david.reband@gmail.com"
+    gitUserName = "davidreband"
+
+    #set_github_release(
+    #  repository_name: "my_repo",
+    #  api_token: ..., # Personal access token
+    #...
+    #)
+
+    if !gitUserMail.nil? && !gitUserMail.empty? && !gitUserName.nil? && !gitUserName.empty?
+              sh "git config --global user.email #{gitUserMail}; git config --global user.name #{gitUserName}"
+    end
+
+    sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'"
+        push_to_git_remote
+
+    #add_git_tag(
+     # grouping: "fastlane-builds",
+     # includes_lane: true,
+    #  prefix: "dc",      
+     # build_number: release_names
+    #)
+
+    #add_git_tag(tag: "my_custom_tag")
+    #push_git_tags(tag: last_git_tag)
 
 
 
