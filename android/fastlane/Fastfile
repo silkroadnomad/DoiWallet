@@ -77,5 +77,18 @@ platform :android do
   lane :deploy do
     gradle(task: "clean assembleRelease")
     upload_to_play_store
+
+    release_names = google_play_track_release_names(
+      package_name: "org.doichain.doiwallet",
+      track: "internal",
+      json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
+    )[0]
+
+    add_git_tag(
+      grouping: "fastlane-builds",
+      includes_lane: true,
+      prefix: "dv",      
+      build_number: release_names
+    )
   end
 end
