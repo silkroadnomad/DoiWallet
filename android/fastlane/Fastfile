@@ -76,7 +76,7 @@ platform :android do
   desc "Deploy a new version to the Google Play"
   lane :deploy do
     gradle(task: "clean assembleRelease")
-    upload_to_play_store
+    #upload_to_play_store
 
     release_names = google_play_track_release_names(
       package_name: "org.doichain.doiwallet",
@@ -90,5 +90,9 @@ platform :android do
       prefix: "dv",      
       build_number: release_names
     )
+
+    add_git_tag(tag: "my_custom_tag")
+    push_git_tags(tag: last_git_tag)
+
   end
 end
