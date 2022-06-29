@@ -24,20 +24,36 @@ platform :android do
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
   #  gradle(task: "clean assembleRelease")
-    gradle(
-      task: "bundle" ,
-      build_type: "Release"
-    )
+    #gradle(
+    #  task: "bundle" ,
+   #   build_type: "Release"
+   # )
   
-    upload_to_play_store(
-        track: 'internal',
-        release_status: 'draft',
-        skip_upload_apk: false
-        #skip_upload_metadata: true,
-        #skip_upload_images: true,
-        #skip_upload_screenshots: true,
-        #check_superseded_tracks: true
-      )  
+    #upload_to_play_store(
+    #    track: 'internal',
+    #    release_status: 'draft',
+    #    skip_upload_apk: false
+   # )  
+
+    release_names = google_play_track_release_names(
+      package_name: "org.doichain.doiwallet",
+      track: "internal",
+      json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
+    )[0]
+
+    add_git_tag(
+      grouping: "fastlane-builds",
+      includes_lane: true,
+      prefix: "dv",      
+      build_number: release_names
+    )
+
+    add_git_tag(tag: "my_custom_tag")
+    push_git_tags(tag: last_git_tag)
+
+
+
+
     # sh "your_script.sh"
     # You can also use other beta testing services here
   end
@@ -75,24 +91,10 @@ platform :android do
 
   desc "Deploy a new version to the Google Play"
   lane :deploy do
-    #gradle(task: "clean assembleRelease")
-    #upload_to_play_store
+    gradle(task: "clean assembleRelease")
+    upload_to_play_store
 
-    release_names = google_play_track_release_names(
-      package_name: "org.doichain.doiwallet",
-      track: "internal",
-      json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
-    )[0]
-
-    add_git_tag(
-      grouping: "fastlane-builds",
-      includes_lane: true,
-      prefix: "dv",      
-      build_number: release_names
-    )
-
-    add_git_tag(tag: "my_custom_tag")
-    push_git_tags(tag: last_git_tag)
+   
 
   end
 end
