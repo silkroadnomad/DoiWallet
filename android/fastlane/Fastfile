@@ -47,8 +47,7 @@ platform :android do
       json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
     )[0]
 
-    gitUserMail = "david.reband@gmail.com"
-    gitUserName = "davidreband"
+    
 
     #set_github_release(
     #  repository_name: "my_repo",
@@ -56,12 +55,20 @@ platform :android do
     #...
     #)
 
-    if !gitUserMail.nil? && !gitUserMail.empty? && !gitUserName.nil? && !gitUserName.empty?
-              sh "git config --global user.email #{gitUserMail}; git config --global user.name #{gitUserName}"
+    ENV['GITUSERMAIL']
+    ENV['GITUSERNAME']
+
+    if !ENV['GITUSERMAIL'].nil? && !ENV['GITUSERMAIL'].empty? && !ENV['GITUSERNAME'].nil? && !ENV['GITUSERNAME'].empty?
+              sh "git config --global user.email #{ENV['GITUSERMAIL']}; git config --global user.name #{ENV['GITUSERNAME']}"
     end
 
     sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'"
-        push_to_git_remote
+    push_to_git_remote{
+      remote: 'origin',
+      remote_branch: ENV['BRANCH'],
+      local_branch: ENV['BRANCH'],
+      api_token: ENV["API_TOKEN"],
+    }
 
     #add_git_tag(
      # grouping: "fastlane-builds",
