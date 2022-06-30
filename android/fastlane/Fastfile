@@ -62,12 +62,12 @@ platform :android do
               sh "git config --global user.email #{ENV['GITUSERMAIL']}; git config --global user.name #{ENV['GITUSERNAME']}"
     end
 
-    sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'"
+    sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'; git remote set-url origin https://#{ENV["API_TOKEN"]}@github.com/davidreband/DoiWallet.git"
     push_to_git_remote(
       remote: 'origin',
       remote_branch: ENV['BRANCH'],
-      local_branch: ENV['BRANCH'],
-      api_token: ENV["API_TOKEN"],
+      local_branch: ENV['BRANCH']
+      #api_token: ENV["API_TOKEN"],
     )
 
     #add_git_tag(
