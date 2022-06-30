@@ -63,12 +63,12 @@ platform :android do
     end
 
     sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'"
-    push_to_git_remote{
+    push_to_git_remote(
       remote: 'origin',
       remote_branch: ENV['BRANCH'],
       local_branch: ENV['BRANCH'],
       api_token: ENV["API_TOKEN"],
-    }
+    )
 
     #add_git_tag(
      # grouping: "fastlane-builds",
