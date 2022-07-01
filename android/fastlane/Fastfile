@@ -23,17 +23,17 @@ platform :android do
 
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
-  #  gradle(task: "clean assembleRelease")
-    #gradle(
-    #  task: "bundle" ,
-   #   build_type: "Release"
-   # )
+    gradle(task: "clean assembleRelease")
+    gradle(
+      task: "bundle" ,
+      build_type: "Release"
+    )
   
-    #upload_to_play_store(
-    #    track: 'internal',
-    #    release_status: 'draft',
-    #    skip_upload_apk: false
-   # )  
+    upload_to_play_store(
+        track: 'internal',
+        release_status: 'draft',
+        skip_upload_apk: false
+    )  
 
     release_names = google_play_track_release_names(
       package_name: "org.doichain.doiwallet",
@@ -55,33 +55,28 @@ platform :android do
     #...
     #)
 
-    ENV['GITUSERMAIL']
-    ENV['GITUSERNAME']
+    
 
     if !ENV['GITUSERMAIL'].nil? && !ENV['GITUSERMAIL'].empty? && !ENV['GITUSERNAME'].nil? && !ENV['GITUSERNAME'].empty?
               sh "git config --global user.email #{ENV['GITUSERMAIL']}; git config --global user.name #{ENV['GITUSERNAME']}"
     end
 
-    sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} | versionName = #{release_names}'; git remote set-url origin https://#{ENV["API_TOKEN"]}@github.com/davidreband/DoiWallet.git"
+    sh "git add .. ; git commit -m 'Version bump : versionCode = #{build_number} [ci skip] | versionName = #{release_names}'; git remote set-url origin https://#{ENV["API_TOKEN"]}@github.com/davidreband/DoiWallet.git"
     push_to_git_remote(
       remote: 'origin',
       remote_branch: ENV['BRANCH'],
-      local_branch: ENV['BRANCH']
-      #api_token: ENV["API_TOKEN"],
+      local_branch: ENV['BRANCH']     
+    )
+    
+
+    add_git_tag(
+      grouping: "fastlane-builds",
+      includes_lane: true,
+      prefix: "dc",      
+      build_number: release_names
     )
 
-    #add_git_tag(
-     # grouping: "fastlane-builds",
-     # includes_lane: true,
-    #  prefix: "dc",      
-     # build_number: release_names
-    #)
-
-    #add_git_tag(tag: "my_custom_tag")
-    #push_git_tags(tag: last_git_tag)
-
-
-
+    push_git_tags(tag: last_git_tag)
 
     # sh "your_script.sh"
     # You can also use other beta testing services here
