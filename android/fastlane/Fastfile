@@ -23,7 +23,7 @@ platform :android do
 
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
-    gradle(task: "clean assembleRelease")
+    #gradle(task: "clean assembleRelease")
     gradle(
       task: "bundle" ,
       build_type: "Release"
@@ -49,13 +49,6 @@ platform :android do
 
     
 
-    #set_github_release(
-    #  repository_name: "my_repo",
-    #  api_token: ..., # Personal access token
-    #...
-    #)
-
-    
 
     if !ENV['GITUSERMAIL'].nil? && !ENV['GITUSERMAIL'].empty? && !ENV['GITUSERNAME'].nil? && !ENV['GITUSERNAME'].empty?
               sh "git config --global user.email #{ENV['GITUSERMAIL']}; git config --global user.name #{ENV['GITUSERNAME']}"
