@@ -54,7 +54,7 @@ platform :android do
               sh "git config --global user.email #{ENV['GITUSERMAIL']}; git config --global user.name #{ENV['GITUSERNAME']}"
     end
 
-    sh "git add ./app/build.gradle ; git commit -m 'Version bump : versionCode = #{build_number} [ci skip] | versionName = #{release_names}'; git remote set-url origin https://#{ENV["API_TOKEN"]}@github.com/davidreband/DoiWallet.git"
+    sh "git add ../app/build.gradle ; git commit -m 'Version bump : versionCode = #{build_number} [ci skip] | versionName = #{release_names}'; git remote set-url origin https://#{ENV["API_TOKEN"]}@github.com/davidreband/DoiWallet.git"
     push_to_git_remote(
       remote: 'origin',
       remote_branch: ENV['BRANCH'],
