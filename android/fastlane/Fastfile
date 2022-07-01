@@ -24,16 +24,16 @@ platform :android do
   desc "Submit a new Beta Build to Crashlytics Beta"
   lane :beta do
     #gradle(task: "clean assembleRelease")
-    gradle(
-      task: "bundle" ,
-      build_type: "Release"
-    )
+    #gradle(
+     # task: "bundle" ,
+     # build_type: "Release"
+    #)
   
-    upload_to_play_store(
-        track: 'internal',
-        release_status: 'draft',
-        skip_upload_apk: false
-    )  
+    #upload_to_play_store(
+     #   track: 'internal',
+    #    release_status: 'draft',
+    #    skip_upload_apk: false
+   # )  
 
     release_names = google_play_track_release_names(
       package_name: "org.doichain.doiwallet",
