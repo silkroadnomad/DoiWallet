@@ -45,9 +45,7 @@ platform :android do
       package_name: "org.doichain.doiwallet",
       track: "internal",
       json_key: "./keystores/pc-api-7544041306212151668-842-081c5b393ff8.json"
-    )[0]
-
-    
+    )[0]  
 
 
     if !ENV['GITUSERMAIL'].nil? && !ENV['GITUSERMAIL'].empty? && !ENV['GITUSERNAME'].nil? && !ENV['GITUSERNAME'].empty?
@@ -59,8 +57,7 @@ platform :android do
       remote: 'origin',
       remote_branch: ENV['BRANCH'],
       local_branch: ENV['BRANCH']     
-    )
-    
+    )    
 
     add_git_tag(
       grouping: "fastlane-builds",
@@ -109,9 +106,7 @@ platform :android do
   desc "Deploy a new version to the Google Play"
   lane :deploy do
     gradle(task: "clean assembleRelease")
-    upload_to_play_store
-
-   
+    upload_to_play_store  
 
   end
 end
