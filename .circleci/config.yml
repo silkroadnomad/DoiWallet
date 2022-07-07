@@ -32,10 +32,7 @@ jobs:
 
       - run: echo $API_TOKEN
       - run: echo $GITUSERMAIL
-      - run: echo $GITUSERNAME
-      
-      
-      
+      - run: echo $GITUSERNAME      
 
       - run: docker run -e API_TOKEN=$API_TOKEN -e GITUSERMAIL=$GITUSERMAIL -e GITUSERNAME=$GITUSERNAME -e KEYSTORE_BASE64=$KEYSTORE_BASE64  -e RELEASE_KEYSTORE_PROPERTIES=$RELEASE_KEYSTORE_PROPERTIES -e JSON_KEY_FILE=$JSON_KEY_FILE  -e BRANCH=$CIRCLE_BRANCH davidreband/doiwallet-release        
 
