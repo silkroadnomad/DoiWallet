@@ -9,16 +9,9 @@ jobs:
 
     steps:
       - checkout
-      - run: yarn install 
-      - restore_cache:
-          key: node_modules-{{ checksum "package-lock.json" }}
+      - run: yarn install       
 
-      - run: test -d node_modules || npm i
-
-      - save_cache:
-          key: node_modules-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
+      - run: test -d node_modules || npm i      
 
       - setup_remote_docker:
           version: 20.10.14
