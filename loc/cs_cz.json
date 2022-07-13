@@ -568,7 +568,7 @@
     "tip": "Umožňuje zobrazit, označit, zmrazit nebo vybrat mince pro lepší správu peněženky. Klepnutím na barevné kruhy můžete vybrat více mincí."
   },
   "units": {
-    "BTC": "DOI",
+    "DOI": "DOI",
     "MAX": "MAX",
     "sat_byte": "swartz/byte",
     "sats": "swartz"

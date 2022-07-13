@@ -568,7 +568,7 @@
     "tip": "Te permite ver, etiquetar, congelar o seleccionar monedas para mejorar la organización de las carteras."
   },
   "units": {
-    "BTC": "DOI",
+    "DOI": "DOI",
     "MAX": "Máx",
     "sat_byte": "swartz/byte",
     "sats": "swartz"

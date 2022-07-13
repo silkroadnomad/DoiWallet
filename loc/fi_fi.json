@@ -556,7 +556,7 @@
     "tip": "Antaa sinun nähdä, merkitä, jäädyttää tai valita kolikoita parempaan lompakon hallintaan. Voit valita useita kolikoita napauttamalla värillisiä ympyröitä. "
   },
   "units": {
-    "BTC": "DOI",
+    "DOI": "DOI",
     "MAX": "MAX",
     "sat_byte": "swartz/bitti",
     "sats": "sattia"
