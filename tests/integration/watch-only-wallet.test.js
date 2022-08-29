@@ -1,8 +1,9 @@
+import assert from 'assert';
+
 import { WatchOnlyWallet } from '../../class';
-const assert = require('assert');
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
-const BlueElectrum = require('../../blue_modules/BlueElectrum'); // so it connects ASAP
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+
+jest.setTimeout(500 * 1000);
 
 afterAll(async () => {
   // after all tests we close socket so the test suite can actually terminate
@@ -12,10 +13,8 @@ afterAll(async () => {
 beforeAll(async () => {
   // awaiting for Electrum to be connected. For RN Electrum would naturally connect
   // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
+  await BlueElectrum.connectMain();
 });
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 500 * 1000;
 
 describe('Watch only wallet', () => {
   it('can fetch balance', async () => {

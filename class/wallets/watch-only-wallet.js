@@ -2,10 +2,12 @@ import { LegacyWallet } from './legacy-wallet';
 import { HDSegwitP2SHWallet } from './hd-segwit-p2sh-wallet';
 import { HDLegacyP2PKHWallet } from './hd-legacy-p2pkh-wallet';
 import { HDSegwitBech32Wallet } from './hd-segwit-bech32-wallet';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
 import { DOICHAIN } from '../../blue_modules/network.js';
 
 const bitcoin = require('bitcoinjs-lib');
-const HDNode = require('bip32');
+const bip32 = BIP32Factory(ecc);
 
 
 export class WatchOnlyWallet extends LegacyWallet {
@@ -75,6 +77,12 @@ export class WatchOnlyWallet extends LegacyWallet {
     else if (this.secret.startsWith('zpub')) hdWalletInstance = new HDSegwitBech32Wallet();
     else return this;
     hdWalletInstance._xpub = this.secret;
+
+    // if derivation path recovered from JSON file it should be moved to hdWalletInstance
+    if (this._derivationPath) {
+      hdWalletInstance._derivationPath = this._derivationPath;
+    }
+
     if (this._hdWalletInstance) {
       // now, porting all properties from old object to new one
       for (const k of Object.keys(this._hdWalletInstance)) {
@@ -264,7 +272,7 @@ export class WatchOnlyWallet extends LegacyWallet {
         xpub = this.secret;
       }
 
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       hdNode.derive(0);
       return true;
     } catch (_) {}
@@ -285,5 +293,20 @@ export class WatchOnlyWallet extends LegacyWallet {
   setUTXOMetadata(...args) {
     if (this._hdWalletInstance) return this._hdWalletInstance.setUTXOMetadata(...args);
     return super.setUTXOMetadata(...args);
+  }
+
+  getDerivationPath(...args) {
+    if (this._hdWalletInstance) return this._hdWalletInstance.getDerivationPath(...args);
+    throw new Error("Not a HD watch-only wallet, can't use derivation path");
+  }
+
+  setDerivationPath(...args) {
+    if (this._hdWalletInstance) return this._hdWalletInstance.setDerivationPath(...args);
+    throw new Error("Not a HD watch-only wallet, can't use derivation path");
+  }
+
+  isSegwit() {
+    if (this._hdWalletInstance) return this._hdWalletInstance.isSegwit();
+    return super.isSegwit();
   }
 }

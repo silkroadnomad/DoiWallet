@@ -1,4 +1,3 @@
-/* global alert */
 import React, { useState } from 'react';
 import { Image, View, TouchableOpacity, StatusBar, Platform, StyleSheet, TextInput, Alert } from 'react-native';
 import { RNCamera } from 'react-native-camera';
@@ -8,8 +7,8 @@ import { decodeUR, extractSingleWorkload, BlueURDecoder } from '../../blue_modul
 import { useNavigation, useRoute, useIsFocused, useTheme } from '@react-navigation/native';
 import loc from '../../loc';
 import { BlueLoading, BlueText, BlueButton, BlueSpacing40 } from '../../BlueComponents';
-import { BlueCurrentTheme } from '../../components/themes';
 import { openPrivacyDesktopSettings } from '../../class/camera';
+import alert from '../../components/Alert';
 
 const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 const createHash = require('create-hash');
@@ -77,12 +76,8 @@ const styles = StyleSheet.create({
     height: '50%',
     marginTop: 5,
     marginHorizontal: 20,
-    borderColor: BlueCurrentTheme.colors.formBorder,
-    borderBottomColor: BlueCurrentTheme.colors.formBorder,
     borderWidth: 1,
     borderRadius: 4,
-    backgroundColor: BlueCurrentTheme.colors.inputBackgroundColor,
-    color: BlueCurrentTheme.colors.foregroundColor,
     textAlignVertical: 'top',
   },
 });
@@ -92,7 +87,7 @@ const ScanQRCode = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const showFileImportButton = route.params.showFileImportButton || false;
-  const { launchedBy, onBarScanned, onDismiss } = route.params;
+  const { launchedBy, onBarScanned, onDismiss, onBarScannerDismissWithoutData = () => {} } = route.params;
   const scannedCache = {};
   const { colors } = useTheme();
   const isFocused = useIsFocused();
@@ -108,6 +103,12 @@ const ScanQRCode = () => {
       backgroundColor: colors.brandingColor,
     },
     progressWrapper: { backgroundColor: colors.brandingColor, borderColor: colors.foregroundColor, borderWidth: 4 },
+    backdoorInput: {
+      borderColor: colors.formBorder,
+      borderBottomColor: colors.formBorder,
+      backgroundColor: colors.inputBackgroundColor,
+      color: colors.foregroundColor,
+    },
   });
   const HashIt = function (s) {
     return createHash('sha256').update(s).digest().toString('hex');
@@ -196,6 +197,10 @@ const ScanQRCode = () => {
     }
     scannedCache[h] = +new Date();
 
+    if (ret.data.toUpperCase().startsWith('UR:CRYPTO-ACCOUNT')) {
+      return _onReadUniformResourceV2(ret.data);
+    }
+
     if (ret.data.toUpperCase().startsWith('UR:CRYPTO-PSBT')) {
       return _onReadUniformResourceV2(ret.data);
     }
@@ -254,13 +259,15 @@ const ScanQRCode = () => {
           takePhotoButtonTitle: null,
           maxHeight: 800,
           maxWidth: 600,
+          selectionLimit: 1,
         },
         response => {
           if (response.didCancel) {
             setIsLoading(false);
           } else {
-            if (response.uri) {
-              const uri = response.uri.toString().replace('file://', '');
+            const asset = response.assets[0];
+            if (asset.uri) {
+              const uri = asset.uri.toString().replace('file://', '');
               LocalQRCode.decode(uri, (error, result) => {
                 if (!error) {
                   onBarCodeRead({ data: result });
@@ -279,6 +286,7 @@ const ScanQRCode = () => {
   };
 
   const dismiss = () => {
+    onBarScannerDismissWithoutData();
     if (launchedBy) {
       navigation.navigate(launchedBy);
     } else {
@@ -300,6 +308,7 @@ const ScanQRCode = () => {
       <StatusBar hidden />
       {isFocused && cameraStatus !== RNCamera.Constants.CameraStatus.NOT_AUTHORIZED && (
         <RNCamera
+          autoFocus
           captureAudio={false}
           androidCameraPermissionOptions={{
             title: loc.send.permission_camera_title,
@@ -346,7 +355,7 @@ const ScanQRCode = () => {
             testID="scanQrBackdoorInput"
             multiline
             underlineColorAndroid="transparent"
-            style={styles.backdoorInput}
+            style={[styles.backdoorInput, stylesHook.backdoorInput]}
             autoCorrect={false}
             autoCapitalize="none"
             spellCheck={false}

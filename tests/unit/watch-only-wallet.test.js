@@ -110,7 +110,7 @@ describe('Watch only wallet', () => {
 
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAFMCAAAAAfTUAYKfU/lPbuIV0AsoBIURL2tAz7iaObvEMcXQBW94AAAAAAAAAACAAdDPAwAAAAAAF6kUUatl8TFvnlvB8H/KsqbnR6kpUluHAAAAAAABASCQ0AMAAAAAABepFDzN1E7LDjAMNARzCHsU4rXqBf55hwEEFgAUG3vPJhyWYtt/ikPpOCW6jCqkmxsiBgLHMhb0QhE8eyJBnE9syGAtMehGmHe1sxpm+TlxjgFXERgAAAAAMQAAgAAAAIAAAACAAAAAAAAAAAAAAA==',
+      'cHNidP8BAFMCAAAAAfTUAYKfU/lPbuIV0AsoBIURL2tAz7iaObvEMcXQBW94AAAAAAAAAACAAQnQAwAAAAAAF6kUUatl8TFvnlvB8H/KsqbnR6kpUluHAAAAAAABASCQ0AMAAAAAABepFDzN1E7LDjAMNARzCHsU4rXqBf55hwEEFgAUG3vPJhyWYtt/ikPpOCW6jCqkmxsiBgLHMhb0QhE8eyJBnE9syGAtMehGmHe1sxpm+TlxjgFXERgAAAAAMQAAgAAAAIAAAACAAAAAAAAAAAAAAA==',
     );
   });
 
@@ -141,7 +141,7 @@ describe('Watch only wallet', () => {
 
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAHECAAAAAYBbjCRXw4r66Ly1aI/SCvis+CDQsCdQej1BhCoDnjt/AAAAAAAAAACAAogTAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOK2OQAAAAAAABYAFOc6kh7rlKStRwwMvbaeu+oFvB4MAAAAAAABAR8gTgAAAAAAABYAFL8PIBBJ6JHVhwsE61MPwWtjtptAIgYDWOHbOE3D4KiuoR7kHtmTtFZ7KXQB+8zb51QALLJxTx8YAAAAAFQAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgM005BVD8MgH5kiSGnwXSfzaxLeDSl3y17Vhrx3F/9XxBgAAAAAVAAAgAAAAIAAAACAAQAAAAAAAAAA',
+      'cHNidP8BAHECAAAAAYBbjCRXw4r66Ly1aI/SCvis+CDQsCdQej1BhCoDnjt/AAAAAAAAAACAAogTAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIGOgAAAAAAABYAFOc6kh7rlKStRwwMvbaeu+oFvB4MAAAAAAABAR8gTgAAAAAAABYAFL8PIBBJ6JHVhwsE61MPwWtjtptAIgYDWOHbOE3D4KiuoR7kHtmTtFZ7KXQB+8zb51QALLJxTx8YAAAAAFQAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgM005BVD8MgH5kiSGnwXSfzaxLeDSl3y17Vhrx3F/9XxBgAAAAAVAAAgAAAAIAAAACAAQAAAAAAAAAA',
     );
   });
 
@@ -181,7 +181,7 @@ describe('Watch only wallet', () => {
     );
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ003QAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIAAAACAAQAAAAAAAAAA',
+      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ0U5AAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIAAAACAAQAAAAAAAAAA',
     );
   });
 
@@ -219,10 +219,63 @@ describe('Watch only wallet', () => {
       22,
       'bc1qtutssamysdkgd87df0afjct0mztx56qpze7wqe',
     );
+    assert.strictEqual(psbt.data.inputs[0].bip32Derivation[0].path, "m/84'/0'/1'/0/0");
+    assert.strictEqual(psbt.data.outputs[1].bip32Derivation[0].path, "m/84'/0'/1'/1/0");
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ003QAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIAAAACAAQAAAAAAAAAA',
+      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ0U5AAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAQAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIABAACAAQAAAAAAAAAA',
     );
+  });
+
+  it('can import Electrum compatible backup wallet, and create a tx with master fingerprint hex', async () => {
+    const w = new WatchOnlyWallet();
+    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii'));
+    w.init();
+    assert.ok(w.valid());
+    assert.strictEqual(
+      w.getSecret(),
+      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
+    );
+    assert.strictEqual(w.getMasterFingerprint(), 1455298230);
+    assert.strictEqual(w.getMasterFingerprintHex(), 'b616be56');
+    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
+    assert.ok(w.useWithHardwareWalletEnabled());
+  });
+
+  it('can import Electrum compatible backup wallet, and create a tx with master fingerprint hex with a length of 7', async () => {
+    const w = new WatchOnlyWallet();
+    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
+    str = str.replace('b616be56', '616be56');
+    // console.log(str)
+    w.setSecret(str);
+    w.init();
+    assert.ok(w.valid());
+    assert.strictEqual(
+      w.getSecret(),
+      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
+    );
+    assert.strictEqual(w.getMasterFingerprint(), 1455298054);
+    assert.strictEqual(w.getMasterFingerprintHex(), '0616be56');
+    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
+    assert.ok(w.useWithHardwareWalletEnabled());
+  });
+
+  it('will fail to import Electrum compatible backup wallet when fingerprint hex is less than 7', async () => {
+    const w = new WatchOnlyWallet();
+    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
+    str = str.replace('b616be56', '16be56');
+    w.setSecret(str);
+    w.init();
+    assert.throws(w.valid, 'invalid fingerprint hex');
+  });
+
+  it('will fail to import Electrum compatible backup wallet when fingerprint is an invalid hex value', async () => {
+    const w = new WatchOnlyWallet();
+    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
+    str = str.replace('b616be56', 'j16be56');
+    w.setSecret(str);
+    w.init();
+    assert.throws(w.valid, 'invalid fingerprint hex');
   });
 
   it('can import cobo vault JSON skeleton wallet', async () => {
@@ -338,12 +391,35 @@ describe('Watch only wallet', () => {
       psbt.data.outputs[1].bip32Derivation[0].pubkey.toString('hex'),
       '03e060c9b5bb85476caa53e3b8cd3d40c9dc2c36a8a5e8ed87e48bfc9bbe1760ad',
     );
+    assert.strictEqual(psbt.data.inputs[0].bip32Derivation[0].path, "m/49'/0'/0'/1/45");
     assert.strictEqual(psbt.data.outputs[1].bip32Derivation[0].path, "m/49'/0'/0'/1/46");
+
+    // now, changing derivation path of a watch-only wallet and expect that new crafted psbt will have this new path:
+
+    const newPath = "m/66'/6'/6'";
+    assert.strictEqual(w.getDerivationPath(), "m/49'/0'/0'");
+    w.setDerivationPath(newPath);
+    assert.strictEqual(w.getDerivationPath(), newPath);
+
+    const { psbt: psbt2 } = await w.createTransaction(
+      utxos,
+      [{ address: 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu', value: 5000 }],
+      1,
+      changeAddress,
+    );
+
+    assert.strictEqual(
+      psbt2.data.outputs[1].bip32Derivation[0].pubkey.toString('hex'),
+      '03e060c9b5bb85476caa53e3b8cd3d40c9dc2c36a8a5e8ed87e48bfc9bbe1760ad',
+    );
+    assert.strictEqual(psbt2.data.inputs[0].bip32Derivation[0].path, newPath + '/1/45');
+    assert.strictEqual(psbt2.data.outputs[1].bip32Derivation[0].path, newPath + '/1/46');
   });
 
   it('xpub watch only has derivation path set to BIP44 default', () => {
     const w = new WatchOnlyWallet();
     w.setSecret('xpub6CQdfC3v9gU86eaSn7AhUFcBVxiGhdtYxdC5Cw2vLmFkfth2KXCMmYcPpvZviA89X6DXDs4PJDk5QVL2G2xaVjv7SM4roWHr1gR4xB3Z7Ps');
+    w.init();
 
     assert.strictEqual(w.getDerivationPath(), "m/44'/0'/0'");
   });
@@ -351,6 +427,7 @@ describe('Watch only wallet', () => {
   it('ypub watch only has derivation path set to BIP49 default', () => {
     const w = new WatchOnlyWallet();
     w.setSecret('ypub6Y9u3QCRC1HkZv3stNxcQVwmw7vC7KX5Ldz38En5P88RQbesP2oy16hNyQocVCfYRQPxdHcd3pmu9AFhLv7NdChWmw5iNLryZ2U6EEHdnfo');
+    w.init();
 
     assert.strictEqual(w.getDerivationPath(), "m/49'/0'/0'");
   });
@@ -358,6 +435,7 @@ describe('Watch only wallet', () => {
   it('zpub watch only has derivation path set to BIP84 default', () => {
     const w = new WatchOnlyWallet();
     w.setSecret('zpub6rjLjQVqVnj7crz9E4QWj4WgczmEseJq22u2B6k2HZr6NE2PQx3ZYg8BnbjN9kCfHymSeMd2EpwpM5iiz5Nrb3TzvddxW2RMcE3VXdVaXHk');
+    w.init();
 
     assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
   });
@@ -411,6 +489,11 @@ describe('BC-UR', () => {
       Buffer.from(decoded, 'hex').toString('ascii'),
       '{"ExtPubKey":"zpub6qT7amLcp2exr4mU4AhXZMjD9CFkopECVhUxc9LHW8pNsJG2B9ogs5sFbGZpxEeT5TBjLmc7EFYgZA9EeWEM1xkJMFLefzZc8eigRFhKB8Q","MasterFingerprint":"01EBDA7D","AccountKeyPath":"m/84\'/0\'/0\'"}',
     );
+
+    const w = new WatchOnlyWallet();
+    w.setSecret(Buffer.from(decoded, 'hex').toString('ascii'));
+    w.init();
+    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
   });
 
   it('v2: can decodeUR() PSBT', () => {

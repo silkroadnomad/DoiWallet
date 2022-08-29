@@ -1,4 +1,3 @@
-/* global alert */
 import React, { useEffect, useState, useCallback, useContext, useRef } from 'react';
 import {
   ActivityIndicator,
@@ -6,9 +5,6 @@ import {
   Dimensions,
   FlatList,
   InteractionManager,
-  Keyboard,
-  KeyboardAvoidingView,
-  Linking,
   PixelRatio,
   Platform,
   ScrollView,
@@ -20,15 +16,13 @@ import {
   View,
   I18nManager,
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
 import { Icon } from 'react-native-elements';
 import { useRoute, useNavigation, useTheme, useFocusEffect } from '@react-navigation/native';
 import { Chain } from '../../models/doichainUnits';
 import { BlueTransactionListItem, BlueWalletNavigationHeader, BlueAlertWalletExportReminder, BlueListItem } from '../../BlueComponents';
 import WalletGradient from '../../class/wallet-gradient';
 import navigationStyle from '../../components/navigationStyle';
-import { LightningCustodianWallet, MultisigHDWallet, WatchOnlyWallet } from '../../class';
-import HandoffComponent from '../../components/handoff';
+import { LightningCustodianWallet, LightningLdkWallet, MultisigHDWallet, WatchOnlyWallet } from '../../class';
 import ActionSheet from '../ActionSheet';
 import loc from '../../loc';
 import { FContainer, FButton } from '../../components/FloatButtons';
@@ -37,10 +31,13 @@ import BottomModal from '../../components/BottomModal';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { isDesktop, isMacCatalina } from '../../blue_modules/environment';
 import BlueClipboard from '../../blue_modules/clipboard';
+import LNNodeBar from '../../components/LNNodeBar';
+import TransactionsNavigationHeader from '../../components/TransactionsNavigationHeader';
+import { TransactionListItem } from '../../components/TransactionListItem';
+import alert from '../../components/Alert';
 
 const fs = require('../../blue_modules/fs');
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
-const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 
 const buttonFontSize =
   PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26) > 22
@@ -48,9 +45,8 @@ const buttonFontSize =
     : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
 
 const WalletTransactions = () => {
-  const { wallets, saveToDisk, setSelectedWallet, walletTransactionUpdateStatus } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, setSelectedWallet, walletTransactionUpdateStatus, isElectrumDisabled } = useContext(BlueStorageContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [isManageFundsModalVisible, setIsManageFundsModalVisible] = useState(false);
   const { walletID } = useRoute().params;
   const { name } = useRoute();
   const wallet = wallets.find(w => w.getID() === walletID);
@@ -61,6 +57,7 @@ const WalletTransactions = () => {
   const [pageSize, setPageSize] = useState(20);
   const { setParams, setOptions, navigate } = useNavigation();
   const { colors } = useTheme();
+  const [lnNodeInfo, setLnNodeInfo] = useState({ canReceive: 0, canSend: 0 });
   const walletActionButtonsRef = useRef();
 
   const stylesHook = StyleSheet.create({
@@ -70,16 +67,10 @@ const WalletTransactions = () => {
     listHeaderText: {
       color: colors.foregroundColor,
     },
-    marketplaceButton1: {
-      backgroundColor: colors.lightButton,
-    },
-    marketplaceButton2: {
+    browserButton2: {
       backgroundColor: colors.lightButton,
     },
     marketpalceText1: {
-      color: colors.cta2,
-    },
-    marketpalceText2: {
       color: colors.cta2,
     },
     list: {
@@ -152,6 +143,7 @@ const WalletTransactions = () => {
     if (wallet.getLastTxFetch() === 0) {
       refreshTransactions();
     }
+    refreshLnNodeInfo();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -171,15 +163,23 @@ const WalletTransactions = () => {
     return false;
   };
 
+  const refreshLnNodeInfo = () => {
+    if (wallet.type === LightningLdkWallet.type) {
+      setLnNodeInfo({ canReceive: wallet.getReceivableBalance(), canSend: wallet.getBalance() });
+    }
+  };
+
   /**
    * Forcefully fetches TXs and balance for wallet
    */
   const refreshTransactions = async () => {
+    if (isElectrumDisabled) return setIsLoading(false);
     if (isLoading) return;
     setIsLoading(true);
     let noErr = true;
     let smthChanged = false;
     try {
+      refreshLnNodeInfo();
       // await BlueElectrum.ping();
       await BlueElectrum.waitTillConnected();
       /** @type {LegacyWallet} */
@@ -238,27 +238,13 @@ const WalletTransactions = () => {
 
     return (
       <View style={styles.flex}>
-        <View style={styles.listHeader}>
-          {/*
-            Current logic - Onchain:
-            - Shows buy button on middle when empty
-            - Show buy button on top when not empty
-            - Shows Marketplace button on details screen, open in browser (iOS)
-            - Shows Marketplace button on details screen, open in in-app (android)
-            Current logic - Offchain:
-            - Shows Lapp Browser empty (iOS)
-            - Shows Lapp Browser with marketplace (android)
-            - Shows Marketplace button to open in browser (iOS)
-
-            The idea is to avoid showing on iOS an appstore/market style app that goes against the TOS.
-
-           */}
-          
-          {wallet.getTransactions().length > 0 && wallet.type !== LightningCustodianWallet.type }
-          {wallet.type === LightningCustodianWallet.type && renderMarketplaceButton()}
-          {wallet.type === LightningCustodianWallet.type && Platform.OS === 'ios' && renderLappBrowserButton()}
-        </View>
-        <View style={[styles.listHeaderTextRow, stylesHook.listHeaderTextRow]}>
+        <View style={styles.listHeader}>{wallet.chain === Chain.OFFCHAIN && renderLappBrowserButton()}</View>
+        {wallet.type === LightningLdkWallet.type && (lnNodeInfo.canSend > 0 || lnNodeInfo.canReceive > 0) && (
+          <View style={[styles.marginHorizontal18, styles.marginBottom18]}>
+            <LNNodeBar canSend={lnNodeInfo.canSend} canReceive={lnNodeInfo.canReceive} itemPriceUnit={itemPriceUnit} />
+          </View>
+        )}
+        <View style={styles.listHeaderTextRow}>
           <Text style={[styles.listHeaderText, stylesHook.listHeaderText]}>{loc.transactions.list_title}</Text>
           <TouchableOpacity
             accessibilityRole="button"
@@ -380,7 +366,7 @@ const WalletTransactions = () => {
             },
           });
         }}
-        style={[styles.marketplaceButton2, stylesHook.marketplaceButton2]}
+        style={[styles.browserButton2, stylesHook.browserButton2]}
       >
         <Text style={[styles.marketpalceText1, stylesHook.marketpalceText1]}>{loc.wallets.list_ln_browser}</Text>
       </TouchableOpacity>
@@ -425,7 +411,9 @@ const WalletTransactions = () => {
     });
   };
 
-  const renderItem = item => <BlueTransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} />;
+  const renderItem = item => (
+    <TransactionListItem item={item.item} itemPriceUnit={itemPriceUnit} timeElapsed={timeElapsed} walletID={walletID} />
+  );
 
   const onBarCodeRead = ret => {
     if (!isLoading) {
@@ -444,27 +432,7 @@ const WalletTransactions = () => {
   };
 
   const choosePhoto = () => {
-    launchImageLibrary(
-      {
-        title: null,
-        mediaType: 'photo',
-        takePhotoButtonTitle: null,
-        maxHeight: 800,
-        maxWidth: 600,
-      },
-      response => {
-        if (response.uri) {
-          const uri = response.uri.toString().replace('file://', '');
-          LocalQRCode.decode(uri, (error, result) => {
-            if (!error) {
-              onBarCodeRead({ data: result });
-            } else {
-              alert(loc.send.qr_error_no_qrcode);
-            }
-          });
-        }
-      },
-    );
+    fs.showImagePickerAndReadImage().then(onBarCodeRead);
   };
 
   const copyFromClipboard = async () => {
@@ -577,17 +545,30 @@ const WalletTransactions = () => {
     });
   };
 
+  const onManageFundsPressed = ({ id }) => {
+    if (id === TransactionsNavigationHeader.actionKeys.Refill) {
+      const availableWallets = [...wallets.filter(item => item.chain === Chain.ONCHAIN && item.allowSend())];
+      if (availableWallets.length === 0) {
+        alert(loc.lnd.refill_create);
+      } else {
+        navigate('SelectWallet', { onWalletSelect, chainType: Chain.ONCHAIN });
+      }
+    } else if (id === TransactionsNavigationHeader.actionKeys.RefillWithExternalWallet) {
+      if (wallet.getUserHasSavedExport()) {
+        navigate('ReceiveDetailsRoot', {
+          screen: 'ReceiveDetails',
+          params: {
+            walletID: wallet.getID(),
+          },
+        });
+      }
+    }
+  };
+
   return (
     <View style={styles.flex}>
-      <StatusBar barStyle="light-content" backgroundColor={WalletGradient.headerColorFor(wallet.type)} />
-      {wallet.chain === Chain.ONCHAIN && wallet.type !== MultisigHDWallet.type && (
-        <HandoffComponent
-          title={`Bitcoin Wallet ${wallet.getLabel()}`}
-          type="org.doichain.doiwallet"
-          url={`https://blockpath.com/search/addr?q=${wallet.getXpub()}`}
-        />
-      )}
-      <BlueWalletNavigationHeader
+      <StatusBar barStyle="light-content" backgroundColor={WalletGradient.headerColorFor(wallet.type)} animated />
+      <TransactionsNavigationHeader
         wallet={wallet}
         onWalletUnitChange={passedWallet =>
           InteractionManager.runAfterInteractions(async () => {
@@ -595,18 +576,20 @@ const WalletTransactions = () => {
             saveToDisk();
           })
         }
-        onManageFundsPressed={() => {
+        onManageFundsPressed={id => {
           if (wallet.type === MultisigHDWallet.type) {
             navigateToViewEditCosigners();
+          } else if (wallet.type === LightningLdkWallet.type) {
+            navigate('LdkInfo', { walletID: wallet.getID() });
           } else if (wallet.type === LightningCustodianWallet.type) {
             if (wallet.getUserHasSavedExport()) {
-              setIsManageFundsModalVisible(true);
+              onManageFundsPressed({ id });
             } else {
               BlueAlertWalletExportReminder({
                 onSuccess: async () => {
                   wallet.setUserHasSavedExport(true);
                   await saveToDisk();
-                  setIsManageFundsModalVisible(true);
+                  onManageFundsPressed({ id });
                 },
                 onFailure: () =>
                   navigate('WalletExportRoot', {
@@ -643,18 +626,16 @@ const WalletTransactions = () => {
               <Text numberOfLines={0} style={styles.emptyTxs}>
                 {(isLightning() && loc.wallets.list_empty_txs1_lightning) || loc.wallets.list_empty_txs1}
               </Text>
-              
+              {isLightning() && <Text style={styles.emptyTxsLightning}>{loc.wallets.list_empty_txs2_lightning}</Text>}
             </ScrollView>
           }
-          onRefresh={refreshTransactions}
-          refreshing={isLoading}
+          {...(isElectrumDisabled ? {} : { refreshing: isLoading, onRefresh: refreshTransactions })}
           data={dataSource}
           extraData={[timeElapsed, dataSource, wallets]}
           keyExtractor={_keyExtractor}
           renderItem={renderItem}
           contentInset={{ top: 0, left: 0, bottom: 90, right: 0 }}
         />
-        {renderManageFundsModal()}
       </View>
 
       <FContainer ref={walletActionButtonsRef}>
@@ -710,7 +691,7 @@ WalletTransactions.navigationOptions = navigationStyle({}, (options, { theme, na
           })
         }
       >
-        <Icon name="kebab-horizontal" type="octicon" size={22} color="#FFFFFF" />
+        <Icon name="more-horiz" type="material" size={22} color="#FFFFFF" />
       </TouchableOpacity>
     ),
     title: '',
@@ -736,27 +717,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 40,
   },
-  modalContent: {
-    backgroundColor: '#FFFFFF',
-    padding: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    minHeight: 200,
-    height: 200,
+  marginHorizontal18: {
+    marginHorizontal: 18,
   },
-  advancedTransactionOptionsModalContent: {
-    padding: 22,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    minHeight: 130,
+  marginBottom18: {
+    marginBottom: 18,
   },
   walletDetails: {
-    marginHorizontal: 16,
-    minWidth: 150,
     justifyContent: 'center',
     alignItems: 'flex-end',
   },
@@ -783,18 +750,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 24,
   },
-  marketplaceButton1: {
-    borderRadius: 9,
-    minHeight: 49,
-    paddingHorizontal: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row',
-    alignSelf: 'auto',
-    flexGrow: 1,
-    marginHorizontal: 4,
-  },
-  marketplaceButton2: {
+  browserButton2: {
     borderRadius: 9,
     minHeight: 49,
     paddingHorizontal: 8,
@@ -808,10 +764,6 @@ const styles = StyleSheet.create({
   marketpalceText1: {
     fontSize: 18,
   },
-  marketpalceText2: {
-    fontSize: 18,
-    marginHorizontal: 8,
-  },
   list: {
     flex: 1,
   },
@@ -824,20 +776,6 @@ const styles = StyleSheet.create({
   emptyTxsLightning: {
     fontSize: 18,
     color: '#9aa0aa',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  buyBitcoin: {
-    backgroundColor: '#007AFF',
-    minWidth: 260,
-    borderRadius: 8,
-    alignSelf: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-  },
-  buyBitcoinText: {
-    fontSize: 15,
-    color: '#fff',
     textAlign: 'center',
     fontWeight: '600',
   },

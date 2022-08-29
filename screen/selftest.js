@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ScrollView, View, StyleSheet } from 'react-native';
+import { ScrollView, View, StyleSheet, Linking } from 'react-native';
 import wif from 'wif';
 import bip38 from 'bip38';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
 
 import loc from '../loc';
 import { BlueSpacing20, SafeBlueArea, BlueCard, BlueText, BlueLoading } from '../BlueComponents';
@@ -20,6 +22,7 @@ const bitcoin = require('bitcoinjs-lib');
 const BlueCrypto = require('react-native-blue-crypto');
 const encryption = require('../blue_modules/encryption');
 const BlueElectrum = require('../blue_modules/BlueElectrum');
+const bip32 = BIP32Factory(ecc);
 
 const styles = StyleSheet.create({
   center: {
@@ -131,7 +134,7 @@ export default class Selftest extends Component {
       const tx = bitcoin.Transaction.fromHex(txNew.tx.toHex());
       assertStrictEqual(
         txNew.tx.toHex(),
-        '020000000001010c86eb9013616e38b4752e56e5683e864cb34fcd7fe790bdc006b60c08446ba50000000017160014139dc70d73097f9d775f8a3280ba3e3435515641ffffffff02905f0100000000001976a914aa381cd428a4e91327fd4434aa0a08ff131f1a5a88ac6e3303000000000017a914749118baa93fb4b88c28909c8bf0a8202a0484f4870247304402205f0bcb0d9968b3c410e2a3699369bf4149bb56ade18b63356b45285a34d64600022043ac1271f3900ea1000a66b9a9d9ceb3e6e4a4ef45c4da0f55b691ad4b64fcb1012103a5de146762f84055db3202c1316cd9008f16047f4f408c1482fdb108217eda0800000000',
+        '020000000001010c86eb9013616e38b4752e56e5683e864cb34fcd7fe790bdc006b60c08446ba50000000017160014139dc70d73097f9d775f8a3280ba3e3435515641ffffffff02905f0100000000001976a914aa381cd428a4e91327fd4434aa0a08ff131f1a5a88aca73303000000000017a914749118baa93fb4b88c28909c8bf0a8202a0484f4870248304502210080545d30e3d30dff272ab11c91fd6150170b603239b48c3d56a3fa66bf240085022003762404e1b45975adc89f61ec1569fa19d6d4a8d405e060897754c489ebeade012103a5de146762f84055db3202c1316cd9008f16047f4f408c1482fdb108217eda0800000000',
       );
       assertStrictEqual(tx.ins.length, 1);
       assertStrictEqual(tx.outs.length, 2);
@@ -154,7 +157,7 @@ export default class Selftest extends Component {
       const mnemonic =
         'honey risk juice trip orient galaxy win situate shoot anchor bounce remind horse traffic exotic since escape mimic ramp skin judge owner topple erode';
       const seed = bip39.mnemonicToSeedSync(mnemonic);
-      const root = bitcoin.bip32.fromSeed(seed, DOICHAIN);
+      const root = bip32.fromSeed(seed, DOICHAIN);
 
       const path = "m/49'/0'/0'/0/0";
       const child = root.derivePath(path);
@@ -236,6 +239,14 @@ export default class Selftest extends Component {
             'shadow pistol academic acid actress prayer class unknown daughter sweater depict flip twice unkind craft early superior advocate guest smoking',
         );
         assertStrictEqual(w._getExternalAddressByIndex(0), '18pvMjy7AJbCDtv4TLYbGPbR7SzGzjqUpj', 'SLIP39 failed');
+      }
+
+      //
+
+      if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
+        assertStrictEqual(await Linking.canOpenURL('https://github.com/BlueWallet/BlueWallet/'), true, 'Linking can not open https url');
+      } else {
+        // skipping RN-specific test'
       }
 
       //

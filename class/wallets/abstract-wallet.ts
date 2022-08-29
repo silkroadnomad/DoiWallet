@@ -2,11 +2,12 @@
 import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import b58 from 'bs58check';
 import createHash from 'create-hash';
+import { CreateTransactionResult, CreateTransactionUtxo, Transaction, Utxo } from './types';
 
 type WalletStatics = {
   type: string;
   typeReadable: string;
-  segwitType?: string;
+  segwitType?: 'p2wpkh' | 'p2sh(p2wpkh)';
   derivationPath?: string;
 };
 
@@ -33,14 +34,14 @@ export class AbstractWallet {
 
   type: string;
   typeReadable: string;
-  segwitType?: string;
+  segwitType?: 'p2wpkh' | 'p2sh(p2wpkh)';
   _derivationPath?: string;
   label: string;
   secret: string;
   balance: number;
   unconfirmed_balance: number; // eslint-disable-line camelcase
   _address: string | false;
-  utxo: string[];
+  utxo: Utxo[];
   _lastTxFetch: number;
   _lastBalanceFetch: number;
   preferredBalanceUnit: DoichainUnit;
@@ -53,12 +54,11 @@ export class AbstractWallet {
   masterFingerprint: number | false;
 
   constructor() {
-    const Constructor = (this.constructor as unknown) as WalletStatics;
+    const Constructor = this.constructor as unknown as WalletStatics;
 
     this.type = Constructor.type;
     this.typeReadable = Constructor.typeReadable;
     this.segwitType = Constructor.segwitType;
-    this._derivationPath = Constructor.derivationPath;
     this.label = '';
     this.secret = ''; // private key or recovery phrase
     this.balance = 0;
@@ -85,14 +85,14 @@ export class AbstractWallet {
   }
 
   getID(): string {
-    const thisWithPassphrase = (this as unknown) as WalletWithPassphrase;
+    const thisWithPassphrase = this as unknown as WalletWithPassphrase;
     const passphrase = thisWithPassphrase.getPassphrase ? thisWithPassphrase.getPassphrase() : '';
-    const string2hash = this.getSecret() + passphrase;
+    const path = this._derivationPath ?? '';
+    const string2hash = this.type + this.getSecret() + passphrase + path;
     return createHash('sha256').update(string2hash).digest().toString('hex');
   }
 
-  // TODO: return type is incomplete
-  getTransactions(): { received: number }[] {
+  getTransactions(): Transaction[] {
     throw new Error('not implemented');
   }
 
@@ -245,6 +245,7 @@ export class AbstractWallet {
           masterFingerprint = Number(parsedSecret.keystore.ckcc_xfp);
         } else if (parsedSecret.keystore.root_fingerprint) {
           masterFingerprint = Number(parsedSecret.keystore.root_fingerprint);
+          if (!masterFingerprint) masterFingerprint = this.getMasterFingerprintFromHex(parsedSecret.keystore.root_fingerprint);
         }
         if (parsedSecret.keystore.label) {
           this.setLabel(parsedSecret.keystore.label);
@@ -262,7 +263,9 @@ export class AbstractWallet {
         this.secret = parsedSecret.ExtPubKey;
         const mfp = Buffer.from(parsedSecret.MasterFingerprint, 'hex').reverse().toString();
         this.masterFingerprint = parseInt(mfp, 16);
-        this._derivationPath = `m/${parsedSecret.AccountKeyPath}`;
+        this._derivationPath = parsedSecret.AccountKeyPath.startsWith('m/')
+          ? parsedSecret.AccountKeyPath
+          : `m/${parsedSecret.AccountKeyPath}`;
         if (parsedSecret.CoboVaultFirmwareVersion) this.use_with_hardware_wallet = true;
       }
     } catch (_) {}
@@ -280,7 +283,7 @@ export class AbstractWallet {
     return this;
   }
 
-  getLatestTransactionTime(): number {
+  getLatestTransactionTime(): string | 0 {
     return 0;
   }
 
@@ -290,7 +293,7 @@ export class AbstractWallet {
     }
     let max = 0;
     for (const tx of this.getTransactions()) {
-      max = Math.max(new Date(tx.received).getTime(), max);
+      max = Math.max(new Date(tx.received ?? 0).getTime(), max);
     }
     return max;
   }
@@ -299,6 +302,7 @@ export class AbstractWallet {
    * @deprecated
    * TODO: be more precise on the type
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createTx(): any {
     throw Error('not implemented');
   }
@@ -313,30 +317,31 @@ export class AbstractWallet {
    * @param skipSigning {boolean} Whether we should skip signing, use returned `psbt` in that case
    * @param masterFingerprint {number} Decimal number of wallet's master fingerprint
    * @returns {{outputs: Array, tx: Transaction, inputs: Array, fee: Number, psbt: Psbt}}
-   *
-   * TODO: be more specific on the return type
    */
   createTransaction(
-    utxos: { vout: number; value: number; txId: string; address: string }[],
-    targets: { value: number; address: string },
+    utxos: CreateTransactionUtxo[],
+    targets: {
+      address: string;
+      value?: number;
+    }[],
     feeRate: number,
     changeAddress: string,
     sequence: number,
     skipSigning = false,
     masterFingerprint: number,
-  ): { outputs: any[]; tx: any; inputs: any[]; fee: number; psbt: any } {
+  ): CreateTransactionResult {
     throw Error('not implemented');
   }
 
-  getAddress(): string {
+  getAddress(): string | false | undefined {
     throw Error('not implemented');
   }
 
-  getAddressAsync(): Promise<string> {
+  getAddressAsync(): Promise<string | false | undefined> {
     return new Promise(resolve => resolve(this.getAddress()));
   }
 
-  async getChangeAddressAsync(): Promise<string> {
+  async getChangeAddressAsync(): Promise<string | false | undefined> {
     return new Promise(resolve => resolve(this.getAddress()));
   }
 
@@ -412,10 +417,17 @@ export class AbstractWallet {
     this._utxoMetadata[`${txid}:${vout}`] = meta;
   }
 
-  /**
-   * @returns {string} Root derivation path for wallet if any
-   */
-  getDerivationPath(): string {
-    return this._derivationPath ?? '';
+  isSegwit() {
+    return false;
+  }
+
+  getMasterFingerprintFromHex(hexValue: string): number {
+    if (hexValue.length < 8) hexValue = '0' + hexValue;
+    const b = Buffer.from(hexValue, 'hex');
+    if (b.length !== 4) throw new Error('invalid fingerprint hex');
+
+    hexValue = hexValue[6] + hexValue[7] + hexValue[4] + hexValue[5] + hexValue[2] + hexValue[3] + hexValue[0] + hexValue[1];
+
+    return parseInt(hexValue, 16);
   }
 }

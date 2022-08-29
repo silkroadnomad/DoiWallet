@@ -1,8 +1,8 @@
-global.net = require('net');
-global.tls = require('tls');
-const BlueElectrum = require('../../blue_modules/BlueElectrum');
-const assert = require('assert');
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
+import assert from 'assert';
+
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+
+jest.setTimeout(150 * 1000);
 
 afterAll(() => {
   // after all tests we close socket so the test suite can actually terminate
@@ -13,7 +13,7 @@ beforeAll(async () => {
   // awaiting for Electrum to be connected. For RN Electrum would naturally connect
   // while app starts up, but for tests we need to wait for it
   try {
-    await BlueElectrum.waitTillConnected();
+    await BlueElectrum.connectMain();
   } catch (err) {
     console.log('failed to connect to Electrum:', err);
     process.exit(1);
@@ -138,6 +138,17 @@ describe('BlueElectrum', () => {
     assert.strictEqual(txs[0].height, 563077);
   });
 
+  // skipped because requires fresh address with pending txs every time
+  it.skip('BlueElectrum can do getMempoolTransactionsByAddress()', async function () {
+    const txs = await BlueElectrum.getMempoolTransactionsByAddress('bc1qp33en9mnw277c9vz5fz9vcu666cvervdnk02327wwph97hdjurqqxtl03c');
+    assert.ok(txs.length > 0);
+    assert.ok(txs[0].tx_hash);
+    assert.ok(txs[0].fee);
+
+    const rez = await BlueElectrum.multiGetTransactionByTxid([txs[0].tx_hash], 10, true);
+    assert.ok(rez[txs[0].tx_hash]);
+  });
+
   it('BlueElectrum can do getTransactionsFullByAddress()', async function () {
     const txs = await BlueElectrum.getTransactionsFullByAddress('bc1qt4t9xl2gmjvxgmp5gev6m8e6s9c85979ta7jeh');
     for (const tx of txs) {
@@ -147,6 +158,7 @@ describe('BlueElectrum', () => {
       assert.ok(!tx.vin);
       assert.ok(!tx.vout);
       assert.ok(tx.inputs);
+      assert.strictEqual(tx.inputs[0]?.addresses[0], 'bc1q7td49wcxfad9v42kmvg5refn9wcnvnru4395qw');
       assert.ok(tx.inputs[0].addresses.length > 0);
       assert.ok(tx.inputs[0].value > 0);
       assert.ok(tx.outputs);
@@ -154,6 +166,13 @@ describe('BlueElectrum', () => {
       assert.ok(tx.outputs[0].scriptPubKey);
       assert.ok(tx.outputs[0].addresses.length > 0);
     }
+  });
+
+  it('BlueElectrum can do txhexToElectrumTransaction()', () => {
+    const tx =
+      '0200000000010137d07edbc9db9a072a79c6f03e7274e52642d64d760143adc64832501087f37b00000000000000008002102700000000000022512040ef293a8a0ebaf8b351a27d89ff4b5b3822a635e4afdca77a30170c363bafa3e4ad0b00000000001600147dfe2249fa56a2f2b4b7ed3b16ee55e7c565198002483045022100e5b9f1c12e133ef659a0e5cc417b1f8625ba9e951bc7083408de2a33d6fb1a84022035ebb1e2d4ab620ee178dc6cd0b58c54123d1526d9a1b3efba612ea80e48edd101210295b56fc62cdd09c200ce19f873d5ddb3074f7141b2533448829385f48f093a1600000000';
+    const decoded = BlueElectrum.txhexToElectrumTransaction(tx);
+    assert.strictEqual(decoded.vout[0].scriptPubKey.addresses[0], 'bc1pgrhjjw52p6a03v635f7cnl6ttvuz9f34ujhaefm6xqtscd3m473szkl92g');
   });
 
   it.each([false, true])('BlueElectrum can do multiGetBalanceByAddress(), disableBatching=%p', async function (diableBatching) {
@@ -252,6 +271,11 @@ describe('BlueElectrum', () => {
     assert.ok(txdatas['5e2fa84148a7389537434b3ad12fcae71ed43ce5fb0f016a7f154a9b99a973df'].vin);
     assert.ok(txdatas['5e2fa84148a7389537434b3ad12fcae71ed43ce5fb0f016a7f154a9b99a973df'].vout);
     assert.ok(txdatas['5e2fa84148a7389537434b3ad12fcae71ed43ce5fb0f016a7f154a9b99a973df'].blocktime);
+    assert.strictEqual(
+      txdatas['5e2fa84148a7389537434b3ad12fcae71ed43ce5fb0f016a7f154a9b99a973df']?.vout[0]?.scriptPubKey?.addresses[0],
+      'bc1qp09gdem9xepasp4zxa2fxyvr8wazhms0wvtds9',
+    );
+
     assert.ok(Object.keys(txdatas).length === 4);
     if (disableBatching) BlueElectrum.setBatchingEnabled();
   });

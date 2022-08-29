@@ -1,7 +1,13 @@
 import { bech32 } from 'bech32';
 import bolt11 from 'bolt11';
+import { isTorDaemonDisabled } from '../blue_modules/environment';
+import { parse } from 'url'; // eslint-disable-line node/no-deprecated-api
+import { createHmac } from 'crypto';
+import secp256k1 from 'secp256k1';
 const CryptoJS = require('crypto-js');
 const createHash = require('create-hash');
+const torrific = require('../blue_modules/torrific');
+const ONION_REGEX = /^(http:\/\/[^/:@]+\.onion(?::\d{1,5})?)(\/.*)?$/; // regex for onion URL
 
 /**
  * @see https://github.com/btcontract/lnurl-rfc/blob/master/lnurl-pay.md
@@ -9,6 +15,7 @@ const createHash = require('create-hash');
 export default class Lnurl {
   static TAG_PAY_REQUEST = 'payRequest'; // type of LNURL
   static TAG_WITHDRAW_REQUEST = 'withdrawRequest'; // type of LNURL
+  static TAG_LOGIN_REQUEST = 'login'; // type of LNURL
 
   constructor(url, AsyncStorage) {
     this._lnurl = url;
@@ -28,7 +35,16 @@ export default class Lnurl {
 
   static getUrlFromLnurl(lnurlExample) {
     const found = Lnurl.findlnurl(lnurlExample);
-    if (!found) return false;
+    if (!found) {
+      if (Lnurl.isLightningAddress(lnurlExample)) {
+        const username = lnurlExample.split('@')[0].trim();
+        const host = lnurlExample.split('@')[1].trim();
+        const proto = host.match(/\.onion$/) ? 'http' : 'https';
+        return `${proto}://${host}/.well-known/lnurlp/${username}`;
+      } else {
+        return false;
+      }
+    }
 
     const decoded = bech32.decode(found, 10000);
     return Buffer.from(bech32.fromWords(decoded.words)).toString();
@@ -38,7 +54,23 @@ export default class Lnurl {
     return Lnurl.findlnurl(url) !== null;
   }
 
+  static isOnionUrl(url) {
+    return Lnurl.parseOnionUrl(url) !== null;
+  }
+
+  static parseOnionUrl(url) {
+    const match = url.match(ONION_REGEX);
+    if (match === null) return null;
+    const [, baseURI, path] = match;
+    return [baseURI, path];
+  }
+
   async fetchGet(url) {
+    const parsedOnionUrl = Lnurl.parseOnionUrl(url);
+    if (parsedOnionUrl) {
+      return _fetchGetTor(parsedOnionUrl);
+    }
+
     const resp = await fetch(url, { method: 'GET' });
     if (resp.status >= 300) {
       throw new Error('Bad response from server');
@@ -92,21 +124,26 @@ export default class Lnurl {
     return decoded;
   }
 
-  async requestBolt11FromLnurlPayService(amountSat) {
+  async requestBolt11FromLnurlPayService(amountSat, comment = '') {
     if (!this._lnurlPayServicePayload) throw new Error('this._lnurlPayServicePayload is not set');
     if (!this._lnurlPayServicePayload.callback) throw new Error('this._lnurlPayServicePayload.callback is not set');
     if (amountSat < this._lnurlPayServicePayload.min || amountSat > this._lnurlPayServicePayload.max)
       throw new Error(
-        'amount is not right, ' +
+        'The specified amount is invalid, ' +
           amountSat +
-          ' should be between ' +
+          ' it should be between ' +
           this._lnurlPayServicePayload.min +
           ' and ' +
           this._lnurlPayServicePayload.max,
       );
     const nonce = Math.floor(Math.random() * 2e16).toString(16);
     const separator = this._lnurlPayServicePayload.callback.indexOf('?') === -1 ? '?' : '&';
-    const urlToFetch = this._lnurlPayServicePayload.callback + separator + 'amount=' + Math.floor(amountSat * 1000) + '&nonce=' + nonce;
+    if (this.getCommentAllowed() && comment && comment.length > this.getCommentAllowed()) {
+      comment = comment.substr(0, this.getCommentAllowed());
+    }
+    if (comment) comment = `&comment=${encodeURIComponent(comment)}`;
+    const urlToFetch =
+      this._lnurlPayServicePayload.callback + separator + 'amount=' + Math.floor(amountSat * 1000) + '&nonce=' + nonce + comment;
     this._lnurlPayServiceBolt11Payload = await this.fetchGet(urlToFetch);
     if (this._lnurlPayServiceBolt11Payload.status === 'ERROR')
       throw new Error(this._lnurlPayServiceBolt11Payload.reason || 'requestBolt11FromLnurlPayService() error');
@@ -162,11 +199,12 @@ export default class Lnurl {
       fixed: min === max,
       min,
       max,
-      domain: data.callback.match(/https:\/\/([^/]+)\//)[1],
+      domain: data.callback.match(/^(https|http):\/\/([^/]+)\//)[2],
       metadata: data.metadata,
       description,
       image,
       amount: min,
+      commentAllowed: data.commentAllowed,
       // lnurl: uri,
     };
     return this._lnurlPayServicePayload;
@@ -246,4 +284,71 @@ export default class Lnurl {
       format: CryptoJS.format.Hex,
     }).toString(CryptoJS.enc.Utf8);
   }
+
+  getCommentAllowed() {
+    return this?._lnurlPayServicePayload?.commentAllowed ? parseInt(this._lnurlPayServicePayload.commentAllowed) : false;
+  }
+
+  authenticate(secret) {
+    return new Promise((resolve, reject) => {
+      if (!this._lnurl) throw new Error('this._lnurl is not set');
+
+      const url = parse(Lnurl.getUrlFromLnurl(this._lnurl), true); // eslint-disable-line node/no-deprecated-api
+
+      const hmac = createHmac('sha256', secret);
+      hmac.on('readable', async () => {
+        try {
+          const privateKey = hmac.read();
+          if (!privateKey) return;
+          const privateKeyBuf = Buffer.from(privateKey, 'hex');
+          const publicKey = secp256k1.publicKeyCreate(privateKeyBuf);
+          const signatureObj = secp256k1.sign(Buffer.from(url.query.k1, 'hex'), privateKeyBuf);
+          const derSignature = secp256k1.signatureExport(signatureObj.signature);
+
+          const reply = await this.fetchGet(`${url.href}&sig=${derSignature.toString('hex')}&key=${publicKey.toString('hex')}`);
+          if (reply.status === 'OK') {
+            resolve();
+          } else {
+            reject(reply.reason);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      });
+      hmac.write(url.hostname);
+      hmac.end();
+    });
+  }
+
+  static isLightningAddress(address) {
+    // ensure only 1 `@` present:
+    if (address.split('@').length !== 2) return false;
+    const splitted = address.split('@');
+    return !!splitted[0].trim() && !!splitted[1].trim();
+  }
+}
+
+async function _fetchGetTor(parsedOnionUrl) {
+  const torDaemonDisabled = await isTorDaemonDisabled();
+  if (torDaemonDisabled) {
+    throw new Error('Tor onion url support disabled');
+  }
+  const [baseURI, path] = parsedOnionUrl;
+  const tor = new torrific.Torsbee({
+    baseURI,
+  });
+  const response = await tor.get(path || '/', {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
+  });
+  const json = response.body;
+  if (typeof json === 'undefined' || response.err) {
+    throw new Error('Bad response from server: ' + response.err + ' ' + JSON.stringify(response.body));
+  }
+  if (json.status === 'ERROR') {
+    throw new Error('Reply from server: ' + json.reason);
+  }
+  return json;
 }

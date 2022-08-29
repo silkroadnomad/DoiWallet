@@ -1,26 +1,21 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, ActivityIndicator, Text, TouchableOpacity, StyleSheet, StatusBar, I18nManager } from 'react-native';
+import { View, ActivityIndicator, Text, TouchableOpacity, StyleSheet, StatusBar, BackHandler } from 'react-native';
 import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
-import {
-  BlueButton,
-  BlueCard,
-  BlueLoading,
-  BlueSpacing10,
-  BlueSpacing20,
-  BlueText,
-  BlueTransactionIncomingIcon,
-  BlueTransactionOutgoingIcon,
-  BlueTransactionPendingIcon,
-  SafeBlueArea,
-} from '../../BlueComponents';
+import { BlueButton, BlueCard, BlueLoading, BlueSpacing10, BlueSpacing20, BlueText, SafeBlueArea } from '../../BlueComponents';
+import TransactionIncomingIcon from '../components/icons/TransactionIncomingIcon';
+import TransactionOutgoingIcon from '../components/icons/TransactionOutgoingIcon';
+import TransactionPendingIcon from '../components/icons/TransactionPendingIcon';
 import navigationStyle from '../../components/navigationStyle';
+import HandoffComponent from '../../components/handoff';
 import { HDSegwitBech32Transaction } from '../../class';
 import { DoichainUnit } from '../../models/doichainUnits';
-import HandoffComponent from '../../components/handoff';
+
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 
 const buttonStatus = Object.freeze({
   possible: 1,
@@ -29,16 +24,19 @@ const buttonStatus = Object.freeze({
 });
 
 const TransactionsStatus = () => {
-  const { setSelectedWallet, wallets, txMetadata, getTransactions } = useContext(BlueStorageContext);
-  const { hash } = useRoute().params;
-  const { navigate, setOptions } = useNavigation();
+  const { setSelectedWallet, wallets, txMetadata, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
+  const { hash, walletID } = useRoute().params;
+  const { navigate, setOptions, goBack } = useNavigation();
   const { colors } = useTheme();
-  const wallet = useRef();
+  const wallet = useRef(wallets.find(w => w.getID() === walletID));
   const [isCPFPPossible, setIsCPFPPossible] = useState();
   const [isRBFBumpFeePossible, setIsRBFBumpFeePossible] = useState();
   const [isRBFCancelPossible, setIsRBFCancelPossible] = useState();
   const [tx, setTX] = useState();
   const [isLoading, setIsLoading] = useState(true);
+  const fetchTxInterval = useRef();
+  const [intervalMs, setIntervalMs] = useState(1000);
+  const [eta, setEta] = useState('');
   const stylesHook = StyleSheet.create({
     value: {
       color: colors.alternativeTextColor2,
@@ -49,7 +47,10 @@ const TransactionsStatus = () => {
     iconRoot: {
       backgroundColor: colors.success,
     },
-    confirmations: {
+    detailsText: {
+      color: colors.buttonTextColor,
+    },
+    details: {
       backgroundColor: colors.lightButton,
     },
   });
@@ -62,29 +63,22 @@ const TransactionsStatus = () => {
 
   useEffect(() => {
     setOptions({
-      headerStyle: {
-        borderBottomWidth: 0,
-        elevation: 0,
-        shadowOpacity: 0,
-        shadowOffset: { height: 0, width: 0 },
-        backgroundColor: colors.customHeader,
-      },
+      headerRight: () => (
+        <TouchableOpacity
+          accessibilityRole="button"
+          testID="TransactionDetailsButton"
+          style={[styles.details, stylesHook.details]}
+          onPress={navigateToTransactionDetials}
+        >
+          <Text style={[styles.detailsText, stylesHook.detailsText]}>{loc.send.create_details}</Text>
+        </TouchableOpacity>
+      ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors]);
+  }, [colors, tx]);
 
   useEffect(() => {
-    for (const w of wallets) {
-      for (const t of w.getTransactions()) {
-        if (t.hash === hash) {
-          console.log('tx', hash, 'belongs to', w.getLabel());
-          wallet.current = w;
-          break;
-        }
-      }
-    }
-
-    for (const tx of getTransactions(null, Infinity, true)) {
+    for (const tx of wallet.current.getTransactions()) {
       if (tx.hash === hash) {
         setTX(tx);
         break;
@@ -92,7 +86,91 @@ const TransactionsStatus = () => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hash]);
+  }, [hash, wallet.current]);
+
+  useEffect(() => {
+    wallet.current = wallets.find(w => w.getID() === walletID);
+  }, [walletID, wallets]);
+
+  // re-fetching tx status periodically
+  useEffect(() => {
+    console.log('transactionStatus - useEffect');
+
+    if (!tx || tx?.confirmations) return;
+    if (!hash) return;
+
+    if (fetchTxInterval.current) {
+      // interval already exists, lets cleanup it and recreate, so theres no duplicate intervals
+      clearInterval(fetchTxInterval.current);
+      fetchTxInterval.current = undefined;
+    }
+
+    console.log('setting up interval to check tx...');
+    fetchTxInterval.current = setInterval(async () => {
+      try {
+        setIntervalMs(31000); // upon first execution we increase poll interval;
+
+        console.log('checking tx', hash, 'for confirmations...');
+        const transactions = await BlueElectrum.multiGetTransactionByTxid([hash], 10, true);
+        const txFromElectrum = transactions[hash];
+        console.log('got txFromElectrum=', txFromElectrum);
+
+        const address = (txFromElectrum?.vout[0]?.scriptPubKey?.addresses || []).pop();
+
+        if (txFromElectrum && !txFromElectrum.confirmations && txFromElectrum.vsize && address) {
+          const txsM = await BlueElectrum.getMempoolTransactionsByAddress(address);
+          let txFromMempool;
+          // searhcing for a correct tx in case this address has several pending txs:
+          for (const tempTxM of txsM) {
+            if (tempTxM.tx_hash === hash) txFromMempool = tempTxM;
+          }
+          if (!txFromMempool) return;
+          console.log('txFromMempool=', txFromMempool);
+
+          const satPerVbyte = Math.round(txFromMempool.fee / txFromElectrum.vsize);
+          const fees = await BlueElectrum.estimateFees();
+          console.log('fees=', fees, 'satPerVbyte=', satPerVbyte);
+          if (satPerVbyte >= fees.fast) {
+            setEta(loc.formatString(loc.transactions.eta_10m));
+          }
+          if (satPerVbyte >= fees.medium && satPerVbyte < fees.fast) {
+            setEta(loc.formatString(loc.transactions.eta_3h));
+          }
+          if (satPerVbyte < fees.medium) {
+            setEta(loc.formatString(loc.transactions.eta_1d));
+          }
+        } else if (txFromElectrum.confirmations > 0) {
+          // now, handling a case when tx became confirmed!
+          ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
+          setEta('');
+          setTX(prevState => {
+            return Object.assign({}, prevState, { confirmations: txFromElectrum.confirmations });
+          });
+          clearInterval(fetchTxInterval.current);
+          fetchTxInterval.current = undefined;
+          wallet?.current?.getID() && fetchAndSaveWalletTransactions(wallet.current.getID());
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }, intervalMs);
+  }, [hash, intervalMs, tx, fetchAndSaveWalletTransactions]);
+
+  const handleBackButton = () => {
+    goBack(null);
+    return true;
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+      clearInterval(fetchTxInterval.current);
+      fetchTxInterval.current = undefined;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const initialState = async () => {
     try {
@@ -122,7 +200,7 @@ const TransactionsStatus = () => {
   }, [wallet.current]);
 
   useEffect(() => {
-    console.log('transactions/details - useEffect');
+    console.log('transactionStatus - useEffect');
   }, []);
 
   const checkPossibilityOfCPFP = async () => {
@@ -278,9 +356,9 @@ const TransactionsStatus = () => {
   return (
     <SafeBlueArea>
       <HandoffComponent
-        title={`Bitcoin Transaction ${tx.hash}`}
-        type="org.doichain.doiwallet"
-        url={`https://blockstream.info/tx/${tx.hash}`}
+        title={loc.transactions.details_title}
+        type={HandoffComponent.activityTypes.ViewInBlockExplorer}
+        url={`https://mempool.space/tx/${tx.hash}`}
       />
 
       <StatusBar barStyle="default" />
@@ -306,19 +384,19 @@ const TransactionsStatus = () => {
                 if (!tx.confirmations) {
                   return (
                     <View style={styles.icon}>
-                      <BlueTransactionPendingIcon />
+                      <TransactionPendingIcon />
                     </View>
                   );
                 } else if (tx.value < 0) {
                   return (
                     <View style={styles.icon}>
-                      <BlueTransactionOutgoingIcon />
+                      <TransactionOutgoingIcon />
                     </View>
                   );
                 } else {
                   return (
                     <View style={styles.icon}>
-                      <BlueTransactionIncomingIcon />
+                      <TransactionIncomingIcon />
                     </View>
                   );
                 }
@@ -335,23 +413,25 @@ const TransactionsStatus = () => {
             </View>
           )}
 
-          <View style={[styles.confirmations, stylesHook.confirmations]}>
+          <View style={styles.confirmations}>
             <Text style={styles.confirmationsText}>
               {loc.formatString(loc.transactions.confirmations_lowercase, {
                 confirmations: tx.confirmations > 6 ? '6+' : tx.confirmations,
               })}
             </Text>
           </View>
+          {eta ? (
+            <View style={styles.eta}>
+              <BlueSpacing10 />
+              <Text style={styles.confirmationsText}>{eta}</Text>
+            </View>
+          ) : null}
         </BlueCard>
 
         <View style={styles.actions}>
           {renderCPFP()}
           {renderRBFBumpFee()}
           {renderRBFCancel()}
-          <TouchableOpacity accessibilityRole="button" style={styles.details} onPress={navigateToTransactionDetials}>
-            <Text style={styles.detailsText}>{loc.send.create_details.toLowerCase()}</Text>
-            <Icon name={I18nManager.isRTL ? 'angle-left' : 'angle-right'} size={18} type="font-awesome" color="#9aa0aa" />
-          </TouchableOpacity>
         </View>
       </View>
     </SafeBlueArea>
@@ -418,16 +498,18 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   confirmations: {
-    borderRadius: 11,
-    width: 109,
-    height: 21,
     alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'center',
   },
   confirmationsText: {
     color: '#9aa0aa',
-    fontSize: 11,
+    fontSize: 13,
+  },
+  eta: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   actions: {
     alignSelf: 'center',
@@ -443,18 +525,30 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   details: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    width: 80,
+    borderRadius: 8,
+    height: 34,
   },
   detailsText: {
-    color: '#9aa0aa',
-    fontSize: 14,
-    marginRight: 8,
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 
-TransactionsStatus.navigationOptions = navigationStyle({
-  title: '',
-});
+TransactionsStatus.navigationOptions = navigationStyle(
+  {
+    headerTitle: '',
+  },
+  (options, { theme }) => ({
+    ...options,
+    headerStyle: {
+      backgroundColor: theme.colors.customHeader,
+      borderBottomWidth: 0,
+      elevation: 0,
+      shadowOpacity: 0,
+      shadowOffset: { height: 0, width: 0 },
+    },
+  }),
+);

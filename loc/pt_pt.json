@@ -1,6 +1,6 @@
 {
   "_": {
-    "bad_password": "pasword errada, tente novamente",
+    "bad_password": "Pasword errada. Por favor, tente novamente.",
     "cancel": "Cancelar",
     "continue": "Continuar",
     "enter_password": "Inserir password",
@@ -13,8 +13,8 @@
     "no": "Não",
     "save": "Salvar",
     "seed": "Seed",
+    "success": "Sucesso",
     "wallet_key": "Chave da carteira",
-    "file_saved": "O arquivo ({filePath}) foi salvo na sua pasta Downloads.",
     "discard_changes": "Descartar alterações?",
     "discard_changes_detail": "Tem alterações por guardar. Tem a certeza que deseja descartar e sair do ecrã?"
   },
@@ -90,10 +90,8 @@
   },
   "lnd": {
     "errorInvoiceExpired": "Factura expirada",
-    "exchange": "Exchange",
     "expired": "Expirado",
     "expiredLow": "expirada",
-    "expiresIn": "Expira: {time}",
     "payButton": "Paga",
     "placeholder": "Factura",
     "potentialFee": "Taxa provável: {fee}",
@@ -131,11 +129,7 @@
     "ask": "Salvou a frase de backup da sua carteira? Esta frase de backup é necessária para pode ter acesso aos fundos em caso de perder este dispositivo. Sem a frase de backup, os fundos serão perdidos permanentemente.",
     "ask_no": "Não, eu não tenho",
     "ask_yes": "Sim, eu fiz",
-    "ok": "OK, eu escrevi-a num papel!",
-    "ok_lnd": "Ok, eu guardei.",
-    "text": "Por favor escreva esta frase mnemónica numa folha de papel. É o seu backup e pode usá-lo para restaurar a sua wallet noutro device.",
-    "text_lnd": "Por favor, reserve um momento para guardar este backup. É o seu backup que lhe permite restaurar a carteira em outro dispositivo.",
-    "title": "A sua wallet foi criada..."
+    "text_lnd": "Por favor, reserve um momento para guardar este backup. É o seu backup que lhe permite restaurar a carteira em outro dispositivo."
   },
   "receive": {
     "details_create": "Criar",
@@ -158,7 +152,6 @@
     "create_details": "Detalhes",
     "create_fee": "Taxa",
     "create_memo": "Nota pessoal",
-    "create_satoshi_per_byte": "satoshiPerByte",
     "create_this_is_hex": "Este é o hex da transacção, assinado e pronto para ser difundido para a network. Continuar?",
     "create_to": "Para",
     "create_tx_size": "Tamanho TX",
@@ -169,7 +162,6 @@
     "details_address_field_is_not_valid": "Campo de endereço não é válido",
     "details_adv_fee_bump": "Permitir aumentar taxa",
     "details_adv_full": "Use o saldo total",
-    "details_adv_full_remove": "Seus outros destinatários serão removidos desta transacção.",
     "details_adv_full_sure": "Tem a certeza de que deseja usar o saldo total da sua carteira para esta transacção?",
     "details_adv_import": "Importar transação",
     "details_amount_field_is_not_valid": "Campo de quantia não é válido",
@@ -178,8 +170,6 @@
     "details_error_decode": "Erro: Não é possível decodificar o endereço Doi",
     "details_fee_field_is_not_valid": "Campo de taxa não é válido",
     "details_next": "Próximo",
-    "details_no_maximum": "A carteira selecionada não suporta cálculo automático de saldo máximo. Tem a certeza que deseja selecionar esta carteira?",
-    "details_no_multiple": "A carteira selecionada não suporta o envio de Bitcoins para vários destinatários. Tem a certeza que deseja selecionar esta carteira?",
     "details_no_signed_tx": "O ficheiro seleccionado não contém uma transacção que possa ser importada.",
     "details_note_placeholder": "Nota pessoal",
     "details_scan": "Scan",
@@ -207,6 +197,7 @@
     "input_total": "Total:",
     "permission_camera_message": "Precisamos da sua permissão para usar sua câmera",
     "permission_camera_title": "Permissão para usar a câmera",
+    "psbt_sign": "Assinar transação",
     "open_settings": "Abrir configurações",
     "permission_storage_later": "Perguntar mais tarde",
     "permission_storage_message": "A DoiWallet precisa da sua permissão para aceder ao seu armazenamento para guardar esta transação.",
@@ -216,9 +207,9 @@
     "psbt_this_is_psbt": "Esta é uma transação doi parcialmente assinada (PSBT). Conclua a assinatura com a sua carteira de hardware.",
     "psbt_tx_export": "Exportar para ficheiro",
     "no_tx_signing_in_progress": "Nenhuma assinatura de transação em progresso.",
+    "outdated_rate": "A taxa foi atualizada pela última vez em: {date}",
     "psbt_tx_open": "Abrir transacção assinada",
     "psbt_tx_scan": "Scan transacção assinada",
-    "qr_error_no_qrcode": "A imagem selecionada não contém um código QR.",
     "qr_error_no_wallet": "O ficheiro seleccionado não contém uma carteira que possa ser importada.",
     "success_done": "Feito",
     "txSaved": "O ficheiro de transacção ({filePath}) foi guardado na pasta Downloads.",
@@ -251,12 +242,8 @@
     "electrum_connected": "Conectado",
     "electrum_connected_not": "Desconectado",
     "electrum_error_connect": "Não é possível conectar ao servidor Electrum fornecido",
-    "electrum_host": "host, por exemplo {example}",
-    "electrum_port": "Porta TCP, geralmente {example}",
-    "electrum_port_ssl": "Porta SSL, geralmente {example}\n\n",
     "electrum_saved": "As alterações foram guardadas com sucesso. Pode ser necessário reiniciar para que as alterações tenham efeito.",
-    "electrum_settings": "Definições do Electrum",
-    "electrum_settings_explain": "Deixe em branco para usar o valor por omissão",
+    "electrum_settings_server": "Electrum server",
     "electrum_status": "Estado",
     "electrum_clear_alert_title": "Limpar histórico?",
     "electrum_clear_alert_message": "Você realmente deseja limpar o histórico de servidores electrum?",
@@ -273,7 +260,6 @@
     "encrypt_title": "Segurança",
     "encrypt_tstorage": "Armazenamento",
     "encrypt_use": "Usar {type}",
-    "encrypt_use_expl": "{type} será usado para confirmar a sua identidade antes de fazer uma transacção, desbloquear, exportar ou apagar uma carteira. {type} não será usado para desbloquear o armazenamento encriptado.",
     "general": "Geral",
     "general_adv_mode": "Ligar modo avançado",
     "general_adv_mode_e": "Quando activado, verá opções avançadas, como diferentes tipos de carteira, a capacidade de especificar a instância do LNDHub à qual se deseja conectar e a entropia personalizada durante a criação da carteira.",
@@ -290,7 +276,6 @@
     "network": "Rede",
     "network_broadcast": "Transmitir transacção",
     "network_electrum": "Electrum server",
-    "not_a_valid_uri": "Não é um URI válido",
     "notifications": "Notificações",
     "open_link_in_explorer": "Abrir link no explorador",
     "password": "Password",
@@ -304,7 +289,6 @@
     "retype_password": "Inserir password novamente",
     "save": "Guardar",
     "saved": "Guardado",
-    "success_transaction_broadcasted": "Sucesso! Sua transação foi transmitida!",
     "total_balance": "Saldo Total",
     "widgets": "Widgets"
   },
@@ -313,7 +297,6 @@
     "ask_me_later": "Pergunte-me depois"
   },
   "transactions": {
-    "cancel_explain": "Substituiremos esta transacção por aquela que lhe paga e tem taxas mais altas. Isso efectivamente cancela a transacção. Isto é chamado de RBF - Substituir por Taxa.",
     "cancel_no": "Esta transacção não é substituível",
     "cancel_title": "Cancelar esta transacção (RBF)",
     "confirmations_lowercase": "{confirmations} confirmações",
@@ -334,15 +317,12 @@
     "details_title": "detalhes",
     "details_to": "Para",
     "details_transaction_details": "Detalhes da transacção",
-    "enable_hw": "Esta carteira não está a ser usada em conjunto com uma carteira de hardware. Gostaria de habilitar o uso de carteira de hardware?",
     "pending": "Pendente",
     "list_title": "transacções",
-    "rbf_explain": "Substituiremos esta transacção por outra com uma taxa mais alta, portanto, ela deve ser confirmada mais rapidamente. Isto é chamado de RBF - Substituir por Taxa.",
     "rbf_title": "Aumento de taxa (RBF)",
     "status_bump": "Aumento de taxa",
     "status_cancel": "Cancelar transacção",
     "transactions_count": "contagem de transações",
-    "txid": "Txid",
     "updating": "A atualizar..."
   },
   "wallets": {
@@ -357,7 +337,6 @@
     "add_lightning": "Lightning",
     "add_lightning_explain": "Para gastar com transações instantâneas",
     "add_lndhub": "Conecte-se ao seu LNDHub",
-    "add_lndhub_error": "O endereço de nó fornecido não é um nó LNDHub válido.",
     "add_lndhub_placeholder": "seu endereço de nó",
     "add_or": "ou",
     "add_title": "adicionar wallet",
@@ -367,14 +346,11 @@
     "details_advanced": "Avançado",
     "details_are_you_sure": "Tem a certeza?",
     "details_connected_to": "Conectado a",
-    "details_del_wb": "Saldo da carteira",
     "details_del_wb_err": "O valor do saldo fornecido não corresponde ao saldo desta carteira. Por favor, tente novamente",
-    "details_del_wb_q": "Esta carteira tem um slado. Antes de continuar, esteja ciente de que não poderá recuperar os fundos sem a frase de backup desta carteira. Para evitar a remoção acidental desta carteira, insira o saldo de {balance} satoshis de sua carteira.",
     "details_delete": "Eliminar",
     "details_delete_wallet": "Remover carteira",
     "details_display": "mostrar na lista de carteiras",
     "details_export_backup": "Exportar / backup",
-    "details_marketplace": "Mercado",
     "details_master_fingerprint": "Master fingerprint",
     "details_no_cancel": "Não, cancelar",
     "details_save": "Guardar",
@@ -387,7 +363,6 @@
     "export_title": "Exportar Wallet",
     "import_do_import": "Importar",
     "import_error": "Falhou. É um dado válido?",
-    "import_explanation": "Escreva a sua frase mnemónica, chave privada, WIF, ou qualquer informação que disponha. Vamos tentar interpretar o formato e importar a sua wallet",
     "import_file": "Importar ficheiro",
     "import_imported": "Importada",
     "import_scan_qr": "ou scan o QR code?",
@@ -397,7 +372,6 @@
     "list_create_a_wallet": "Adicionar uma wallet",
     "list_empty_txs1": "As suas transacções aparecerão aqui,",
     "list_empty_txs1_lightning": "A wallet Lightning deve ser usada para as suas transações diárias. As taxas são muito baixas e a velocidade muito elevada",
-    "list_empty_txs2": "nenhuma de momento",
     "list_empty_txs2_lightning": "\nPara começar a usar toque em \"gerir fundos\" e recarregue o seu saldo.",
     "list_header": "Uma carteira representa um par de chaves, uma privada e outra que pode partilhar para receber doi.",
     "list_import_error": "Foi encontrado um erro ao tentar importar esta carteira.",
@@ -416,5 +390,21 @@
     "take_photo": "Tirar foto",
     "xpub_copiedToClipboard": "copiado para o clipboard",
     "xpub_title": "XPUB da wallet"
+  },
+  "multisig": {
+    "confirm": "Confirmar",
+    "header": "Enviar",
+    "share": "partilhar",
+    "create": "Criar",
+    "co_sign_transaction": "Assinar transação",
+    "ms_help_title5": "Ligar modo avançado"
+  },
+  "units": {
+    "sats": "sats"
+  },
+  "addresses": {
+    "sign_placeholder_address": "Endereço",
+    "type_receive": "receber",
+    "transactions": "transacções"
   }
 }

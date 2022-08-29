@@ -1,23 +1,28 @@
+import assert from 'assert';
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
 import Settings from '../../screen/settings/settings';
 import Selftest from '../../screen/selftest';
-import { BlueHeader } from '../../BlueComponents';
-const assert = require('assert');
+import { BlueHeaderDefaultSub } from '../../BlueComponents';
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+
 jest.mock('react-native-qrcode-svg', () => 'Video');
-jest.useFakeTimers();
 
-jest.mock('amplitude-js', () => ({
-  getInstance: function () {
-    return {
-      init: jest.fn(),
-      logEvent: jest.fn(),
-    };
-  },
-}));
+beforeAll(async () => {
+  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
+  // while app starts up, but for tests we need to wait for it
+  await BlueElectrum.connectMain();
+  jest.useFakeTimers();
+});
 
-it('BlueHeader works', () => {
-  const rendered = TestRenderer.create(<BlueHeader />).toJSON();
+afterAll(() => {
+  jest.useRealTimers();
+  // after all tests we close socket so the test suite can actually terminate
+  BlueElectrum.forceDisconnect();
+});
+
+it('BlueHeaderDefaultSub works', () => {
+  const rendered = TestRenderer.create(<BlueHeaderDefaultSub />).toJSON();
   expect(rendered).toBeTruthy();
 });
 

@@ -220,9 +220,6 @@ const Entropy = () => {
     entropyText: {
       color: colors.foregroundColor,
     },
-    coinBody: {
-      borderColor: colors.lightButton,
-    },
   });
 
   const push = v => v && dispatch({ type: 'push', value: v.value, bits: v.bits });
@@ -271,7 +268,7 @@ const Entropy = () => {
   );
 };
 
-Entropy.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.entropy.title }));
+Entropy.navigationOptions = navigationStyle({}, opts => ({ ...opts, headerTitle: loc.entropy.title }));
 
 const styles = StyleSheet.create({
   entropy: {

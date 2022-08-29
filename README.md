@@ -2,7 +2,6 @@
 
 [![GitHub tag](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/BlueWallet/BlueWallet/master/package.json&query=$.version&label=Version)](https://github.com/BlueWallet/BlueWallet)
 [![CircleCI](https://circleci.com/gh/BlueWallet/BlueWallet.svg?style=svg)](https://circleci.com/gh/BlueWallet/BlueWallet)
-[![e2e on master](https://travis-ci.com/BlueWallet/BlueWallet.svg?branch=master)](https://travis-ci.com/BlueWallet/BlueWallet)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 ![](https://img.shields.io/github/license/BlueWallet/BlueWallet.svg)
 
@@ -128,6 +127,11 @@ Transifex automatically creates Pull Request when language reaches 100% translat
 Builds automated and tested with BrowserStack
 
 <a href="https://www.browserstack.com/"><img src="https://i.imgur.com/syscHCN.png" width="160px"></a>
+
+Bugs reported via BugSnag
+
+<a href="https://www.bugsnag.com"><img src="https://images.typeform.com/images/QKuaAssrFCq7/image/default" width="160px"></a>
+
 
 ## RESPONSIBLE DISCLOSURE
 

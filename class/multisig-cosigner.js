@@ -1,6 +1,9 @@
 import b58 from 'bs58check';
 import { DOICHAIN } from '../blue_modules/network';
-const HDNode = require('bip32');
+import { MultisigHDWallet } from './wallets/multisig-hd-wallet';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+const bip32 = BIP32Factory(ecc);
 
 export class MultisigCosigner {
   constructor(data) {
@@ -64,6 +67,19 @@ export class MultisigCosigner {
         this._path = json.path;
         this._cosigners = [true];
         this._valid = true;
+
+        // a bit more logic here: according to the formal BIP48 spec, this xpub field _can_ start with 'xpub', but
+        // the actual type of segwit can be inferred from the path
+        if (
+          this._xpub.startsWith('xpub') &&
+          [MultisigHDWallet.PATH_NATIVE_SEGWIT, MultisigHDWallet.PATH_WRAPPED_SEGWIT].includes(this._path)
+        ) {
+          const w = new MultisigHDWallet();
+          w.addCosigner(this._xpub, '00000000', this._path);
+          w.setDerivationPath(this._path);
+          this._xpub = w.convertXpubToMultisignatureXpub(this._xpub);
+        }
+
         return;
       }
     } catch (_) {

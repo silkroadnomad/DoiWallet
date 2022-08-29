@@ -1,4 +1,3 @@
-/* global alert */
 import { Alert, Linking, PermissionsAndroid, Platform } from 'react-native';
 import RNFS from 'react-native-fs';
 import Share from 'react-native-share';
@@ -9,6 +8,7 @@ import { presentCameraNotAuthorizedAlert } from '../class/camera';
 import { isDesktop } from '../blue_modules/environment';
 import ActionSheet from '../screen/ActionSheet';
 import BlueClipboard from './clipboard';
+import alert from '../components/Alert';
 const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 
 const writeFileAndExportToAndroidDestionation = async ({ filename, contents, destinationLocalizedString, destination }) => {
@@ -47,7 +47,7 @@ const writeFileAndExport = async function (filename, contents) {
   if (Platform.OS === 'ios') {
     const filePath = RNFS.TemporaryDirectoryPath + `/${filename}`;
     await RNFS.writeFile(filePath, contents);
-    Share.open({
+    await Share.open({
       url: 'file://' + filePath,
       saveToFiles: isDesktop,
     })
@@ -58,37 +58,12 @@ const writeFileAndExport = async function (filename, contents) {
         RNFS.unlink(filePath);
       });
   } else if (Platform.OS === 'android') {
-    Alert.alert(
-      loc._.file_save_title,
-
-      loc.formatString(loc._.file_save_location, { filePath: filename }),
-      [
-        { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
-        {
-          text: loc._.downloads_folder,
-          onPress: () => {
-            writeFileAndExportToAndroidDestionation({
-              filename,
-              contents,
-              destinationLocalizedString: loc._.downloads_folder,
-              destination: RNFS.DownloadDirectoryPath,
-            });
-          },
-        },
-        {
-          text: loc._.external_storage,
-          onPress: async () => {
-            writeFileAndExportToAndroidDestionation({
-              filename,
-              contents,
-              destination: RNFS.ExternalStorageDirectoryPath,
-              destinationLocalizedString: loc._.external_storage,
-            });
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+    await writeFileAndExportToAndroidDestionation({
+      filename,
+      contents,
+      destinationLocalizedString: loc._.downloads_folder,
+      destination: RNFS.DownloadDirectoryPath,
+    });
   }
 };
 
@@ -99,8 +74,8 @@ const writeFileAndExport = async function (filename, contents) {
  */
 const openSignedTransaction = async function () {
   try {
-    const res = await DocumentPicker.pick({
-      type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallt.psbt.txn'] : [DocumentPicker.types.allFiles],
+    const res = await DocumentPicker.pickSingle({
+      type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn'] : [DocumentPicker.types.allFiles],
     });
 
     return await _readPsbtFileIntoBase64(res.uri);
@@ -137,17 +112,21 @@ const showImagePickerAndReadImage = () => {
         takePhotoButtonTitle: null,
         maxHeight: 800,
         maxWidth: 600,
+        selectionLimit: 1,
       },
       response => {
-        if (response.uri) {
-          const uri = response.uri.toString().replace('file://', '');
-          LocalQRCode.decode(uri, (error, result) => {
-            if (!error) {
-              resolve(result);
-            } else {
-              reject(new Error(loc.send.qr_error_no_qrcode));
-            }
-          });
+        if (!response.didCancel) {
+          const asset = response.assets[0];
+          if (asset.uri) {
+            const uri = asset.uri.toString().replace('file://', '');
+            LocalQRCode.decode(uri, (error, result) => {
+              if (!error) {
+                resolve(result);
+              } else {
+                reject(new Error(loc.send.qr_error_no_qrcode));
+              }
+            });
+          }
         }
       },
     ),
@@ -182,7 +161,7 @@ const takePhotoWithImagePickerAndReadPhoto = () => {
 
 const showFilePickerAndReadFile = async function () {
   try {
-    const res = await DocumentPicker.pick({
+    const res = await DocumentPicker.pickSingle({
       type:
         Platform.OS === 'ios'
           ? [

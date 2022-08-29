@@ -1,8 +1,10 @@
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import { DOICHAIN } from '../../blue_modules/network.js';
-const bitcoin = require('bitcoinjs-lib');
-const HDNode = require('bip32');
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+const bip32 = BIP32Factory(ecc);
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
+
 
 /**
  * HD Wallet (BIP39).
@@ -39,9 +41,9 @@ export class HDLegacyP2PKHWallet extends AbstractHDElectrumWallet {
       return this._xpub; // cache hit
     }
     const seed = this._getSeed();
-    const root = bitcoin.bip32.fromSeed(seed, DOICHAIN);
+    const root = bip32.fromSeed(seed, DOICHAIN);
 
-    const path = "m/44'/0'/0'";
+    const path = this.getDerivationPath();
     const child = root.derivePath(path).neutered();
     this._xpub = child.toBase58();
 
@@ -94,13 +96,13 @@ export class HDLegacyP2PKHWallet extends AbstractHDElectrumWallet {
 
     if (node === 0 && !this._node0) {
       const xpub = this.getXpub();
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node0 = hdNode.derive(node);
     }
 
     if (node === 1 && !this._node1) {
       const xpub = this.getXpub();
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node1 = hdNode.derive(node);
     }
 

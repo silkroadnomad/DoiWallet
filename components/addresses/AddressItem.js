@@ -11,8 +11,6 @@ import Share from 'react-native-share';
 
 const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) => {
   const { colors } = useTheme();
-  const tooltip = useRef();
-  const listItem = useRef();
 
   const hasTransactions = item.transactions > 0;
 
@@ -37,7 +35,9 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
 
   const { navigate } = useNavigation();
 
+  const menuRef = useRef();
   const navigateToReceive = () => {
+    menuRef.current?.dismissMenu();
     navigate('ReceiveDetailsRoot', {
       screen: 'ReceiveDetails',
       params: {
@@ -48,6 +48,7 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
   };
 
   const navigateToSignVerify = () => {
+    menuRef.current?.dismissMenu();
     navigate('SignVerifyRoot', {
       screen: 'SignVerify',
       params: {
@@ -55,10 +56,6 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
         address: item.address,
       },
     });
-  };
-
-  const showToolTipMenu = () => {
-    tooltip.current.showMenu();
   };
 
   const balance = formatBalance(item.balance, balanceUnit, true);
@@ -71,25 +68,35 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
     Share.open({ message: item.address }).catch(error => console.log(error));
   };
 
+  const onToolTipPress = id => {
+    if (id === AddressItem.actionKeys.CopyToClipboard) {
+      handleCopyPress();
+    } else if (id === AddressItem.actionKeys.Share) {
+      handleSharePress();
+    } else if (id === AddressItem.actionKeys.SignVerify) {
+      navigateToSignVerify();
+    }
+  };
+
   const getAvailableActions = () => {
     const actions = [
       {
-        id: 'copyToClipboard',
+        id: AddressItem.actionKeys.CopyToClipboard,
         text: loc.transactions.details_copy,
-        onPress: handleCopyPress,
+        icon: AddressItem.actionIcons.Clipboard,
       },
       {
-        id: 'share',
+        id: AddressItem.actionKeys.Share,
         text: loc.receive.details_share,
-        onPress: handleSharePress,
+        icon: AddressItem.actionIcons.Share,
       },
     ];
 
     if (allowSignVerifyMessage) {
       actions.push({
-        id: 'signVerify',
+        id: AddressItem.actionKeys.SignVerify,
         text: loc.addresses.sign_title,
-        onPress: navigateToSignVerify,
+        icon: AddressItem.actionIcons.Signature,
       });
     }
 
@@ -98,16 +105,16 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
 
   const render = () => {
     return (
-      <View>
-        <TooltipMenu ref={tooltip} anchorRef={listItem} actions={getAvailableActions()} />
-        <ListItem
-          ref={listItem}
-          key={`${item.key}`}
-          button
-          onPress={navigateToReceive}
-          containerStyle={stylesHook.container}
-          onLongPress={showToolTipMenu}
-        >
+      <TooltipMenu
+        title={item.address}
+        ref={menuRef}
+        actions={getAvailableActions()}
+        onPressMenuItem={onToolTipPress}
+        previewQRCode
+        previewValue={item.address}
+        onPress={navigateToReceive}
+      >
+        <ListItem key={`${item.key}`} containerStyle={stylesHook.container}>
           <ListItem.Content style={stylesHook.list}>
             <ListItem.Title style={stylesHook.list} numberOfLines={1} ellipsizeMode="middle">
               <Text style={[styles.index, stylesHook.index]}>{item.index + 1}</Text>{' '}
@@ -124,11 +131,32 @@ const AddressItem = ({ item, balanceUnit, walletID, allowSignVerifyMessage }) =>
             </Text>
           </View>
         </ListItem>
-      </View>
+      </TooltipMenu>
     );
   };
 
   return render();
+};
+
+AddressItem.actionKeys = {
+  Share: 'share',
+  CopyToClipboard: 'copyToClipboard',
+  SignVerify: 'signVerify',
+};
+
+AddressItem.actionIcons = {
+  Signature: {
+    iconType: 'SYSTEM',
+    iconValue: 'signature',
+  },
+  Share: {
+    iconType: 'SYSTEM',
+    iconValue: 'square.and.arrow.up',
+  },
+  Clipboard: {
+    iconType: 'SYSTEM',
+    iconValue: 'doc.on.doc',
+  },
 };
 
 const styles = StyleSheet.create({

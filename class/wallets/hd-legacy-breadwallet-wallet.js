@@ -1,9 +1,12 @@
-import * as bip32 from 'bip32';
 import * as bitcoinjs from 'bitcoinjs-lib';
 import { HDLegacyP2PKHWallet } from './hd-legacy-p2pkh-wallet';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+
 import { DOICHAIN } from '../../blue_modules/network.js';
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
+const bip32 = BIP32Factory(ecc);
 
 /**
  * HD Wallet (BIP39).
@@ -43,14 +46,14 @@ export class HDLegacyBreadwalletWallet extends HDLegacyP2PKHWallet {
     if (node === 0) {
       _node =
         this._node0 ||
-        (this._node0 = bitcoinjs.bip32
+        (this._node0 = bip32
           .fromBase58(this.getXpub(), DOICHAIN)
           .derive(node));
     }
     if (node === 1) {
       _node =
         this._node1 ||
-        (this._node1 = bitcoinjs.bip32
+        (this._node1 = bip32
           .fromBase58(this.getXpub(), DOICHAIN)
           .derive(node));
     }
@@ -198,6 +201,14 @@ export class HDLegacyBreadwalletWallet extends HDLegacyP2PKHWallet {
     return lastUsedIndex;
   }
 
+  _addPsbtInput(psbt, input, sequence, masterFingerprintBuffer) {
+    // hack to use
+    // AbstractHDElectrumWallet._addPsbtInput for bech32 address
+    // HDLegacyP2PKHWallet._addPsbtInput for legacy address
+    const ProxyClass = input.address.startsWith('bc1') ? AbstractHDElectrumWallet : HDLegacyP2PKHWallet;
+    const proxy = new ProxyClass();
+    return proxy._addPsbtInput.apply(this, [psbt, input, sequence, masterFingerprintBuffer]);
+  }
   _getDerivationPathByAddress(address, BIP = 0) {
     const path = `m/${BIP}'`;
     for (let c = 0; c < this.next_free_address_index + this.gap_limit; c++) {
@@ -208,14 +219,5 @@ export class HDLegacyBreadwalletWallet extends HDLegacyP2PKHWallet {
     }
 
     return false;
-  }
-
-  _addPsbtInput(psbt, input, sequence, masterFingerprintBuffer) {
-    // hack to use
-    // AbstractHDElectrumWallet._addPsbtInput for bech32 address
-    // HDLegacyP2PKHWallet._addPsbtInput for legacy address
-    const ProxyClass = input.address.startsWith('bc1') ? AbstractHDElectrumWallet : HDLegacyP2PKHWallet;
-    const proxy = new ProxyClass();
-    return proxy._addPsbtInput.apply(this, [psbt, input, sequence, masterFingerprintBuffer]);
   }
 }

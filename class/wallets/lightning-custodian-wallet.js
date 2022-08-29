@@ -2,9 +2,8 @@ import { LegacyWallet } from './legacy-wallet';
 import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
 import { DoichainUnit, Chain } from '../../models/doichainUnits';
-import { isTorCapable } from '../../blue_modules/environment';
+import { isTorDaemonDisabled } from '../../blue_modules/environment';
 //const torrific = require('../../blue_modules/torrific');
-
 export class LightningCustodianWallet extends LegacyWallet {
   static type = 'lightningCustodianWallet';
   static typeReadable = 'Lightning';
@@ -68,7 +67,7 @@ export class LightningCustodianWallet extends LegacyWallet {
     return obj;
   }
 
-  init() {
+  async init() {
     this._api = new Frisbee({
       baseURI: this.baseURI,
     });
@@ -356,11 +355,11 @@ export class LightningCustodianWallet extends LegacyWallet {
   }
 
   async allowOnchainAddress() {
-    if (this.getAddress() !== undefined) {
+    if (this.getAddress() !== undefined && this.getAddress() !== null) {
       return true;
     } else {
       await this.fetchBtcAddress();
-      return this.getAddress() !== undefined;
+      return this.getAddress() !== undefined && this.getAddress() !== null;
     }
   }
 
@@ -514,7 +513,7 @@ export class LightningCustodianWallet extends LegacyWallet {
    *   route_hints: [] }
    *
    * @param invoice BOLT invoice string
-   * @return {Promise.<Object>}
+   * @return {payment_hash: string}
    */
   decodeInvoice(invoice) {
     const { payeeNodeKey, tags, satoshis, millisatoshis, timestamp } = bolt11.decode(invoice);
@@ -661,6 +660,10 @@ export class LightningCustodianWallet extends LegacyWallet {
     }
 
     return false;
+  }
+
+  authenticate(lnurl) {
+    return lnurl.authenticate(this.secret);
   }
 }
 

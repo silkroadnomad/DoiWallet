@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import LottieView from 'lottie-react-native';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import { Text } from 'react-native-elements';
 import BigNumber from 'bignumber.js';
@@ -31,7 +30,6 @@ const Success = () => {
   });
   useEffect(() => {
     console.log('send/success - useEffect');
-    ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -67,23 +65,28 @@ export const SuccessView = ({ amount, amountUnit, fee, invoiceDescription, shoul
   });
 
   useEffect(() => {
-    if (shouldAnimate) {
-      animationRef.current.reset();
-      animationRef.current.resume();
+    if (shouldAnimate && animationRef.current) {
+      /*
+      https://github.com/lottie-react-native/lottie-react-native/issues/832#issuecomment-1008209732
+      Temporary workaround until Lottie is fixed.
+      */
+      setTimeout(() => {
+        animationRef.current?.reset();
+        animationRef.current?.play();
+      }, 100);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colors]);
+  }, [colors, shouldAnimate]);
 
   return (
     <View style={styles.root}>
       <BlueCard style={styles.amount}>
         <View style={styles.view}>
-          {amount && (
+          {amount ? (
             <>
               <Text style={[styles.amountValue, stylesHook.amountValue]}>{amount}</Text>
               <Text style={[styles.amountUnit, stylesHook.amountUnit]}>{' ' + loc.units[amountUnit]}</Text>
             </>
-          )}
+          ) : null}
         </View>
         {fee > 0 && (
           <Text style={styles.feeText}>
@@ -136,7 +139,8 @@ const styles = StyleSheet.create({
     paddingTop: 19,
   },
   buttonContainer: {
-    padding: 58,
+    paddingHorizontal: 58,
+    paddingBottom: 16,
   },
   amount: {
     alignItems: 'center',
@@ -144,8 +148,6 @@ const styles = StyleSheet.create({
   view: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingTop: 76,
-    paddingBottom: 16,
   },
   amountValue: {
     fontSize: 36,
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
     color: '#37c0a1',
     fontSize: 14,
     marginHorizontal: 4,
-    paddingBottom: 6,
+    paddingVertical: 6,
     fontWeight: '500',
     alignSelf: 'center',
   },
@@ -171,9 +173,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     alignSelf: 'center',
-    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 43,
     marginBottom: 53,
   },
   lottie: {

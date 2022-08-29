@@ -1,4 +1,3 @@
-/* global alert */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -23,6 +22,7 @@ import { HDSegwitBech32Transaction, HDSegwitBech32Wallet } from '../../class';
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import Notifications from '../../blue_modules/notifications';
+import alert from '../../components/Alert';
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
 
 const styles = StyleSheet.create({
@@ -62,20 +62,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     alignSelf: 'center',
   },
-  doneWrap: {
-    flex: 1,
-    paddingTop: 19,
-  },
-  doneCard: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingTop: 76,
-    paddingBottom: 16,
-  },
-  blueBigCheckmark: {
-    marginTop: 43,
-    marginBottom: 53,
-  },
 });
 
 export default class CPFP extends Component {
@@ -92,10 +78,11 @@ export default class CPFP extends Component {
       stage: 1,
       txid,
       wallet,
+      isElectrumDisabled: true,
     };
   }
 
-  broadcast() {
+  broadcast = () => {
     this.setState({ isLoading: true }, async () => {
       try {
         await BlueElectrum.ping();
@@ -114,7 +101,7 @@ export default class CPFP extends Component {
         alert(error.message);
       }
     });
-  }
+  };
 
   onSuccessBroadcast() {
     this.context.txMetadata[this.state.newTxid] = { memo: 'Child pays for parent (CPFP)' };
@@ -208,7 +195,7 @@ export default class CPFP extends Component {
           >
             <Text style={styles.actionText}>{loc.send.create_verify}</Text>
           </TouchableOpacity>
-          <BlueButton onPress={() => this.broadcast()} title={loc.send.confirm_sendNow} />
+          <BlueButton disabled={this.context.isElectrumDisabled} onPress={this.broadcast} title={loc.send.confirm_sendNow} />
         </BlueCard>
       </View>
     );

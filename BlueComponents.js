@@ -1,7 +1,7 @@
 /* eslint react/prop-types: "off", react-native/no-inline-styles: "off" */
-import React, { Component, useState, useMemo, useCallback, useContext, useRef, useEffect, forwardRef } from 'react';
+import React, { Component, forwardRef } from 'react';
 import PropTypes from 'prop-types';
-import { Icon, Input, Text, Header, ListItem, Avatar } from 'react-native-elements';
+import { Icon, Text, Header, ListItem, Avatar } from 'react-native-elements';
 import {
   ActivityIndicator,
   Alert,
@@ -11,19 +11,15 @@ import {
   InputAccessoryView,
   Keyboard,
   KeyboardAvoidingView,
-  Linking,
-  PixelRatio,
   Platform,
-  PlatformColor,
   SafeAreaView,
   StyleSheet,
   Switch,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
-  InteractionManager,
   I18nManager,
+  ImageBackground,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import LinearGradient from 'react-native-linear-gradient';
@@ -33,16 +29,12 @@ import * as NavigationService from './NavigationService';
 import WalletGradient from './class/wallet-gradient';
 import { BlurView } from '@react-native-community/blur';
 import NetworkTransactionFees, { NetworkTransactionFee, NetworkTransactionFeeType } from './models/networkTransactionFees';
-import Biometric from './class/biometrics';
-import { encodeUR } from './blue_modules/ur';
-import QRCode from 'react-native-qrcode-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useTheme } from '@react-navigation/native';
 import { BlueCurrentTheme } from './components/themes';
-import loc, { formatBalance, formatStringAddTwoWhiteSpaces, formatBalanceWithoutSuffix, transactionTimeToReadable } from './loc';
-import Lnurl from './class/lnurl';
+import PlusIcon from './components/icons/PlusIcon';
+import loc, { formatStringAddTwoWhiteSpaces } from './loc';
 import { BlueStorageContext } from './blue_modules/storage-context';
-import ToolTipMenu from './components/TooltipMenu';
 
 const { height, width } = Dimensions.get('window');
 const aspectRatio = height / width;
@@ -52,8 +44,6 @@ if (aspectRatio > 1.6) {
 } else {
   isIpad = true;
 }
-// eslint-disable-next-line no-unused-expressions
-Platform.OS === 'android' ? (ActivityIndicator.defaultProps.color = PlatformColor('?attr/colorControlActivated')) : null;
 
 export const BlueButton = props => {
   const { colors } = useTheme();
@@ -68,7 +58,6 @@ export const BlueButton = props => {
   return (
     <TouchableOpacity
       style={{
-        flex: 1,
         borderWidth: 0.7,
         borderColor: 'transparent',
         backgroundColor: backgroundColor,
@@ -79,6 +68,7 @@ export const BlueButton = props => {
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 16,
+        flexGrow: 1,
       }}
       accessibilityRole="button"
       {...props}
@@ -104,7 +94,6 @@ export const SecondButton = forwardRef((props, ref) => {
     <TouchableOpacity
       accessibilityRole="button"
       style={{
-        flex: 1,
         borderWidth: 0.7,
         borderColor: 'transparent',
         backgroundColor: backgroundColor,
@@ -114,6 +103,8 @@ export const SecondButton = forwardRef((props, ref) => {
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 16,
+        flexGrow: 1,
       }}
       {...props}
       ref={ref}
@@ -147,7 +138,7 @@ export const BitcoinButton = props => {
           <View>
             <Image style={{ width: 34, height: 34, marginRight: 8 }} source={require('./img/addWallet/bitcoin.png')} />
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={{ color: colors.newBlue, fontWeight: 'bold', fontSize: 18, writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' }}>
               {loc.wallets.add_bitcoin}
             </Text>
@@ -247,7 +238,7 @@ export const VaultButton = props => {
           <View>
             <Image style={{ width: 34, height: 34, marginRight: 8 }} source={require('./img/addWallet/vault.png')} />
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text
               style={{
                 color: colors.foregroundColor,
@@ -296,7 +287,7 @@ export const LightningButton = props => {
           <View>
             <Image style={{ width: 34, height: 34, marginRight: 8 }} source={require('./img/addWallet/lightning.png')} />
           </View>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text
               style={{ color: colors.lnborderColor, fontWeight: 'bold', fontSize: 18, writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' }}
             >
@@ -607,20 +598,15 @@ export const BlueAlertWalletExportReminder = ({ onSuccess = () => {}, onFailure 
 };
 
 export const BluePrivateBalance = () => {
-  return Platform.select({
-    ios: (
-      <View style={{ flexDirection: 'row', marginTop: 13 }}>
-        <BlurView style={styles.balanceBlur} blurType="light" blurAmount={25} />
-        <Icon name="eye-slash" type="font-awesome" color="#FFFFFF" />
-      </View>
-    ),
-    android: (
-      <View style={{ flexDirection: 'row', marginTop: 13 }}>
-        <View style={{ backgroundColor: '#FFFFFF', opacity: 0.5, height: 30, width: 100, marginRight: 8 }} />
-        <Icon name="eye-slash" type="font-awesome" color="#FFFFFF" />
-      </View>
-    ),
-  });
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 13, borderRadius: 9 }}>
+      <ImageBackground
+        blurRadius={6}
+        style={{ backgroundColor: '#FFFFFF', opacity: 0.5, height: 30, width: 110, marginRight: 8, borderRadius: 9 }}
+      />
+      <Icon name="eye-slash" type="font-awesome" color="#FFFFFF" />
+    </View>
+  );
 };
 
 export const BlueCopyToClipboardButton = ({ stringToCopy, displayText = false }) => {
@@ -634,10 +620,12 @@ export const BlueCopyToClipboardButton = ({ stringToCopy, displayText = false })
 export class BlueCopyTextToClipboard extends Component {
   static propTypes = {
     text: PropTypes.string,
+    truncated: PropTypes.bool,
   };
 
   static defaultProps = {
     text: '',
+    truncated: false,
   };
 
   constructor(props) {
@@ -647,9 +635,9 @@ export class BlueCopyTextToClipboard extends Component {
 
   static getDerivedStateFromProps(props, state) {
     if (state.hasTappedText) {
-      return { hasTappedText: state.hasTappedText, address: state.address };
+      return { hasTappedText: state.hasTappedText, address: state.address, truncated: props.truncated };
     } else {
-      return { hasTappedText: state.hasTappedText, address: props.text };
+      return { hasTappedText: state.hasTappedText, address: props.text, truncated: props.truncated };
     }
   }
 
@@ -673,7 +661,11 @@ export class BlueCopyTextToClipboard extends Component {
           disabled={this.state.hasTappedText}
           testID="BlueCopyTextToClipboard"
         >
-          <Animated.Text style={styleCopyTextToClipboard.address} numberOfLines={0} testID="AddressValue">
+          <Animated.Text
+            style={styleCopyTextToClipboard.address}
+            {...(this.props.truncated ? { numberOfLines: 1, ellipsizeMode: 'middle' } : { numberOfLines: 0 })}
+            testID="AddressValue"
+          >
             {this.state.address}
           </Animated.Text>
         </TouchableOpacity>
@@ -704,17 +696,8 @@ export const BlueCard = props => {
 
 export const BlueText = props => {
   const { colors } = useTheme();
-  return (
-    <Text
-      {...props}
-      style={{
-        color: colors.foregroundColor,
-
-        ...props.style,
-        writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
-      }}
-    />
-  );
+  const style = StyleSheet.compose({ color: colors.foregroundColor, writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' }, props.style);
+  return <Text {...props} style={style} />;
 };
 
 export const BlueTextCentered = props => {
@@ -745,6 +728,7 @@ export const BlueListItem = React.memo(props => {
             color: props.disabled ? colors.buttonDisabledTextColor : colors.foregroundColor,
             fontSize: 16,
             fontWeight: '500',
+            writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
           }}
           numberOfLines={0}
           accessible={props.switch === undefined}
@@ -755,19 +739,25 @@ export const BlueListItem = React.memo(props => {
           <ListItem.Subtitle
             numberOfLines={props.subtitleNumberOfLines ?? 1}
             accessible={props.switch === undefined}
-            style={{ flexWrap: 'wrap', color: colors.alternativeTextColor, fontWeight: '400', fontSize: 14 }}
+            style={{
+              flexWrap: 'wrap',
+              writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+              color: colors.alternativeTextColor,
+              fontWeight: '400',
+              fontSize: 14,
+            }}
           >
             {props.subtitle}
           </ListItem.Subtitle>
         )}
       </ListItem.Content>
-      <ListItem.Content right>
-        {props.rightTitle && (
+      {props.rightTitle && (
+        <ListItem.Content right>
           <ListItem.Title style={props.rightTitleStyle} numberOfLines={0} right>
             {props.rightTitle}
           </ListItem.Title>
-        )}
-      </ListItem.Content>
+        </ListItem.Content>
+      )}
       {props.isLoading ? (
         <ActivityIndicator />
       ) : (
@@ -793,24 +783,6 @@ export const BlueFormLabel = props => {
         fontWeight: '400',
         marginHorizontal: 20,
         writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
-      }}
-    />
-  );
-};
-
-export const BlueFormInput = props => {
-  const { colors } = useTheme();
-  return (
-    <Input
-      {...props}
-      inputStyle={{ color: colors.foregroundColor, maxWidth: width - 105 }}
-      containerStyle={{
-        marginTop: 5,
-        borderColor: colors.inputBorderColor,
-        borderBottomColor: colors.inputBorderColor,
-        borderWidth: 0.5,
-        borderBottomWidth: 0.5,
-        backgroundColor: colors.inputBackgroundColor,
       }}
     />
   );
@@ -849,19 +821,6 @@ export const BlueFormMultiInput = props => {
   );
 };
 
-export const BlueHeader = props => {
-  return (
-    <Header
-      {...props}
-      backgroundColor="transparent"
-      outerContainerStyles={{
-        borderBottomColor: 'transparent',
-        borderBottomWidth: 0,
-      }}
-    />
-  );
-};
-
 export const BlueHeaderDefaultSub = props => {
   const { colors } = useTheme();
 
@@ -895,32 +854,31 @@ export const BlueHeaderDefaultSub = props => {
 export const BlueHeaderDefaultMain = props => {
   const { colors } = useTheme();
   const { isDrawerList } = props;
-  const { isImportingWallet } = useContext(BlueStorageContext);
   return (
-    <Header
-      leftComponent={{
-        text: props.leftText,
-        style: {
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: isDrawerList ? colors.elevated : colors.background,
+        paddingHorizontal: 16,
+        borderTopColor: isDrawerList ? colors.elevated : colors.background,
+        borderBottomColor: isDrawerList ? colors.elevated : colors.background,
+        marginBottom: 8,
+      }}
+    >
+      <Text
+        style={{
+          textAlign: 'left',
           fontWeight: 'bold',
           fontSize: 34,
           color: colors.foregroundColor,
-          paddingHorizontal: 4,
-        },
-      }}
-      placement="left"
-      containerStyle={{
-        borderTopColor: isDrawerList ? colors.elevated : colors.background,
-        borderBottomColor: isDrawerList ? colors.elevated : colors.background,
-        maxHeight: 44,
-        height: 44,
-        paddingTop: 0,
-        marginBottom: 8,
-      }}
-      bottomDivider={false}
-      topDivider={false}
-      backgroundColor={isDrawerList ? colors.elevated : colors.background}
-      rightComponent={isImportingWallet ? undefined : <BluePlusIcon onPress={props.onNewWalletPress} Component={TouchableOpacity} />}
-    />
+        }}
+      >
+        {props.leftText}
+      </Text>
+      <PlusIcon onPress={props.onNewWalletPress} Component={TouchableOpacity} />
+    </View>
   );
 };
 
@@ -932,14 +890,6 @@ export const BlueSpacing40 = props => {
   return <View {...props} style={{ height: 50 }} />;
 };
 
-export const BlueSpacingVariable = props => {
-  if (isIpad) {
-    return <BlueSpacing40 {...props} />;
-  } else {
-    return <BlueSpacing {...props} />;
-  }
-};
-
 export class is {
   static ipad() {
     return isIpad;
@@ -947,7 +897,8 @@ export class is {
 }
 
 export const BlueSpacing20 = props => {
-  return <View {...props} style={{ height: 20, opacity: 0 }} />;
+  const { horizontal = false } = props;
+  return <View {...props} style={{ height: horizontal ? 0 : 20, width: horizontal ? 20 : 0, opacity: 0 }} />;
 };
 
 export const BlueSpacing10 = props => {
@@ -1015,613 +966,6 @@ export const BlueLoading = props => {
     </View>
   );
 };
-
-const stylesBlueIcon = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  box1: {
-    position: 'relative',
-    top: 15,
-  },
-  box: {
-    alignSelf: 'flex-end',
-    paddingHorizontal: 14,
-    paddingTop: 8,
-  },
-  boxIncoming: {
-    position: 'relative',
-  },
-  ball: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
-  ballIncoming: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    transform: [{ rotate: '-45deg' }],
-    justifyContent: 'center',
-  },
-  ballIncomingWithoutRotate: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
-  ballReceive: {
-    width: 30,
-    height: 30,
-    borderBottomLeftRadius: 15,
-    transform: [{ rotate: '-45deg' }],
-  },
-  ballOutgoing: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    transform: [{ rotate: '225deg' }],
-    justifyContent: 'center',
-  },
-  ballOutgoingWithoutRotate: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
-  ballOutgoingExpired: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-  },
-  ballTransparrent: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'transparent',
-  },
-  ballDimmed: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: 'gray',
-  },
-});
-
-export const BluePlusIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ball: {
-      backgroundColor: colors.buttonBackgroundColor,
-    },
-  });
-  return (
-    <Avatar
-      rounded
-      containerStyle={[stylesBlueIcon.ball, stylesBlueIconHooks.ball]}
-      icon={{ name: 'add', size: 22, type: 'ionicons', color: colors.foregroundColor }}
-      {...props}
-    />
-  );
-};
-
-export const BlueTransactionIncomingIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballIncoming: {
-      backgroundColor: colors.ballReceive,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballIncoming, stylesBlueIconHooks.ballIncoming]}>
-          <Icon {...props} name="arrow-down" size={16} type="font-awesome" color={colors.incomingForegroundColor} />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionPendingIcon = props => {
-  const { colors } = useTheme();
-
-  const stylesBlueIconHooks = StyleSheet.create({
-    ball: {
-      backgroundColor: colors.buttonBackgroundColor,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ball, stylesBlueIconHooks.ball]}>
-          <Icon
-            {...props}
-            name="kebab-horizontal"
-            size={16}
-            type="octicon"
-            color={colors.foregroundColor}
-            iconStyle={{ left: 0, top: 7 }}
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionExpiredIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballOutgoingExpired: {
-      backgroundColor: colors.ballOutgoingExpired,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballOutgoingExpired, stylesBlueIconHooks.ballOutgoingExpired]}>
-          <Icon {...props} name="clock" size={16} type="octicon" color="#9AA0AA" iconStyle={{ left: 0, top: 0 }} />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionOnchainIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballIncoming: {
-      backgroundColor: colors.ballReceive,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballIncoming, stylesBlueIconHooks.ballIncoming]}>
-          <Icon
-            {...props}
-            name="link"
-            size={16}
-            type="font-awesome"
-            color={colors.incomingForegroundColor}
-            iconStyle={{ left: 0, top: 0, transform: [{ rotate: '-45deg' }] }}
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionOffchainIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballOutgoingWithoutRotate: {
-      backgroundColor: colors.ballOutgoing,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballOutgoingWithoutRotate, stylesBlueIconHooks.ballOutgoingWithoutRotate]}>
-          <Icon
-            {...props}
-            name="bolt"
-            size={16}
-            type="font-awesome"
-            color={colors.outgoingForegroundColor}
-            iconStyle={{ left: 0, marginTop: 6 }}
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionOffchainIncomingIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballIncomingWithoutRotate: {
-      backgroundColor: colors.ballReceive,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballIncomingWithoutRotate, stylesBlueIconHooks.ballIncomingWithoutRotate]}>
-          <Icon
-            {...props}
-            name="bolt"
-            size={16}
-            type="font-awesome"
-            color={colors.incomingForegroundColor}
-            iconStyle={{ left: 0, marginTop: 6 }}
-          />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-export const BlueTransactionOutgoingIcon = props => {
-  const { colors } = useTheme();
-  const stylesBlueIconHooks = StyleSheet.create({
-    ballOutgoing: {
-      backgroundColor: colors.ballOutgoing,
-    },
-  });
-  return (
-    <View {...props}>
-      <View style={stylesBlueIcon.boxIncoming}>
-        <View style={[stylesBlueIcon.ballOutgoing, stylesBlueIconHooks.ballOutgoing]}>
-          <Icon {...props} name="arrow-down" size={16} type="font-awesome" color={colors.outgoingForegroundColor} />
-        </View>
-      </View>
-    </View>
-  );
-};
-
-const sendReceiveScanButtonFontSize =
-  PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26) > 22
-    ? 22
-    : PixelRatio.roundToNearestPixel(Dimensions.get('window').width / 26);
-export const BlueReceiveButtonIcon = props => {
-  const { colors } = useTheme();
-
-  return (
-    <TouchableOpacity accessibilityRole="button" {...props} style={{ flex: 1 }}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.buttonBackgroundColor,
-        }}
-      >
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-          <View
-            style={{
-              left: 5,
-              backgroundColor: 'transparent',
-              transform: [{ rotate: '-45deg' }],
-              alignItems: 'center',
-              marginRight: 8,
-            }}
-          >
-            <Icon
-              {...props}
-              name="arrow-down"
-              size={sendReceiveScanButtonFontSize}
-              type="font-awesome"
-              color={colors.buttonAlternativeTextColor}
-            />
-          </View>
-          <Text
-            style={{
-              color: colors.buttonAlternativeTextColor,
-              fontWeight: '500',
-              fontSize: sendReceiveScanButtonFontSize,
-              left: 5,
-              backgroundColor: 'transparent',
-            }}
-          >
-            {formatStringAddTwoWhiteSpaces(loc.receive.header)}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-export const BlueTransactionListItem = React.memo(({ item, itemPriceUnit = DoichainUnit.DOI, timeElapsed }) => {
-  const [subtitleNumberOfLines, setSubtitleNumberOfLines] = useState(1);
-  const { colors } = useTheme();
-  const { navigate } = useNavigation();
-  const { txMetadata, wallets, preferredFiatCurrency, language } = useContext(BlueStorageContext);
-  const containerStyle = useMemo(
-    () => ({
-      backgroundColor: 'transparent',
-      borderBottomColor: colors.lightBorder,
-      paddingTop: 16,
-      paddingBottom: 16,
-      paddingRight: 0,
-    }),
-    [colors.lightBorder],
-  );
-  const toolTip = useRef();
-  const copyToolTip = useRef();
-  const listItemRef = useRef();
-
-  const title = useMemo(() => {
-    if (item.confirmations === 0) {
-      return loc.transactions.pending;
-    } else {
-      return transactionTimeToReadable(item.received);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.confirmations, item.received, language]);
-  const txMemo = txMetadata[item.hash]?.memo ?? '';
-  const subtitle = useMemo(() => {
-    let sub = item.confirmations < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
-    if (sub !== '') sub += ' ';
-    sub += txMemo;
-    if (item.memo) sub += item.memo;
-    return sub || null;
-  }, [txMemo, item.confirmations, item.memo]);
-
-  const rowTitle = useMemo(() => {
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      if (isNaN(item.value)) {
-        item.value = '0';
-      }
-      const currentDate = new Date();
-      const now = (currentDate.getTime() / 1000) | 0;
-      const invoiceExpiration = item.timestamp + item.expire_time;
-
-      if (invoiceExpiration > now) {
-        return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-      } else if (invoiceExpiration < now) {
-        if (item.ispaid) {
-          return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-        } else {
-          return loc.lnd.expired;
-        }
-      }
-    } else {
-      return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item, itemPriceUnit, preferredFiatCurrency]);
-
-  const rowTitleStyle = useMemo(() => {
-    let color = colors.successColor;
-
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      const currentDate = new Date();
-      const now = (currentDate.getTime() / 1000) | 0;
-      const invoiceExpiration = item.timestamp + item.expire_time;
-
-      if (invoiceExpiration > now) {
-        color = colors.successColor;
-      } else if (invoiceExpiration < now) {
-        if (item.ispaid) {
-          color = colors.successColor;
-        } else {
-          color = '#9AA0AA';
-        }
-      }
-    } else if (item.value / 100000000 < 0) {
-      color = colors.foregroundColor;
-    }
-
-    return {
-      color,
-      fontSize: 14,
-      fontWeight: '600',
-      textAlign: 'right',
-      width: 96,
-    };
-  }, [item, colors.foregroundColor, colors.successColor]);
-
-  const avatar = useMemo(() => {
-    // is it lightning refill tx?
-    if (item.category === 'receive' && item.confirmations < 3) {
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionPendingIcon />
-        </View>
-      );
-    }
-
-    if (item.type && item.type === 'bitcoind_tx') {
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionOnchainIcon />
-        </View>
-      );
-    }
-    if (item.type === 'paid_invoice') {
-      // is it lightning offchain payment?
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionOffchainIcon />
-        </View>
-      );
-    }
-
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      if (!item.ispaid) {
-        const currentDate = new Date();
-        const now = (currentDate.getTime() / 1000) | 0;
-        const invoiceExpiration = item.timestamp + item.expire_time;
-        if (invoiceExpiration < now) {
-          return (
-            <View style={{ width: 25 }}>
-              <BlueTransactionExpiredIcon />
-            </View>
-          );
-        }
-      } else {
-        return (
-          <View style={{ width: 25 }}>
-            <BlueTransactionOffchainIncomingIcon />
-          </View>
-        );
-      }
-    }
-
-    if (!item.confirmations) {
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionPendingIcon />
-        </View>
-      );
-    } else if (item.value < 0) {
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionOutgoingIcon />
-        </View>
-      );
-    } else {
-      return (
-        <View style={{ width: 25 }}>
-          <BlueTransactionIncomingIcon />
-        </View>
-      );
-    }
-  }, [item]);
-
-  useEffect(() => {
-    setSubtitleNumberOfLines(1);
-  }, [subtitle]);
-
-  const onPress = useCallback(async () => {
-    if (item.hash) {
-      navigate('TransactionStatus', { hash: item.hash });
-    } else if (item.type === 'user_invoice' || item.type === 'payment_request' || item.type === 'paid_invoice') {
-      const lightningWallet = wallets.filter(wallet => wallet?.getID() === item.walletID);
-      if (lightningWallet.length === 1) {
-        try {
-          // is it a successful lnurl-pay?
-          const LN = new Lnurl(false, AsyncStorage);
-          let paymentHash = item.payment_hash;
-          if (typeof paymentHash === 'object') {
-            paymentHash = Buffer.from(paymentHash.data).toString('hex');
-          }
-          const loaded = await LN.loadSuccessfulPayment(paymentHash);
-          if (loaded) {
-            NavigationService.navigate('ScanLndInvoiceRoot', {
-              screen: 'LnurlPaySuccess',
-              params: {
-                paymentHash,
-                justPaid: false,
-                fromWalletID: lightningWallet[0].getID(),
-              },
-            });
-            return;
-          }
-        } catch (e) {
-          console.log(e);
-        }
-
-        navigate('LNDViewInvoice', {
-          invoice: item,
-          walletID: lightningWallet[0].getID(),
-          isModal: false,
-        });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item, wallets]);
-
-  const onLongPress = useCallback(() => {
-    toolTip.current.showMenu();
-  }, []);
-
-  const handleOnExpandNote = useCallback(() => {
-    setSubtitleNumberOfLines(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtitle]);
-
-  const subtitleProps = useMemo(() => ({ numberOfLines: subtitleNumberOfLines }), [subtitleNumberOfLines]);
-  const handleOnCopyTap = useCallback(() => {
-    toolTip.current.hideMenu();
-    setTimeout(copyToolTip.current.showMenu, 205);
-  }, []);
-  const handleOnCopyAmountTap = useCallback(() => Clipboard.setString(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
-  const handleOnCopyTransactionID = useCallback(() => Clipboard.setString(item.hash), [item.hash]);
-  const handleOnCopyNote = useCallback(() => Clipboard.setString(subtitle), [subtitle]);
-  const handleOnViewOnBlockExplorer = useCallback(() => {
-    const url = `https://explorer.doichain.org/tx/${item.hash}`;
-    Linking.canOpenURL(url).then(supported => {
-      if (supported) {
-        Linking.openURL(url);
-      }
-    });
-  }, [item.hash]);
-  const handleCopyOpenInBlockExplorerPress = useCallback(() => {
-    Clipboard.setString(`https://explorer.doichain.org/tx/${item.hash}`);
-  }, [item.hash]);
-  const toolTipActions = useMemo(() => {
-    const actions = [
-      {
-        id: 'copy',
-        text: loc.transactions.details_copy,
-        onPress: handleOnCopyTap,
-      },
-    ];
-    if (item.hash) {
-      actions.push({
-        id: 'open_in_blockExplorer',
-        text: loc.transactions.details_show_in_block_explorer,
-        onPress: handleOnViewOnBlockExplorer,
-      });
-    }
-    if (subtitle && subtitleNumberOfLines === 1) {
-      actions.push({
-        id: 'expandNote',
-        text: loc.transactions.expand_note,
-        onPress: handleOnExpandNote,
-      });
-    }
-    return actions;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.hash, subtitle, rowTitle, subtitleNumberOfLines, txMetadata]);
-
-  const copyToolTipActions = useMemo(() => {
-    const actions = [];
-    if (rowTitle !== loc.lnd.expired) {
-      actions.push({
-        id: 'copyAmount',
-        text: loc.send.create_amount,
-        onPress: handleOnCopyAmountTap,
-      });
-    }
-
-    if (item.hash) {
-      actions.push(
-        {
-          id: 'copyTX_ID',
-          text: loc.transactions.txid,
-          onPress: handleOnCopyTransactionID,
-        },
-        {
-          id: 'copy_blockExplorer',
-          text: loc.transactions.block_explorer_link,
-          onPress: handleCopyOpenInBlockExplorerPress,
-        },
-      );
-    }
-    if (subtitle) {
-      actions.push({
-        id: 'copyNote',
-        text: loc.transactions.note,
-        onPress: handleOnCopyNote,
-      });
-    }
-    return actions;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toolTipActions]);
-
-  return (
-    <TouchableWithoutFeedback ref={listItemRef}>
-      <View style={{ marginHorizontal: 4 }}>
-        <ToolTipMenu ref={toolTip} anchorRef={listItemRef} actions={toolTipActions} />
-        <ToolTipMenu ref={copyToolTip} anchorRef={listItemRef} actions={copyToolTipActions} />
-        <BlueListItem
-          leftAvatar={avatar}
-          title={title}
-          subtitleNumberOfLines={subtitleNumberOfLines}
-          subtitle={subtitle}
-          subtitleProps={subtitleProps}
-          onPress={onPress}
-          chevron={false}
-          Component={TouchableOpacity}
-          rightTitle={rowTitle}
-          rightTitleStyle={rowTitleStyle}
-          containerStyle={containerStyle}
-          onLongPress={onLongPress}
-        />
-      </View>
-    </TouchableWithoutFeedback>
-  );
-});
 
 export class BlueReplaceFeeSuggestions extends Component {
   static propTypes = {
@@ -1767,7 +1111,7 @@ export class BlueReplaceFeeSuggestions extends Component {
               }}
               onFocus={() => this.onCustomFeeTextChange(this.state.customFeeValue)}
               defaultValue={`${this.props.transactionMinimum}`}
-              placeholder={loc.send.fee_satbyte}
+              placeholder={loc.send.fee_satvbyte}
               placeholderTextColor="#81868e"
               inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
             />
@@ -1775,20 +1119,12 @@ export class BlueReplaceFeeSuggestions extends Component {
           </View>
         </TouchableOpacity>
         <BlueText style={{ color: BlueCurrentTheme.colors.alternativeTextColor }}>
-          {loc.formatString(loc.send.fee_replace_min, { min: this.props.transactionMinimum })}
+          {loc.formatString(loc.send.fee_replace_minvb, { min: this.props.transactionMinimum })}
         </BlueText>
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  balanceBlur: {
-    height: 30,
-    width: 100,
-    marginRight: 16,
-  },
-});
 
 export function BlueBigCheckmark({ style }) {
   const defaultStyles = {
@@ -1845,160 +1181,3 @@ export const BlueTabs = ({ active, onSwitch, tabs }) => (
     ))}
   </View>
 );
-
-export class DynamicQRCode extends Component {
-  constructor() {
-    super();
-    const qrCodeHeight = height > width ? width - 40 : width / 3;
-    const qrCodeMaxHeight = 370;
-    this.state = {
-      index: 0,
-      total: 0,
-      qrCodeHeight: Math.min(qrCodeHeight, qrCodeMaxHeight),
-      intervalHandler: null,
-    };
-  }
-
-  fragments = [];
-
-  componentDidMount() {
-    const { value, capacity = 200 } = this.props;
-    this.fragments = encodeUR(value, capacity);
-    this.setState(
-      {
-        total: this.fragments.length,
-      },
-      () => {
-        this.startAutoMove();
-      },
-    );
-  }
-
-  moveToNextFragment = () => {
-    const { index, total } = this.state;
-    if (index === total - 1) {
-      this.setState({
-        index: 0,
-      });
-    } else {
-      this.setState(state => ({
-        index: state.index + 1,
-      }));
-    }
-  };
-
-  startAutoMove = () => {
-    if (!this.state.intervalHandler)
-      this.setState(() => ({
-        intervalHandler: setInterval(this.moveToNextFragment, 500),
-      }));
-  };
-
-  stopAutoMove = () => {
-    clearInterval(this.state.intervalHandler);
-    this.setState(() => ({
-      intervalHandler: null,
-    }));
-  };
-
-  moveToPreviousFragment = () => {
-    const { index, total } = this.state;
-    if (index > 0) {
-      this.setState(state => ({
-        index: state.index - 1,
-      }));
-    } else {
-      this.setState(state => ({
-        index: total - 1,
-      }));
-    }
-  };
-
-  render() {
-    const currentFragment = this.fragments[this.state.index];
-    return currentFragment ? (
-      <View style={animatedQRCodeStyle.container}>
-        <BlueSpacing20 />
-        <View style={animatedQRCodeStyle.qrcodeContainer}>
-          <QRCode
-            value={currentFragment.toUpperCase()}
-            size={this.state.qrCodeHeight}
-            color="#000000"
-            logoBackgroundColor={BlueCurrentTheme.colors.brandingColor}
-            backgroundColor="#FFFFFF"
-            ecl="L"
-          />
-        </View>
-        <BlueSpacing20 />
-        <View>
-          <Text style={animatedQRCodeStyle.text}>
-            {loc.formatString(loc._.of, { number: this.state.index + 1, total: this.state.total })}
-          </Text>
-        </View>
-        <BlueSpacing20 />
-        <View style={animatedQRCodeStyle.controller}>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={[animatedQRCodeStyle.button, { width: '25%', alignItems: 'flex-start' }]}
-            onPress={this.moveToPreviousFragment}
-          >
-            <Text style={animatedQRCodeStyle.text}>{loc.send.dynamic_prev}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={[animatedQRCodeStyle.button, { width: '50%' }]}
-            onPress={this.state.intervalHandler ? this.stopAutoMove : this.startAutoMove}
-          >
-            <Text style={animatedQRCodeStyle.text}>{this.state.intervalHandler ? loc.send.dynamic_stop : loc.send.dynamic_start}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={[animatedQRCodeStyle.button, { width: '25%', alignItems: 'flex-end' }]}
-            onPress={this.moveToNextFragment}
-          >
-            <Text style={animatedQRCodeStyle.text}>{loc.send.dynamic_next}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    ) : (
-      <View>
-        <Text>{loc.send.dynamic_init}</Text>
-      </View>
-    );
-  }
-}
-
-const animatedQRCodeStyle = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  qrcodeContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 6,
-    borderRadius: 8,
-    borderColor: '#FFFFFF',
-    margin: 6,
-  },
-  controller: {
-    width: '90%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderRadius: 25,
-    height: 45,
-    paddingHorizontal: 18,
-  },
-  button: {
-    alignItems: 'center',
-    height: 45,
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: 14,
-    color: BlueCurrentTheme.colors.foregroundColor,
-    fontWeight: 'bold',
-  },
-});

@@ -14,7 +14,16 @@
     "no": "Hayır",
     "save": "Kaydet",
     "seed": "Seed",
-    "wallet_key": "Cüzdan anahtarı"
+    "success": "Başarılı",
+    "wallet_key": "Cüzdan anahtarı",
+    "invalid_animated_qr_code_fragment": "Geçersiz QRCode fragmanı. Lütfen tekrar deneyiniz.",
+    "file_saved": "Dosya {filepath} kaydedildi {destination}",
+    "file_save_title": "Dosyayı kaydet",
+    "file_save_location": "Nereye kaydedileceğini seç {filePath}",
+    "downloads_folder": "İndirilenler Dosyası",
+    "external_storage": "Dış depolama ünitesi",
+    "discard_changes": "Değişiklikleri iptal et?",
+    "discard_changes_detail": "Değişiklikler kaydedilmedi. Kaydetmeden ekrandan çıkmak istediğinize emin misiniz?"
   },
   "azteco": {
     "codeIs": "Bilet kodunuz ",
@@ -35,19 +44,9 @@
     "error": "Hata",
     "network": "Ağ Hatası"
   },
-  "hodl": {
-    "are_you_sure_you_want_to_logout": "Hodl Hodl'dan çıkış yapmak istediğinize emin misiniz?",
-    "cont_address_escrow": "Escrow",
-    "cont_buying": "Satın al",
-    "cont_cancel": "Anlaşmayı iptal et",
-    "cont_cancel_q": "Anlaşmadan vazgeçmek istediğinize emin misiniz ?",
-    "cont_cancel_y": "Evet, anlaşmayı boz.",
-    "filter_currency": "Para birimi",
-    "filter_detail": "Ayrıntılar",
-    "filter_filters": "Filtreler"
-  },
   "lnd": {
     "expired": "Süresi doldu",
+    "expiredLow": "Süresi doldu",
     "placeholder": "Fatura",
     "refill": "Yükle",
     "refill_lnd_balance": "Lightning cüzdana bakiye yükle",
@@ -71,9 +70,6 @@
   "pleasebackup": {
     "ask_no": "Hayır, kaydetmedim.",
     "ask_yes": "Evet, kaydettim.",
-    "ok": "Tamam, bir yere not aldım.",
-    "ok_lnd": "Tamam, kaydettim.",
-    "text": "Bir dakikanızı ayırıp nimonik cümlenizi bir parça kağıda not almayı ihmal etmeyin. Nimonik cümleniz, cüzdanınızı herhangi bir cihazda tekrar oluşturabilmenizi sağlar.",
     "text_lnd": "Lütfen kurtarma kodunuzu kaydedin. Cüzdanınızı kayıp etmeniz durumunda onu geri oluşturabilmenizi sağlar.",
     "text_lnd2": "Bu cüzdan DoiWallet tarafından sağlanmaktadır.",
     "title": "Cüzdanınız oluşturuldu."
@@ -99,7 +95,6 @@
     "create_details": "Detaylar",
     "create_fee": "Ücret",
     "create_memo": "Not",
-    "create_satoshi_per_byte": "Bayt başına Satoshi",
     "create_this_is_hex": "Bu, işleminizin hex kodu. İmzalandı ve ağa yayınlanmaya hazır.",
     "create_to": "Kime",
     "create_tx_size": "TX boyutu",
@@ -155,6 +150,8 @@
     "advanced_options": "Gelişmiş Seçenekler",
     "biometrics": "Biyometrikler",
     "currency": "Para Birimi",
+    "electrum_clear_alert_cancel": "Vazgeç",
+    "electrum_clear": "Temizle",
     "general_adv_mode": "Enable advanced mode",
     "header": "ayarlar",
     "language": "Dil",
@@ -178,12 +175,14 @@
     "ask_me_later": "Daha sonra hatırlat"
   },
   "transactions": {
+    "cpfp_create": "Oluştur",
     "details_copy": "Kopya",
     "details_from": "Girdi",
     "details_show_in_block_explorer": "Blok gezgininde göster",
     "details_title": "İşlem",
     "details_to": "Çıktı",
     "details_transaction_details": "İşlem detayları",
+    "pending": "Beklemede",
     "list_title": "işlemler"
   },
   "wallets": {
@@ -222,6 +221,11 @@
     "xpub_title": "cüzdan XPUB"
   },
   "multisig": {
+    "confirm": "Onayla",
+    "header": "Gönder",
+    "share": "Paylaş",
+    "create": "Oluştur",
+    "co_sign_transaction": "Bir işlemi imzalayın",
     "ms_help": "Yardım",
     "ms_help_title5": "Gelişmiş Mod"
   },
@@ -233,7 +237,11 @@
   "units": {
     "BTC": "DOI",
     "MAX": "Maks",
-    "sat_byte": "swartz/byte",
-    "sats": "swartz"
+    "sats": "sat"
+  },
+  "addresses": {
+    "sign_placeholder_address": "Adres",
+    "type_receive": "Al",
+    "transactions": "işlemler"
   }
 }

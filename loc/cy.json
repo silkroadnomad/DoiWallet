@@ -79,10 +79,8 @@
   },
   "lnd": {
     "errorInvoiceExpired": "Anfoneb wedi gorffen",
-    "exchange": "Cyfnewid",
     "expired": "Gorffen",
     "expiredLow": "Gorffen",
-    "expiresIn": "Yn Gorffen: {time}",
     "payButton": "Talu",
     "placeholder": "Anfoneb",
     "potentialFee": "Ffi Tebygol: {fee}",
@@ -161,7 +159,8 @@
     "permission_camera_message": "Angen dy ganiatad i ddefnyddio dy gamera.",
     "permission_camera_title": "Caniatad i ddefnyddio'r camera",
     "psbt_sign": "Arwyddo trafodyn",
-    "open_settings": "Agor Gosodiadau"
+    "open_settings": "Agor Gosodiadau",
+    "success_done": "Wedi Cwblhau"
   },
   "settings": {
     "currency": "Arian",
@@ -193,7 +192,6 @@
     "retype_password": "Ail-deipio cyfrinair",
     "save": "Safio",
     "saved": "Wedi Safio",
-    "success_transaction_broadcasted": "Llwyddiant! Mae dy drafodyn wedi cael ei ddarlledu!",
     "total_balance": "Balans Llawn"
   },
   "transactions": {
@@ -227,10 +225,8 @@
     "details_advanced": "Arbenigol",
     "details_are_you_sure": "Wyt ti'n siwr?",
     "details_connected_to": "Wedi cysylltu efo",
-    "details_del_wb": "Balans Waled",
     "details_delete": "Gwaredu",
     "details_delete_wallet": "Gwaredu Waled",
-    "details_marketplace": "Marchnad",
     "details_no_cancel": "Na, canslo",
     "details_save": "Safio",
     "details_show_addresses": "Dangos cyfeiriadau",
@@ -241,8 +237,6 @@
     "import_do_import": "Mewnforio",
     "import_file": "Mewnforio ffeil",
     "import_imported": "Mewnforwyd",
-    "import_placeholder_fail": "Waled Mewnfor",
-    "import_placeholder_inprogress": "Mewnforio Waled...",
     "import_scan_qr": "Sganio neu fewnforio ffeil",
     "import_success": "Mae dy waled wedi cael ei fewnforio'n llwyddiannus.",
     "import_title": "Mewnforio",
@@ -268,26 +262,26 @@
     "header": "Anfon",
     "share": "Rhannu",
     "view": "Golwg",
+    "create": "Creu",
+    "co_sign_transaction": "Arwyddo trafodyn",
     "wallet_type": "Math o Waled",
     "view_key": "Golwg"
+  },
+  "cc": {
+    "change": "Newid"
   },
   "units": {
     "MAX": "Mwyafswm"
   },
   "addresses": {
-    "sign_title": "Arwyddo/Gwirio neges",
     "sign_sign": "Arwyddo",
     "sign_verify": "Gwirio",
-    "sign_signature_correct": "Gwirio Wedi Llwyddo!",
-    "sign_signature_incorrect": "Gwirio Wedi Methu!",
     "sign_placeholder_address": "Cyfeiriad",
     "sign_placeholder_message": "Neges",
     "sign_placeholder_signature": "Llofnod",
     "addresses_title": "Cyfeiriadau",
     "type_change": "Newid",
-    "type_receive": "Derbyn"
-  },
-  "aopp": {
-    "title": "Dewis Cyfeiriad"
+    "type_receive": "Derbyn",
+    "transactions": "Trafodion"
   }
 }

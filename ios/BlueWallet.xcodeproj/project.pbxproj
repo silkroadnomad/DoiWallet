@@ -10,12 +10,12 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		2CBF38F626DE66BC00FB1A2D /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 		32B5A32A2334450100F8D608 /* Bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32B5A3292334450100F8D608 /* Bridge.swift */; };
 		6D32C5C62596CE3A008C077C /* EventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D32C5C52596CE3A008C077C /* EventEmitter.m */; };
 		6DF25A9F249DB97E001D06F5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6DF25A9E249DB97E001D06F5 /* LaunchScreen.storyboard */; };
 		764B49B1420D4AEB8109BF62 /* libsqlite3.0.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B468CC34D5B41F3950078EF /* libsqlite3.0.tbd */; };
 		782F075B5DD048449E2DECE9 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B9D9B3A7B2CB4255876B67AF /* libz.tbd */; };
+		84E05A842721191B001A0D3A /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 84E05A832721191B001A0D3A /* Settings.bundle */; };
 		906451CAD44154C2950030EC /* libPods-BlueWallet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 731973BA0AC6EA78962CE5B6 /* libPods-BlueWallet.a */; };
 /* End PBXBuildFile section */
 
@@ -177,6 +177,8 @@
 		7BAA8F97E61B677D33CF1944 /* Pods-WalletInformationAndMarketWidgetExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WalletInformationAndMarketWidgetExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-WalletInformationAndMarketWidgetExtension/Pods-WalletInformationAndMarketWidgetExtension.release.xcconfig"; sourceTree = "<group>"; };
 		7E45F9A25C15BEA362225C9B /* libPods-WidgetsExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-WidgetsExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8448882949434D41A054C0B2 /* ToolTipMenuTests.xctest */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = ToolTipMenuTests.xctest; sourceTree = "<group>"; };
+		849047C92702A32A008EE567 /* Handoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Handoff.swift; sourceTree = "<group>"; };
+		84E05A832721191B001A0D3A /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		8637D4B5E14D443A9031DA95 /* libRNFS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFS.a; sourceTree = "<group>"; };
 		8C30FBCA42C6BF0B45757763 /* Pods-WidgetsExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WidgetsExtension.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WidgetsExtension/Pods-WidgetsExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		90F86BC5194548CA87D729A9 /* libToolTipMenu.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libToolTipMenu.a; sourceTree = "<group>"; };
@@ -221,13 +223,11 @@
 		CA741BA794714D3F80251AC9 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
 		CD746B955C55410793BB72C0 /* libRNGestureHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGestureHandler.a; sourceTree = "<group>"; };
 		CF4A4D7AAD974D67A2D62B3E /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
-		D6EC5B694E664FD7B02EDD2F /* libRNSentry.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNSentry.a; sourceTree = "<group>"; };
 		E0A230940404CA7C51FBED37 /* Pods-WidgetsExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WidgetsExtension.release.xcconfig"; path = "Pods/Target Support Files/Pods-WidgetsExtension/Pods-WidgetsExtension.release.xcconfig"; sourceTree = "<group>"; };
 		E6B44173A8854B6D85D7F933 /* libRNVectorIcons-tvOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libRNVectorIcons-tvOS.a"; sourceTree = "<group>"; };
 		E8E8CE89B3D142C6A8A56C34 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Octicons.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED2971642150620600B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS12.0.sdk/System/Library/Frameworks/JavaScriptCore.framework; sourceTree = DEVELOPER_DIR; };
-		F11DD40F6E9A4F13B3410B94 /* libRNSentry-tvOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libRNSentry-tvOS.a"; sourceTree = "<group>"; };
 		F6F53AFC25FB422485CB22D6 /* SystemConfiguration.framework */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		FC63C7054F1C4FDFB7A830E5 /* libRCTPrivacySnapshot.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTPrivacySnapshot.a; sourceTree = "<group>"; };
 		FC98DC24A81A463AB8B2E6B1 /* libRNImagePicker.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNImagePicker.a; sourceTree = "<group>"; };
@@ -282,6 +282,7 @@
 				6DF25A9E249DB97E001D06F5 /* LaunchScreen.storyboard */,
 				6D32C5C42596CE2F008C077C /* EventEmitter.h */,
 				6D32C5C52596CE3A008C077C /* EventEmitter.m */,
+				84E05A832721191B001A0D3A /* Settings.bundle */,
 			);
 			name = BlueWallet;
 			sourceTree = "<group>";
@@ -529,10 +530,8 @@
 				1DD63E4B5C8344BB9880C9EC /* libReactNativePermissions.a */,
 				6A65D81712444D37BA152B06 /* libRNRandomBytes.a */,
 				BBA99996E6FA4B49ACE0BEFA /* libRNRate.a */,
-				D6EC5B694E664FD7B02EDD2F /* libRNSentry.a */,
 				6EB3338E347F4AFAA8C85C04 /* libRNDeviceInfo-tvOS.a */,
 				253243E162CE4822BF3A3B7D /* libRNRandomBytes-tvOS.a */,
-				F11DD40F6E9A4F13B3410B94 /* libRNSentry-tvOS.a */,
 				4F12F501B686459183E0BE0D /* libRNVectorIcons.a */,
 				E6B44173A8854B6D85D7F933 /* libRNVectorIcons-tvOS.a */,
 				94565BFC6A0C4235B3EC7B01 /* libRNSVG.a */,
@@ -558,6 +557,7 @@
 				B43D0372225847C500FBAA95 /* WalletGradient.swift */,
 				B43D0377225847C500FBAA95 /* WalletInformation.swift */,
 				B43D0373225847C500FBAA95 /* WatchDataSource.swift */,
+				849047C92702A32A008EE567 /* Handoff.swift */,
 			);
 			path = Objects;
 			sourceTree = "<group>";
@@ -575,10 +575,11 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				B40D4E2D225841C300428FCC /* Embed Watch Content */,
-				2130DE983D1D45AC8FC45F7E /* Upload Debug Symbols to Sentry */,
 				3271B0B6236E2E0700DA766F /* Embed App Extensions */,
 				C18D00A61007A84C9887DEDE /* [CP] Copy Pods Resources */,
 				68CD4C52AC5B27E333599B5C /* [CP] Embed Pods Frameworks */,
+				A8D9893AE3CD454A9094B651 /* Upload source maps to Bugsnag */,
+				4B36CFF6FE55027DCA5CB6E1 /* Upload Bugsnag dSYM */,
 			);
 			buildRules = (
 			);
@@ -597,7 +598,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
-				LastUpgradeCheck = 1020;
+				LastUpgradeCheck = 1330;
 				ORGANIZATIONNAME = BlueWallet;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
@@ -612,10 +613,9 @@
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "BlueWallet" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 				af,
@@ -659,8 +659,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2CBF38F626DE66BC00FB1A2D /* main.jsbundle in Resources */,
 				6DF25A9F249DB97E001D06F5 /* LaunchScreen.storyboard in Resources */,
+				84E05A842721191B001A0D3A /* Settings.bundle in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -680,21 +680,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export SENTRY_PROPERTIES=sentry.properties\nexport NODE_BINARY=node\n../node_modules/@sentry/cli/bin/sentry-cli react-native xcode ../node_modules/react-native/scripts/react-native-xcode.sh\n";
+			shellScript = "export EXTRA_PACKAGER_ARGS=\"--sourcemap-output $TMPDIR/$(md5 -qs \"$CONFIGURATION_BUILD_DIR\")-main.jsbundle.map\"\nexport NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
-		2130DE983D1D45AC8FC45F7E /* Upload Debug Symbols to Sentry */ = {
+		4B36CFF6FE55027DCA5CB6E1 /* Upload Bugsnag dSYM */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
+			inputFileListPaths = (
 			);
-			name = "Upload Debug Symbols to Sentry";
+			inputPaths = (
+				"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+			);
+			name = "Upload Bugsnag dSYM";
+			outputFileListPaths = (
+			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export SENTRY_PROPERTIES=sentry.properties\n../node_modules/@sentry/cli/bin/sentry-cli upload-dsym";
+			shellPath = "/usr/bin/env ruby";
+			shellScript = "api_key = nil # Insert your key here to use it directly from this script\n\n# Attempt to get the API key from an environment variable\nunless api_key\n  api_key = ENV[\"BUGSNAG_API_KEY\"]\n\n  # If not present, attempt to lookup the value from the Info.plist\n  unless api_key\n    info_plist_path = \"#{ENV[\"BUILT_PRODUCTS_DIR\"]}/#{ENV[\"INFOPLIST_PATH\"]}\"\n    plist_buddy_response = `/usr/libexec/PlistBuddy -c \"print :bugsnag:apiKey\" \"#{info_plist_path}\"`\n    plist_buddy_response = `/usr/libexec/PlistBuddy -c \"print :BugsnagAPIKey\" \"#{info_plist_path}\"` if !$?.success?\n    api_key = plist_buddy_response if $?.success?\n  end\nend\n\nfail(\"No Bugsnag API key detected - add your key to your Info.plist, BUGSNAG_API_KEY environment variable or this Run Script phase\") unless api_key\n\nfork do\n  Process.setsid\n  STDIN.reopen(\"/dev/null\")\n  STDOUT.reopen(\"/dev/null\", \"a\")\n  STDERR.reopen(\"/dev/null\", \"a\")\n\n  require 'shellwords'\n\n  Dir[\"#{ENV[\"DWARF_DSYM_FOLDER_PATH\"]}/*/Contents/Resources/DWARF/*\"].each do |dsym|\n    curl_command = \"curl --http1.1 -F dsym=@#{Shellwords.escape(dsym)} -F projectRoot=#{Shellwords.escape(ENV[\"PROJECT_DIR\"])} \"\n    curl_command += \"-F apiKey=#{Shellwords.escape(api_key)} \"\n    curl_command += \"https://upload.bugsnag.com/\"\n    system(curl_command)\n  end\nend\n";
 		};
 		68CD4C52AC5B27E333599B5C /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -704,10 +710,12 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BlueWallet/Pods-BlueWallet-frameworks.sh",
 				"${PODS_XCFRAMEWORKS_BUILD_DIR}/OpenSSL-Universal/OpenSSL.framework/OpenSSL",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/rn-ldk/LDKFramework.framework/LDKFramework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/OpenSSL.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/LDKFramework.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -735,6 +743,20 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		A8D9893AE3CD454A9094B651 /* Upload source maps to Bugsnag */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Upload source maps to Bugsnag";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SOURCE_MAP=\"$TMPDIR/$(md5 -qs \"$CONFIGURATION_BUILD_DIR\")-main.jsbundle.map\" ../node_modules/@bugsnag/react-native/bugsnag-react-native-xcode.sh\n";
 		};
 		C18D00A61007A84C9887DEDE /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -784,7 +806,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-BlueWallet/Pods-BlueWallet-resources.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -878,14 +899,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9B3A324B70BC8C6D9314FD4F /* Pods-BlueWallet.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 613;
+				CURRENT_PROJECT_VERSION = 702;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = FK2Q96BU2T;
 				ENABLE_BITCODE = NO;
@@ -897,7 +916,7 @@
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = BlueWallet/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -906,7 +925,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.2.5;
+				MARKETING_VERSION = 6.3.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -914,7 +933,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.doichain.Doiwallet;
 				PRODUCT_NAME = BlueWallet;
-				PROVISIONING_PROFILE_SPECIFIER = DoiWallet;
+				PROVISIONING_PROFILE_SPECIFIER = link;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "BlueWallet-Bridging-Header.h";
@@ -929,20 +948,19 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = B459EE96941AE09BCB547DC0 /* Pods-BlueWallet.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWalletRelease.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 613;
+				CURRENT_PROJECT_VERSION = 702;
 				DEVELOPMENT_TEAM = FK2Q96BU2T;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = BlueWallet/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -951,7 +969,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.2.5;
+				MARKETING_VERSION = 6.3.2;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -959,7 +977,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = org.doichain.Doiwallet;
 				PRODUCT_NAME = BlueWallet;
-				PROVISIONING_PROFILE_SPECIFIER = DoiWallet;
+				PROVISIONING_PROFILE_SPECIFIER = link;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "BlueWallet-Bridging-Header.h";
@@ -992,6 +1010,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1001,7 +1020,7 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1017,7 +1036,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1049,6 +1068,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -1058,7 +1078,7 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "arm64 ";
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1067,7 +1087,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LIBRARY_SEARCH_PATHS = "\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;

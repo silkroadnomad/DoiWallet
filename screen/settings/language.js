@@ -1,13 +1,13 @@
-/* global alert */
 import React, { useState, useEffect, useContext } from 'react';
 import { FlatList, StyleSheet } from 'react-native';
 import { useNavigation, useTheme } from '@react-navigation/native';
 
 import navigationStyle from '../../components/navigationStyle';
 import { BlueListItem } from '../../BlueComponents';
-import loc from '../../loc';
+import loc, { saveLanguage } from '../../loc';
 import { AvailableLanguages } from '../../loc/languages';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
+import alert from '../../components/Alert';
 
 const styles = StyleSheet.create({
   flex: {
@@ -36,7 +36,7 @@ const Language = () => {
       <BlueListItem
         onPress={() => {
           const currentLanguage = AvailableLanguages.find(language => language.value === selectedLanguage);
-          loc.saveLanguage(item.item.value).then(() => {
+          saveLanguage(item.item.value).then(() => {
             setSelectedLanguage(item.item.value);
             setLanguage();
             if (currentLanguage.isRTL || item.item.isRTL) {

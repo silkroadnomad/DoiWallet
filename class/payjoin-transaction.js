@@ -1,8 +1,10 @@
-/* global alert */
 import * as bitcoin from 'bitcoinjs-lib';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import alert from '../components/Alert';
+import { ECPairFactory } from 'ecpair';
+const ecc = require('tiny-secp256k1');
+const ECPair = ECPairFactory(ecc);
 import { DOICHAIN } from '../blue_modules/network.js';
-
 const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
 // Implements IPayjoinClientWallet
@@ -18,7 +20,7 @@ export default class PayjoinTransaction {
   async getPsbt() {
     // Nasty hack to get this working for now
     const unfinalized = this._psbt.clone();
-    unfinalized.data.inputs.forEach((input, index) => {
+    for (const [index, input] of unfinalized.data.inputs.entries()) {
       delete input.finalScriptWitness;
 
       const address = bitcoin.address.fromOutputScript(
@@ -29,7 +31,7 @@ export default class PayjoinTransaction {
       const keyPair = bitcoin.ECPair.fromWIF(wif, DOICHAIN);
 
       unfinalized.signInput(index, keyPair);
-    });
+    }
 
     return unfinalized;
   }
@@ -56,7 +58,6 @@ export default class PayjoinTransaction {
         payjoinPsbt.signInput(index, keyPair).finalizeInput(index);
       } catch (e) {}
     });
-
     this._payjoinPsbt = payjoinPsbt;
     return this._payjoinPsbt;
   }

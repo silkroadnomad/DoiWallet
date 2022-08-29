@@ -1,14 +1,18 @@
 import * as bip39 from 'bip39';
 import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
 
 import { randomBytes } from '../rng';
 import { AbstractHDWallet } from './abstract-hd-wallet';
+import { ECPairFactory } from 'ecpair';
+const ECPair = ECPairFactory(ecc);
 import { DOICHAIN } from '../../blue_modules/network.js';
 const bitcoin = require('bitcoinjs-lib');
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
-const HDNode = require('bip32');
 const reverse = require('buffer-reverse');
+const bip32 = BIP32Factory(ecc);
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -88,8 +92,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   _getWIFByIndex(internal, index) {
     if (!this.secret) return false;
     const seed = this._getSeed();
-    const root = HDNode.fromSeed(seed, DOICHAIN);
-    const path = `m/84'/0'/0'/${internal ? 1 : 0}/${index}`;
+    const root = bip32.fromSeed(seed, DOICHAIN);
+    const path = `${this.getDerivationPath()}/${internal ? 1 : 0}/${index}`;
     const child = root.derivePath(path);
 
     return child.toWIF();
@@ -107,13 +111,13 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     if (node === 0 && !this._node0) {
       const xpub = this.constructor._zpubToXpub(this.getXpub());
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node0 = hdNode.derive(node);
     }
 
     if (node === 1 && !this._node1) {
       const xpub = this.constructor._zpubToXpub(this.getXpub());
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node1 = hdNode.derive(node);
     }
 
@@ -140,13 +144,13 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     if (node === 0 && !this._node0) {
       const xpub = this.constructor._zpubToXpub(this.getXpub());
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node0 = hdNode.derive(node);
     }
 
     if (node === 1 && !this._node1) {
       const xpub = this.constructor._zpubToXpub(this.getXpub());
-      const hdNode = HDNode.fromBase58(xpub, DOICHAIN);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       this._node1 = hdNode.derive(node);
     }
 
@@ -178,10 +182,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       return this._xpub; // cache hit
     }
     // first, getting xpub
-    const seed = this._getSeed();    
-    const root = HDNode.fromSeed(seed, DOICHAIN);
+    const seed = this._getSeed();
+    const root = bip32.fromSeed(seed, DOICHAIN);
 
-    const path = "m/84'/0'/0'";
+    const path = this.getDerivationPath();
     const child = root.derivePath(path).neutered();
     const xpub = child.toBase58();
 
@@ -780,8 +784,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     return ret;
   }
 
-  _getDerivationPathByAddress(address, BIP = 84) {
-    const path = `m/${BIP}'/0'/0'`;
+  _getDerivationPathByAddress(address) {
+    const path = this.getDerivationPath();
     for (let c = 0; c < this.next_free_address_index + this.gap_limit; c++) {
       if (this._getExternalAddressByIndex(c) === address) return path + '/0/' + c;
     }
@@ -854,6 +858,24 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    */
   createTransaction(utxos, targets, feeRate, changeAddress, sequence, skipSigning = false, masterFingerprint) {
     if (targets.length === 0) throw new Error('No destination provided');
+    // compensating for coinselect inability to deal with segwit inputs, and overriding script length for proper vbytes calculation
+    for (const u of utxos) {
+      // this is a hacky way to distinguish native/wrapped segwit, but its good enough for our case since we have only
+      // those 2 wallet types
+      if (this._getExternalAddressByIndex(0).startsWith('bc1')) {
+        u.script = { length: 27 };
+      } else if (this._getExternalAddressByIndex(0).startsWith('3')) {
+        u.script = { length: 50 };
+      }
+    }
+
+    for (const t of targets) {
+      if (t.address.startsWith('bc1')) {
+        // in case address is non-typical and takes more bytes than coinselect library anticipates by default
+        t.script = { length: bitcoin.address.toOutputScript(t.address).length + 3 };
+      }
+    }
+
     const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
 
     sequence = sequence || AbstractHDElectrumWallet.defaultRBFSequence;
@@ -866,7 +888,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       let keyPair;
       if (!skipSigning) {
         // skiping signing related stuff
-        keyPair = bitcoin.ECPair.fromWIF(this._getWifForAddress(input.address), DOICHAIN);
+        keyPair = ECPair.fromWIF(this._getWifForAddress(input.address), DOICHAIN);
         keypairs[c] = keyPair;
       }
       values[c] = input.value;
@@ -1081,7 +1103,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    */
   cosignPsbt(psbt) {
     const seed = this._getSeed();
-    const hdRoot = HDNode.fromSeed(seed, DOICHAIN);
+    const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 
     for (let cc = 0; cc < psbt.inputCount; cc++) {
       try {
@@ -1094,7 +1116,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           const internal = +splt[splt.length - 2];
           const index = +splt[splt.length - 1];
           const wif = this._getWIFByIndex(internal, index);
-          const keyPair = bitcoin.ECPair.fromWIF(wif, DOICHAIN);
+          const keyPair = ECPair.fromWIF(wif, DOICHAIN);
           try {
             psbt.signInput(cc, keyPair);
           } catch (e) {} // protects agains duplicate cosignings or if this output can't be signed with current wallet
@@ -1115,7 +1137,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @returns {string} Hex string of fingerprint derived from mnemonics. Always has lenght of 8 chars and correct leading zeroes. All caps
    */
   static seedToFingerprint(seed) {
-    const root = bitcoin.bip32.fromSeed(seed, DOICHAIN);
+    const root = bip32.fromSeed(seed, DOICHAIN);
     let hex = root.fingerprint.toString('hex');
     while (hex.length < 8) hex = '0' + hex; // leading zeroes
     return hex.toUpperCase();
@@ -1125,8 +1147,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @param mnemonic {string}  Mnemonic phrase (12 or 24 words)
    * @returns {string} Hex fingerprint
    */
-  static mnemonicToFingerprint(mnemonic) {
-    const seed = bip39.mnemonicToSeedSync(mnemonic);
+  static mnemonicToFingerprint(mnemonic, passphrase) {
+    const seed = bip39.mnemonicToSeedSync(mnemonic, passphrase);
     return AbstractHDElectrumWallet.seedToFingerprint(seed);
   }
 

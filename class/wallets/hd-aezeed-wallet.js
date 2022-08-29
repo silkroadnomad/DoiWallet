@@ -1,8 +1,12 @@
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 import b58 from 'bs58check';
+import BIP32Factory from 'bip32';
+import * as ecc from 'tiny-secp256k1';
+
 import { DOICHAIN } from '../../blue_modules/network.js';
 const bitcoin = require('bitcoinjs-lib');
 const { CipherSeed } = require('aezeed');
+const bip32 = BIP32Factory(ecc);
 
 /**
  * AEZEED mnemonics support, which is used in LND
@@ -37,7 +41,7 @@ export class HDAezeedWallet extends AbstractHDElectrumWallet {
 
   getXpub() {
     // first, getting xpub
-    const root = bitcoin.bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
+    const root = bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
 
     const path = "m/84'/0'/0'";
     const child = root.derivePath(path).neutered();
@@ -83,13 +87,13 @@ export class HDAezeedWallet extends AbstractHDElectrumWallet {
   }
 
   _getNode0() {
-    const root = bitcoin.bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
+    const root = bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
     const node = root.derivePath("m/84'/0'/0'");
     return node.derive(0);
   }
 
   _getNode1() {
-    const root = bitcoin.bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
+    const root = bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
     const node = root.derivePath("m/84'/0'/0'");
     return node.derive(1);
   }
@@ -124,7 +128,7 @@ export class HDAezeedWallet extends AbstractHDElectrumWallet {
 
   _getWIFByIndex(internal, index) {
     if (!this.secret) return false;
-    const root = bitcoin.bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
+    const root = bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
     const path = `m/84'/0'/0'/${internal ? 1 : 0}/${index}`;
     const child = root.derivePath(path);
 
@@ -152,7 +156,7 @@ export class HDAezeedWallet extends AbstractHDElectrumWallet {
   }
 
   getIdentityPubkey() {
-    const root = bitcoin.bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
+    const root = bip32.fromSeed(this._getEntropyCached(), DOICHAIN);
     const node = root.derivePath("m/1017'/0'/6'/0/0");
 
     return node.publicKey.toString('hex');
@@ -173,6 +177,10 @@ export class HDAezeedWallet extends AbstractHDElectrumWallet {
   }
 
   allowPayJoin() {
+    return true;
+  }
+
+  isSegwit() {
     return true;
   }
 

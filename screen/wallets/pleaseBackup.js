@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useContext } from 'react';
-import { ActivityIndicator, View, BackHandler, Text, ScrollView, StyleSheet, StatusBar, I18nManager } from 'react-native';
+import { ActivityIndicator, View, BackHandler, Text, ScrollView, StyleSheet, I18nManager } from 'react-native';
 import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 
 import { SafeBlueArea, BlueButton } from '../../BlueComponents';
@@ -71,7 +71,6 @@ const PleaseBackup = () => {
     </View>
   ) : (
     <SafeBlueArea style={stylesHook.flex}>
-      <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.flex} testID="PleaseBackupScrollView">
         <View style={styles.please}>
           <Text style={[styles.pleaseText, stylesHook.pleaseText]}>{loc.pleasebackup.text}</Text>
@@ -89,11 +88,9 @@ const PleaseBackup = () => {
 
 PleaseBackup.navigationOptions = navigationStyle(
   {
-    closeButton: true,
-    headerLeft: null,
-    headerRight: null,
     gestureEnabled: false,
     swipeEnabled: false,
+    headerHideBackButton: true,
   },
   opts => ({ ...opts, title: loc.pleasebackup.title }),
 );
@@ -142,6 +139,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     fontSize: 16,
     fontWeight: '500',
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
   },
   secret: {
     flexWrap: 'wrap',
