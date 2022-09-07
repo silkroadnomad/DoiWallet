@@ -82,7 +82,7 @@ const SendDetails = () => {
   const { isEditable = true } = routeParams;
   
     // if utxo is limited we use it to calculate available balance
-    const balance = utxo ? utxo.reduce((prev, curr) => prev + curr.value, 0) : wallet.getBalance();
+    const balance = utxo ? utxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance();
     const allBalance = formatBalanceWithoutSuffix(balance, DoichainUnit.DOI, true);
 
   // if cutomFee is not set, we need to choose highest possible fee for wallet balance

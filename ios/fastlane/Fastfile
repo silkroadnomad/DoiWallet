@@ -20,4 +20,20 @@ platform :ios do
   lane :custom_lane do
     # add actions here: https://docs.fastlane.tools/actions
   end
+
+  lane :tests do
+    run_tests(scheme: "BlueWallet")
+  end
+
+
+  lane :beta do
+	  #build_app(scheme: "BlueWallet"), xcargs: "-allowProvisioningUpdates"
+    #build_app(scheme: "BlueWallet")
+    build_ios_app(scheme: "BlueWallet", clean: true)
+   # upload_to_testflight(
+   #    skip_waiting_for_build_processing: true
+   # )
+    #upload_to_testflight
+  end
+
 end

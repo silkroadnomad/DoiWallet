@@ -15,8 +15,22 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "BlueWallet.app"
+               BuildableName = "DoiWallet.app"
                BlueprintName = "BlueWallet"
+               ReferencedContainer = "container:BlueWallet.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
+               BuildableName = "BlueWalletTests.xctest"
+               BlueprintName = "BlueWalletTests"
                ReferencedContainer = "container:BlueWallet.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -31,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "BlueWallet.app"
+            BuildableName = "DoiWallet.app"
             BlueprintName = "BlueWallet"
             ReferencedContainer = "container:BlueWallet.xcodeproj">
          </BuildableReference>
@@ -64,7 +78,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "BlueWallet.app"
+            BuildableName = "DoiWallet.app"
             BlueprintName = "BlueWallet"
             ReferencedContainer = "container:BlueWallet.xcodeproj">
          </BuildableReference>
@@ -88,7 +102,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "BlueWallet.app"
+            BuildableName = "DoiWallet.app"
             BlueprintName = "BlueWallet"
             ReferencedContainer = "container:BlueWallet.xcodeproj">
          </BuildableReference>
