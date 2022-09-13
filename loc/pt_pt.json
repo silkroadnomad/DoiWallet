@@ -400,7 +400,8 @@
     "ms_help_title5": "Ligar modo avançado"
   },
   "units": {
-    "sats": "sats"
+    "sats": "sats",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_placeholder_address": "Endereço",

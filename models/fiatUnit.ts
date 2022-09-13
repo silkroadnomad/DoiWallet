@@ -1,3 +1,4 @@
+import Frisbee from 'frisbee'
 import untypedFiatUnit from './fiatUnits.json';
 
 export const FiatUnitSource = {

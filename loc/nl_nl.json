@@ -636,7 +636,8 @@
     "BTC": "DOI",
     "MAX": "MAX",
     "sat_byte": "swartz/byte",
-    "sats": "swartz"
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_title": "Onderteken/Verifieer bericht",

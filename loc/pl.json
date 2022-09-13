@@ -591,7 +591,8 @@
     "BTC": "DOI",
     "MAX": "Max",
     "sat_byte": "swartz/bajt",
-    "sats": "swartz"
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_title": "Podpisz/Zweryfikuj wiadomość",

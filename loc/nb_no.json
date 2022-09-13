@@ -588,7 +588,8 @@
     "BTC": "BTC",
     "MAX": "Maks",
     "sat_vbyte": "sat/vByte",
-    "sats": "sats"
+    "sats": "sats",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_title": "Signer/Bekreft Melding",

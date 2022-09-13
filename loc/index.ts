@@ -285,7 +285,7 @@ export function formatBalance(balance: number, toUnit: string, withFormatting = 
   if (toUnit === DoichainUnit.DOI) {
     const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
     return removeTrailingZeros(+value) + ' ' + loc.units[DoichainUnit.DOI];
-  } else if (toUnit === DoichainUnit.SWARTZ) {
+  } else if (toUnit === DoichainUnit.SWARTZ) {    
     return (withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance)) + ' ' + loc.units[DoichainUnit.SWARTZ];
   } else if (toUnit === DoichainUnit.LOCAL_CURRENCY) {
     return currency.satoshiToLocalCurrency(balance);

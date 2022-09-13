@@ -548,7 +548,8 @@
     "BTC": "BTC",
     "MAX": "Maks",
     "sat_vbyte": "sat/vBait",
-    "sats": "sat"
+    "sats": "sat",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_title": "Tandatangan/Sahkan pesanan",

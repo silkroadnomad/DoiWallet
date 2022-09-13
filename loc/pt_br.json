@@ -643,7 +643,8 @@
     "BTC": "DOI",
     "MAX": "Máx.",
     "sat_byte": "swartz/byte",
-    "sats": "swartz"
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_title": "Assinar/Verificar Mensagem",

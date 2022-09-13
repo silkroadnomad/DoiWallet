@@ -644,7 +644,8 @@
     "DOI": "DOI",
     "MAX": "Max",
     "sat_byte": "swartz/byte",
-    "sats": "swartz"
+    "sats": "swartz",
+    "swartz":"swartz"    
   },
   "addresses": {
     "sign_title": "Sign/Verify message",

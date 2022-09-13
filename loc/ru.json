@@ -638,7 +638,8 @@
     "DOI": "DOI",
     "MAX": "МАКС",
     "sat_vbyte": "sat/vByte",
-    "sats": "сатоши"
+    "sats": "сатоши",    
+    "swartz":"сатоши"
   },
   "addresses": {
     "sign_title": "Подписать/Проверить Сообщение",

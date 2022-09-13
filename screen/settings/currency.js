@@ -76,7 +76,7 @@ const Currency = () => {
                     setSelectedCurrency(item);
                     setPreferredFiatCurrency();
                   } catch (error) {
-                    console.log(error);
+                    console.log("_____dddddd", error);
                     alert(loc.settings.currency_fetch_error);
                   } finally {
                     setIsSavingNewPreferredCurrency(false);
