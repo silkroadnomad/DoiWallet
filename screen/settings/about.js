@@ -163,7 +163,21 @@ const firstInstallTime = useFirstInstallTime().result;
         }}
         onPress={handleOnDiscordPress}
         title={loc.settings.about_sm_discord}
+      /> <BlueListItem
+        leftIcon={{
+          name: "flask",
+          type: "font-awesome",
+          color: "#FC0D44",
+        }}
+        chevron
+        onPress={handleOnSelfTestPress}
+        testID="RunSelfTestButton"
+        title={loc.settings.about_selftest}
       />
+      <BlueButton
+            onPress={handleOnRatePress}
+            title={loc.settings.about_review + " ⭐🙏"}
+          />
   */
 
   return (
@@ -181,10 +195,7 @@ const firstInstallTime = useFirstInstallTime().result;
           <Text style={styles.textBackup}>
             {formatStringAddTwoWhiteSpaces(loc.settings.about_backup)}
           </Text>
-          <BlueButton
-            onPress={handleOnRatePress}
-            title={loc.settings.about_review + " ⭐🙏"}
-          />
+          
         </View>
       </BlueCard>
 
@@ -237,17 +248,7 @@ const firstInstallTime = useFirstInstallTime().result;
         onPress={handleOnLicensingPress}
         title={loc.settings.about_license}
       />
-      <BlueListItem
-        leftIcon={{
-          name: "flask",
-          type: "font-awesome",
-          color: "#FC0D44",
-        }}
-        chevron
-        onPress={handleOnSelfTestPress}
-        testID="RunSelfTestButton"
-        title={loc.settings.about_selftest}
-      />
+     
       <BlueSpacing20 />
       <BlueSpacing20 />
       <BlueTextCentered>
