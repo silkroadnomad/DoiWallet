@@ -1,7 +1,5 @@
 apply plugin: "com.android.application"
 
-import com.android.build.OutputFile
-
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
@@ -99,6 +97,7 @@ def enableSeparateBuildPerCPUArchitecture = false
  * Run Proguard to shrink the Java bytecode in release builds.
  */
 def enableProguardInReleaseBuilds = false
+def useIntlJsc = false
 
 /**
  * The preferred build flavor of JavaScriptCore.
@@ -199,7 +198,8 @@ android {
             // https://developer.android.com/studio/build/configure-apk-splits.html
             // Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
             def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
-            def abi = output.getFilter(OutputFile.ABI)            
+           // def abi = output.getFilter(OutputFile.ABI)    
+            def abi = output.getFilter(com.android.build.OutputFile.ABI)        
 
             if (abi != null) {  // null for the universal-debug, universal-release variants
              //  output.versionCodeOverride =   versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
@@ -219,7 +219,7 @@ dependencies {
     implementation files("../../node_modules/rn-ldk/android/libs/LDK-release.aar")
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
-   // implementation files("../../node_modules/react-native-tor/android/libs/sifir_android.aar")
+    //mplementation files("../../node_modules/react-native-tor/android/libs/sifir_android.aar")
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
@@ -243,6 +243,11 @@ dependencies {
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
         implementation jscFlavor
+    }
+    if (useIntlJsc) {
+        implementation 'org.webkit:android-jsc-intl:+'
+    } else {
+        implementation 'org.webkit:android-jsc:+'
     }
 
     androidTestImplementation(project(path: ":detox"))
