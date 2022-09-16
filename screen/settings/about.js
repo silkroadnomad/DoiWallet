@@ -174,10 +174,7 @@ const firstInstallTime = useFirstInstallTime().result;
         testID="RunSelfTestButton"
         title={loc.settings.about_selftest}
       />
-      <BlueButton
-            onPress={handleOnRatePress}
-            title={loc.settings.about_review + " ⭐🙏"}
-          />
+     
   */
 
   return (
@@ -195,7 +192,8 @@ const firstInstallTime = useFirstInstallTime().result;
           <Text style={styles.textBackup}>
             {formatStringAddTwoWhiteSpaces(loc.settings.about_backup)}
           </Text>
-          
+          <BlueButton  onPress={handleOnRatePress}   title={loc.settings.about_review + " ⭐🙏"}
+          />
         </View>
       </BlueCard>
 
