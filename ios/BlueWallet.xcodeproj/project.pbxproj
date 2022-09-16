@@ -875,7 +875,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 705;
+				CURRENT_PROJECT_VERSION = 706;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = FK2Q96BU2T;
 				ENABLE_BITCODE = NO;
@@ -897,7 +897,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.3.9;
+				MARKETING_VERSION = 6.3.10;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -929,7 +929,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 705;
+				CURRENT_PROJECT_VERSION = 706;
 				DEVELOPMENT_TEAM = FK2Q96BU2T;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -945,7 +945,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.3.9;
+				MARKETING_VERSION = 6.3.10;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"$(inherited)",

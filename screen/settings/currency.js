@@ -38,7 +38,7 @@ const Currency = () => {
       preferredCurrency = await currency.getPreferredCurrency();
       if (preferredCurrency === null) {
         throw Error();
-      }
+      }      
       setSelectedCurrency(preferredCurrency);
     } catch (_error) {
       setSelectedCurrency(preferredCurrency);
@@ -75,8 +75,7 @@ const Currency = () => {
                     await fetchCurrency();
                     setSelectedCurrency(item);
                     setPreferredFiatCurrency();
-                  } catch (error) {
-                    console.log("_____dddddd", error);
+                  } catch (error) {                    
                     alert(loc.settings.currency_fetch_error);
                   } finally {
                     setIsSavingNewPreferredCurrency(false);
