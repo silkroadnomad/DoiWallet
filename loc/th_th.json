@@ -211,7 +211,7 @@
   "settings": {
     "about": "เกี่ยวกับ",
     "about_backup": "ท่านควรบันทึกคีย์ของท่านเสมอ",
-    "about_free": "DoiWallet คือโปรเจ็คโอเพนซอร์ส ไม่มีการคิดค่าใช้จ่าย สร้างโดยผู้ใช้บิตคอยน์",
+    "about_free": "DoiWallet is a free and open source project based on BlueWallet",
     "about_release_notes": "บันทึกของโปรแกรมนี้",
     "about_review": "กรุณาแสดงความเห็น",
     "about_selftest": "ทำการทดสอบ",

@@ -237,7 +237,7 @@
     "about": "Sobre nosotros",
     "about_awesome": "Built with the awesome",
     "about_backup": "¡Guarda siempre una copia de seguridad de tus llaves!",
-    "about_free": "DoiWallet es un proyecto de código abierto y gratuito. Elaborado por usuarios de Doi.",
+    "about_free": "DoiWallet is a free and open source project based on BlueWallet.",
     "about_license": "Licencia MIT",
     "about_release_notes": "Notas de la versión",
     "about_review": "Escribe una reseña",
@@ -568,7 +568,7 @@
     "tip": "Te permite ver, etiquetar, congelar o seleccionar monedas para mejorar la organización de las carteras."
   },
   "units": {
-    "BTC": "DOI",
+    "DOI": "DOI",
     "MAX": "Máx",
     "sat_byte": "swartz/byte",
     "sats": "swartz"

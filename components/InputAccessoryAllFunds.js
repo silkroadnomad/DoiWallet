@@ -31,7 +31,9 @@ const InputAccessoryAllFunds = ({ balance, canUseAll, onUseAllPressed }) => {
           <BlueButtonLink onPress={onUseAllPressed} style={styles.totalCan} title={`${balance} ${DoichainUnit.DOI}`} />
         ) : (
           <Text style={[styles.totalCanNot, stylesHook.totalCanNot]}>
-            {balance} {DoichainUnit.DOI}
+
+            {balance}
+
           </Text>
         )}
       </View>

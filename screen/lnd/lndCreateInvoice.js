@@ -159,8 +159,9 @@ const LNDCreateInvoice = () => {
         case DoichainUnit.DOI:
           invoiceAmount = currency.btcToSatoshi(invoiceAmount);
           break;
+
         case DoichainUnit.LOCAL_CURRENCY:
-          // trying to fetch cached schwartz equivalent for this fiat amount
+
           invoiceAmount = AmountInput.getCachedSatoshis(invoiceAmount) || currency.btcToSatoshi(currency.fiatToBTC(invoiceAmount));
           break;
       }
@@ -180,19 +181,19 @@ const LNDCreateInvoice = () => {
         const callbackUrl = callback + (callback.indexOf('?') !== -1 ? '&' : '?') + 'k1=' + k1 + '&pr=' + invoiceRequest;
 
         let reply;
-        if (isTorCapable && callbackUrl.includes('.onion')) {
-          const api = new torrific.Torsbee();
-          const torResponse = await api.get(callbackUrl);
-          reply = torResponse.body;
-          if (reply && typeof reply === 'string') reply = JSON.parse(reply);
-        } else {
+        //if (isTorCapable && callbackUrl.includes('.onion')) {
+        //  const api = new torrific.Torsbee();
+        //  const torResponse = await api.get(callbackUrl);
+        //  reply = torResponse.body;
+        //  if (reply && typeof reply === 'string') reply = JSON.parse(reply);
+       // } else {
           const resp = await fetch(callbackUrl, { method: 'GET' });
           if (resp.status >= 300) {
             const text = await resp.text();
             throw new Error(text);
           }
           reply = await resp.json();
-        }
+       // }
 
         if (reply.status === 'ERROR') {
           throw new Error('Reply from server: ' + reply.reason);
@@ -231,12 +232,12 @@ const LNDCreateInvoice = () => {
     // calling the url
     let reply;
     try {
-      if (isTorCapable && url.includes('.onion')) {
-        const api = new torrific.Torsbee();
-        const torResponse = await api.get(url);
-        reply = torResponse.body;
-        if (reply && typeof reply === 'string') reply = JSON.parse(reply);
-      } else {
+     // if (isTorCapable && url.includes('.onion')) {
+      //  const api = new torrific.Torsbee();
+      //  const torResponse = await api.get(url);
+     //   reply = torResponse.body;
+     //   if (reply && typeof reply === 'string') reply = JSON.parse(reply);
+     // } else {
         const resp = await fetch(url, { method: 'GET' });
         if (resp.status >= 300) {
           throw new Error('Bad response from server');
@@ -245,7 +246,7 @@ const LNDCreateInvoice = () => {
         if (reply.status === 'ERROR') {
           throw new Error('Reply from server: ' + reply.reason);
         }
-      }
+     // }
 
       if (reply.tag === Lnurl.TAG_PAY_REQUEST) {
         // we are here by mistake. user wants to SEND to lnurl-pay, but he is on a screen that creates

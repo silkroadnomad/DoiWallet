@@ -237,7 +237,7 @@
     "about": "About",
     "about_awesome": "Built with the awesome",
     "about_backup": "Always backup your keys!",
-    "about_free": "DoiWallet is a free and open-source project. Crafted by Doi users.",
+    "about_free": "DoiWallet is a free and open source project based on BlueWallet",
     "about_license": "MIT License",
     "about_release_notes": "Release notes",
     "about_review": "Leave us a review",
@@ -568,8 +568,8 @@
     "use_coins": "Use Coins",
     "tip": "This feature allows you to see, label, freeze or select coins for improved wallet management. You can select multiple coins by tapping on the colored circles."
   },
-  "units": {
-    "BTC": "DOI",
+  "units": {    
+    "DOI": "DOI",
     "MAX": "Max",
     "sat_byte": "swartz/byte",
     "sats": "swartz"
