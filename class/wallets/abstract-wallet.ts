@@ -1,6 +1,6 @@
 import b58 from 'bs58check';
 import createHash from 'create-hash';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain  } from '../../models/doichainUnits';
 import { CreateTransactionResult, CreateTransactionUtxo, Transaction, Utxo } from './types';
 
 type WalletWithPassphrase = AbstractWallet & { getPassphrase: () => string };
@@ -38,7 +38,7 @@ export class AbstractWallet {
   _utxo: Utxo[];
   _lastTxFetch: number;
   _lastBalanceFetch: number;
-  preferredBalanceUnit: BitcoinUnit;
+  preferredBalanceUnit: DoichainUnit;
   chain: Chain;
   hideBalance: boolean;
   userHasSavedExport: boolean;
@@ -56,7 +56,7 @@ export class AbstractWallet {
     this._utxo = [];
     this._lastTxFetch = 0;
     this._lastBalanceFetch = 0;
-    this.preferredBalanceUnit = BitcoinUnit.BTC;
+    this.preferredBalanceUnit = DoichainUnit.DOI;
     this.chain = Chain.ONCHAIN;
     this.hideBalance = false;
     this.userHasSavedExport = false;
@@ -124,13 +124,13 @@ export class AbstractWallet {
     return this.balance + (this.getUnconfirmedBalance() < 0 ? this.getUnconfirmedBalance() : 0);
   }
 
-  getPreferredBalanceUnit(): BitcoinUnit {
-    for (const value of Object.values(BitcoinUnit)) {
+  getPreferredBalanceUnit(): DoichainUnit {
+    for (const value of Object.values(DoichainUnit)) {
       if (value === this.preferredBalanceUnit) {
         return this.preferredBalanceUnit;
       }
     }
-    return BitcoinUnit.BTC;
+    return DoichainUnit.DOI;
   }
 
   async allowOnchainAddress(): Promise<boolean> {

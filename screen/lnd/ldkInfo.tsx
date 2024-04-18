@@ -6,7 +6,7 @@ import { Psbt } from 'bitcoinjs-lib';
 import { BlueSpacing20, BlueSpacing10, BlueLoading, BlueTextCentered } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { Chain } from '../../models/bitcoinUnits';
+import { Chain } from '../../models/doichainUnits';
 import loc, { formatBalance } from '../../loc';
 import LNNodeBar from '../../components/LNNodeBar';
 import BottomModal from '../../components/BottomModal';

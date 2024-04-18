@@ -20,7 +20,7 @@ import { BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueCompon
 import navigationStyle from '../../components/navigationStyle';
 import AmountInput from '../../components/AmountInput';
 import * as NavigationService from '../../NavigationService';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
 import loc, { formatBalance, formatBalanceWithoutSuffix, formatBalancePlain } from '../../loc';
 import Lnurl from '../../class/lnurl';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
@@ -42,7 +42,9 @@ const LNDCreateInvoice = () => {
   const { name } = useRoute();
   const { colors } = useTheme();
   const { navigate, getParent, goBack, pop, setParams } = useNavigation();
-  const [unit, setUnit] = useState(wallet.current?.getPreferredBalanceUnit() || BitcoinUnit.BTC);
+  const [unit, setUnit] = useState(
+    wallet.current?.getPreferredBalanceUnit() || DoichainUnit.BTC
+  );
   const [amount, setAmount] = useState();
   const [renderWalletSelectionButtonHidden, setRenderWalletSelectionButtonHidden] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -155,15 +157,17 @@ const LNDCreateInvoice = () => {
     try {
       let invoiceAmount = amount;
       switch (unit) {
-        case BitcoinUnit.SATS:
+        case DoichainUnit.SWARTZ:
           invoiceAmount = parseInt(invoiceAmount, 10); // basically nop
           break;
-        case BitcoinUnit.BTC:
+        case DoichainUnit.DOI:
           invoiceAmount = btcToSatoshi(invoiceAmount);
           break;
-        case BitcoinUnit.LOCAL_CURRENCY:
+        case DoichainUnit.LOCAL_CURRENCY:
           // trying to fetch cached sat equivalent for this fiat amount
-          invoiceAmount = AmountInput.getCachedSatoshis(invoiceAmount) || btcToSatoshi(fiatToBTC(invoiceAmount));
+          invoiceAmount =
+            AmountInput.getCachedSatoshis(invoiceAmount) ||
+            btcToSatoshi(fiatToBTC(invoiceAmount));
           break;
       }
 
@@ -173,14 +177,20 @@ const LNDCreateInvoice = () => {
           let text;
           if (invoiceAmount < min) {
             text =
-              unit === BitcoinUnit.SATS
+              unit === DoichainUnit.SWARTZ
                 ? loc.formatString(loc.receive.minSats, { min })
-                : loc.formatString(loc.receive.minSatsFull, { min, currency: formatBalance(min, unit) });
+                : loc.formatString(loc.receive.minSatsFull, {
+                    min,
+                    currency: formatBalance(min, unit),
+                  });
           } else {
             text =
-              unit === BitcoinUnit.SATS
+              unit === DoichainUnit.SWARTZ
                 ? loc.formatString(loc.receive.maxSats, { max })
-                : loc.formatString(loc.receive.maxSatsFull, { max, currency: formatBalance(max, unit) });
+                : loc.formatString(loc.receive.maxSatsFull, {
+                    max,
+                    currency: formatBalance(max, unit),
+                  });
           }
           triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
           presentAlert({ message: text });
@@ -284,14 +294,14 @@ const LNDCreateInvoice = () => {
       let newAmount = (reply.maxWithdrawable / 1000).toString();
       const sats = newAmount;
       switch (unit) {
-        case BitcoinUnit.SATS:
+        case DoichainUnit.SWARTZ:
           // nop
           break;
-        case BitcoinUnit.BTC:
+        case DoichainUnit.DOI:
           newAmount = satoshiToBTC(newAmount);
           break;
-        case BitcoinUnit.LOCAL_CURRENCY:
-          newAmount = formatBalancePlain(newAmount, BitcoinUnit.LOCAL_CURRENCY);
+        case DoichainUnit.LOCAL_CURRENCY:
+          newAmount = formatBalancePlain(newAmount, DoichainUnit.LOCAL_CURRENCY);
           AmountInput.setCachedSatoshis(newAmount, sats);
           break;
       }
@@ -374,9 +384,9 @@ const LNDCreateInvoice = () => {
           <TouchableOpacity accessibilityRole="button" style={styles.walletNameTouch} onPress={navigateToSelectWallet}>
             <Text style={[styles.walletNameText, styleHooks.walletNameText]}>{wallet.current.getLabel()}</Text>
             <Text style={[styles.walletNameBalance, styleHooks.walletNameBalance]}>
-              {formatBalanceWithoutSuffix(wallet.current.getBalance(), BitcoinUnit.SATS, false)}
+              {formatBalanceWithoutSuffix(wallet.current.getBalance(), DoichainUnit.SATS, false)}
             </Text>
-            <Text style={[styles.walletNameSats, styleHooks.walletNameSats]}>{BitcoinUnit.SATS}</Text>
+            <Text style={[styles.walletNameSats, styleHooks.walletNameSats]}>{DoichainUnit.SWARTZ}</Text>
           </TouchableOpacity>
         </View>
       </View>

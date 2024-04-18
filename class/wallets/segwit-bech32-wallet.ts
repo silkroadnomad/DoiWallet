@@ -4,6 +4,7 @@ import ecc from '../../blue_modules/noble_ecc';
 import { LegacyWallet } from './legacy-wallet';
 import { CreateTransactionResult, CreateTransactionUtxo } from './types';
 import { CoinSelectTarget } from 'coinselect';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 const ECPair = ECPairFactory(ecc);
 
@@ -20,13 +21,14 @@ export class SegwitBech32Wallet extends LegacyWallet {
     if (this._address) return this._address;
     let address;
     try {
-      const keyPair = ECPair.fromWIF(this.secret);
+      const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
       if (!keyPair.compressed) {
         console.warn('only compressed public keys are good for segwit');
         return false;
       }
       address = bitcoin.payments.p2wpkh({
         pubkey: keyPair.publicKey,
+        network: DOICHAIN,
       }).address;
     } catch (err) {
       return false;
@@ -41,8 +43,8 @@ export class SegwitBech32Wallet extends LegacyWallet {
       const pubkey = Buffer.from(witness, 'hex');
       return (
         bitcoin.payments.p2wpkh({
-          pubkey,
-          network: bitcoin.networks.bitcoin,
+          pubkey: pubkey,
+          network: DOICHAIN,
         }).address ?? false
       );
     } catch (_) {
@@ -62,7 +64,7 @@ export class SegwitBech32Wallet extends LegacyWallet {
       return (
         bitcoin.payments.p2wpkh({
           output: scriptPubKey2,
-          network: bitcoin.networks.bitcoin,
+          network: DOICHAIN,
         }).address ?? false
       );
     } catch (_) {
@@ -86,17 +88,17 @@ export class SegwitBech32Wallet extends LegacyWallet {
     }
     const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
     sequence = sequence || 0xffffffff; // disable RBF by default
-    const psbt = new bitcoin.Psbt();
+    const psbt = new bitcoin.Psbt({ network: DOICHAIN });
     let c = 0;
     const values: Record<number, number> = {};
-    const keyPair = ECPair.fromWIF(this.secret);
+    const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
 
     inputs.forEach(input => {
       values[c] = input.value;
       c++;
 
       const pubkey = keyPair.publicKey;
-      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: pubkey, network: DOICHAIN, });
       if (!p2wpkh.output) {
         throw new Error('Internal error: no p2wpkh.output during createTransaction()');
       }

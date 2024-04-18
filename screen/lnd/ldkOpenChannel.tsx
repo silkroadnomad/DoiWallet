@@ -7,7 +7,7 @@ import { BlueStorageContext } from '../../blue_modules/storage-context';
 import BigNumber from 'bignumber.js';
 import AddressInput from '../../components/AddressInput';
 import AmountInput from '../../components/AmountInput';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from '../../models/doichainUnits';
 import loc from '../../loc';
 import { HDSegwitBech32Wallet, LightningLdkWallet } from '../../class';
 import { ArrowPicker } from '../../components/ArrowPicker';
@@ -47,7 +47,7 @@ const LdkOpenChannel = (props: any) => {
   } = useRoute<LdkOpenChannelProps>().params;
   const fundingWallet = wallets.find(w => w.getID() === fundingWalletID) as HDSegwitBech32Wallet;
   const ldkWallet = wallets.find(w => w.getID() === ldkWalletID) as LightningLdkWallet;
-  const [unit, setUnit] = useState<BitcoinUnit | string>(ldkWallet.getPreferredBalanceUnit());
+  const [unit, setUnit] = useState<DoichainUnit | string>(ldkWallet.getPreferredBalanceUnit());
   const [isLoading, setIsLoading] = useState(false);
   const psbtOpenChannelStartedTs = useRef<number>();
   const name = useRoute().name;
@@ -215,13 +215,13 @@ const LdkOpenChannel = (props: any) => {
           onAmountUnitChange={(newUnit: string) => {
             let amountSats = fundingAmount.amountSats;
             switch (newUnit) {
-              case BitcoinUnit.SATS:
+              case DoichainUnit.SWARTZ:
                 amountSats = parseInt(fundingAmount.amount, 10);
                 break;
-              case BitcoinUnit.BTC:
+              case DoichainUnit.DOI:
                 amountSats = btcToSatoshi(fundingAmount.amount);
                 break;
-              case BitcoinUnit.LOCAL_CURRENCY:
+              case DoichainUnit.LOCAL_CURRENCY:
                 // also accounting for cached fiat->sat conversion to avoid rounding error
                 amountSats = btcToSatoshi(fiatToBTC(fundingAmount.amount));
                 break;
@@ -232,13 +232,13 @@ const LdkOpenChannel = (props: any) => {
           onChangeText={(text: string) => {
             let amountSats = fundingAmount.amountSats;
             switch (unit) {
-              case BitcoinUnit.BTC:
+              case DoichainUnit.DOI:
                 amountSats = btcToSatoshi(text);
                 break;
-              case BitcoinUnit.LOCAL_CURRENCY:
+              case DoichainUnit.LOCAL_CURRENCY:
                 amountSats = btcToSatoshi(fiatToBTC(Number(text)));
                 break;
-              case BitcoinUnit.SATS:
+              case DoichainUnit.SWARTZ:
                 amountSats = parseInt(text, 10);
                 break;
             }

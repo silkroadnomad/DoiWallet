@@ -61,7 +61,7 @@
     "create_fake_storage": "Vytvoriť falošné zašifrované úložisko",
     "create_password": "Vytvoriť heslo",
     "create_password_explanation": "Heslo k falošnému úložisku nesmie byť rovnaké ako heslo k hlavnému úložisku",
-    "help": "Za určitých okolností môžete byť donútení k prezradeniu hesla. K zaisteniu bezpečnosti vaších prostriedkov, BlueWallet môže vytvořiť ďalšie zašifrované úložiská s rozdielným heslom. V prípade potreby môžete toto heslo dať tretej strane. Pokiaľ bude zadané do BlueWallet, odomkne nové \"falošné\" úložisko. Toto bude vyzerať hodnoverne, ale udrží vaše pravé hlavné úložisko v bezpečí.",
+    "help": "Za určitých okolností môžete byť donútení k prezradeniu hesla. K zaisteniu bezpečnosti vaších prostriedkov, DoiWallet môže vytvořiť ďalšie zašifrované úložiská s rozdielným heslom. V prípade potreby môžete toto heslo dať tretej strane. Pokiaľ bude zadané do DoiWallet, odomkne nové \"falošné\" úložisko. Toto bude vyzerať hodnoverne, ale udrží vaše pravé hlavné úložisko v bezpečí.",
     "help2": "Nové úložisko bude plne funkčné, môžete naň uložiť minimálnu čiastku, aby vyzeralo uveriteľnejšie.",
     "password_should_not_match": "Heslo k falošnému úložisku nesmie byť rovnaké ako heslo k hlavnému úložisku",
     "retype_password": "Heslo znovu",
@@ -125,9 +125,9 @@
     "txSaved": "Transakcia bola uložená do {filePath}"
   },
   "settings": {
-    "about": "O BlueWallet",
+    "about": "O DoiWallet",
     "about_backup": "Vždy si zálohujte kľúče!",
-    "about_free": "BlueWallet je projekt, ktorý je zdarma a s otvorenými zdrojovými kódmi. Vytvorený používateľmi Bitcoinu.",
+    "about_free": "DoiWallet je projekt, ktorý je zdarma a s otvorenými zdrojovými kódmi. Vytvorený používateľmi Bitcoinu.",
     "about_review": "Napíšte nám recenziu",
     "about_sm_github": "GitHub",
     "about_sm_telegram": "Telegram chat",
@@ -188,7 +188,7 @@
     "transactions_count": "počet transakcií"
   },
   "wallets": {
-    "add_bitcoin": "Bitcoin",
+    "add_bitcoin": "Doi",
     "add_create": "Vytvoriť",
     "add_entropy_generated": "{gen} bytov vygenerovanej entropie",
     "add_entropy_provide": "Vytvoriť entropiu pomocou hodov kockou",
@@ -252,7 +252,11 @@
     "title": "Je to moja adresa?"
   },
   "units": {
-    "sats": "sats"
+    "DOI": "DOI",
+    "MAX": "MAX",
+    "sat_byte": "swartz/byte",
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_placeholder_address": "adresa",

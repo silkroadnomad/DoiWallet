@@ -4,6 +4,7 @@ import { ECPairFactory } from 'ecpair';
 import ecc from '../../blue_modules/noble_ecc';
 import { LegacyWallet } from './legacy-wallet';
 import { CreateTransactionResult, CreateTransactionUtxo } from './types';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 const ECPair = ECPairFactory(ecc);
 
@@ -15,7 +16,7 @@ const ECPair = ECPairFactory(ecc);
  */
 function pubkeyToP2shSegwitAddress(pubkey: Buffer): string | false {
   const { address } = bitcoin.payments.p2sh({
-    redeem: bitcoin.payments.p2wpkh({ pubkey }),
+    redeem: bitcoin.payments.p2wpkh({pubkey: pubkey, network: DOICHAIN, }),
   });
   return address ?? false;
 }
@@ -32,7 +33,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
   static witnessToAddress(witness: string): string | false {
     try {
       const pubKey = Buffer.from(witness, 'hex');
-      return pubkeyToP2shSegwitAddress(pubKey);
+      return pubkeyToP2shSegwitAddress(pubKey, DOICHAIN);
     } catch (_) {
       return false;
     }
@@ -50,7 +51,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
       return (
         bitcoin.payments.p2sh({
           output: scriptPubKey2,
-          network: bitcoin.networks.bitcoin,
+          network:  DOICHAIN,
         }).address ?? false
       );
     } catch (_) {
@@ -62,7 +63,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
     if (this._address) return this._address;
     let address;
     try {
-      const keyPair = ECPair.fromWIF(this.secret);
+      const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
       const pubKey = keyPair.publicKey;
       if (!keyPair.compressed) {
         console.warn('only compressed public keys are good for segwit');
@@ -104,17 +105,17 @@ export class SegwitP2SHWallet extends LegacyWallet {
     }
     const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
     sequence = sequence || 0xffffffff; // disable RBF by default
-    const psbt = new bitcoin.Psbt();
+    const psbt = new bitcoin.Psbt({ network: DOICHAIN });
     let c = 0;
     const values: Record<number, number> = {};
-    const keyPair = ECPair.fromWIF(this.secret);
+    const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
 
     inputs.forEach(input => {
       values[c] = input.value;
       c++;
 
       const pubkey = keyPair.publicKey;
-      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: pubkey, network: DOICHAIN });
       const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
       if (!p2sh.output) {
         throw new Error('Internal error: no p2sh.output during createTransaction()');

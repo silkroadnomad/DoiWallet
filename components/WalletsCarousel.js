@@ -190,7 +190,6 @@ export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelect
           : transactionTimeToReadable(item.getLatestTransactionTime());
 
   const balance = !item.hideBalance && formatBalance(Number(item.getBalance()), item.getPreferredBalanceUnit(), true);
-
   return (
     <Animated.View
       style={[

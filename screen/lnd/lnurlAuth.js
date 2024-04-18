@@ -6,7 +6,7 @@ import { BlueCard, BlueLoading, BlueSpacing20, BlueSpacing40, BlueText } from '.
 
 import navigationStyle from '../../components/navigationStyle';
 import Lnurl from '../../class/lnurl';
-import { Chain } from '../../models/bitcoinUnits';
+import { Chain } from "../../models/doichainUnits";
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { useNavigation, useRoute } from '@react-navigation/native';

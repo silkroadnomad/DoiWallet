@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import PayjoinTransaction from '../../class/payjoin-transaction';
 import { BlueText, BlueCard } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit} from "../../models/doichainUnits";
 import Biometric from '../../class/biometrics';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../loc';
 import Notifications from '../../blue_modules/notifications';
@@ -16,6 +16,7 @@ import presentAlert from '../../components/Alert';
 import { useTheme } from '../../components/themes';
 import Button from '../../components/Button';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { DOICHAIN } from "../../blue_modules/network.js";
 import SafeArea from '../../components/SafeArea';
 import { satoshiToBTC, satoshiToLocalCurrency } from '../../blue_modules/currency';
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
@@ -108,7 +109,7 @@ const Confirm = () => {
    * @return {string}
    */
   const getPaymentScript = () => {
-    return bitcoin.address.toOutputScript(recipients[0].address);
+    return bitcoin.address.toOutputScript(recipients[0].address, DOICHAIN);
   };
 
   const send = async () => {
@@ -141,7 +142,7 @@ const Confirm = () => {
         amount += recipient.value;
       }
 
-      amount = formatBalanceWithoutSuffix(amount, BitcoinUnit.BTC, false);
+      amount = formatBalanceWithoutSuffix(amount, DoichainUnit.DOI, false);
       triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
       navigate('Success', {
         fee: Number(fee),
@@ -184,7 +185,7 @@ const Confirm = () => {
           <Text testID="TransactionValue" style={[styles.valueValue, stylesHook.valueValue]}>
             {satoshiToBTC(item.value)}
           </Text>
-          <Text style={[styles.valueUnit, stylesHook.valueValue]}>{' ' + loc.units[BitcoinUnit.BTC]}</Text>
+          <Text style={[styles.valueUnit, stylesHook.valueValue]}>{' ' + loc.units[DoichainUnit.DOI]}</Text>
         </View>
         <Text style={[styles.transactionAmountFiat, stylesHook.transactionAmountFiat]}>{satoshiToLocalCurrency(item.value)}</Text>
         <BlueCard>
@@ -233,7 +234,7 @@ const Confirm = () => {
       <View style={styles.cardBottom}>
         <BlueCard>
           <Text style={styles.cardText} testID="TransactionFee">
-            {loc.send.create_fee}: {formatBalance(feeSatoshi, BitcoinUnit.BTC)} ({satoshiToLocalCurrency(feeSatoshi)})
+            {loc.send.create_fee}: {formatBalance(feeSatoshi, DoichainUnit.DOI)} ({satoshiToLocalCurrency(feeSatoshi)})
           </Text>
           {isLoading ? <ActivityIndicator /> : <Button disabled={isElectrumDisabled} onPress={send} title={loc.send.confirm_sendNow} />}
         </BlueCard>

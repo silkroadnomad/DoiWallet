@@ -5,6 +5,7 @@ import b58 from 'bs58check';
 import { CoinSelectReturnInput } from 'coinselect';
 import ecc from '../../blue_modules/noble_ecc';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -59,7 +60,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     }
     // first, getting xpub
     const seed = this._getSeed();
-    const root = bip32.fromSeed(seed);
+    const root = bip32.fromSeed(seed, DOICHAIN);
 
     const path = this.getDerivationPath();
     if (!path) {
@@ -86,7 +87,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     if (!pubkey || !path) {
       throw new Error('Internal error: pubkey or path are invalid');
     }
-    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey:pubkey, network: DOICHAIN });
     const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
     if (!p2sh.output) {
       throw new Error('Internal error: no p2sh.output during _addPsbtInput()');

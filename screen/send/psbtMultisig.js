@@ -6,7 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { BlueCard, BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import loc from '../../loc';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from "../../models/doichainUnits";
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import presentAlert from '../../components/Alert';
 import { useTheme } from '../../components/themes';
@@ -238,7 +238,7 @@ const PsbtMultisig = () => {
       <View style={styles.containerText}>
         <BlueText style={[styles.textBtc, stylesHook.textBtc]}>{totalBtc}</BlueText>
         <View style={styles.textBtcUnit}>
-          <BlueText style={[styles.textBtcUnitValue, stylesHook.textBtcUnitValue]}> {BitcoinUnit.BTC}</BlueText>
+          <BlueText style={[styles.textBtcUnitValue, stylesHook.textBtcUnitValue]}> {DoichainUnit.DOI}</BlueText>
         </View>
       </View>
       <View style={styles.containerText}>

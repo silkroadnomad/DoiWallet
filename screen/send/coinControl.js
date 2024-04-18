@@ -19,7 +19,7 @@ import {
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as RNLocalize from 'react-native-localize';
 import loc, { formatBalance } from '../../loc';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from "../../models/doichainUnits";
 import { BlueSpacing10, BlueSpacing20 } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import BottomModal from '../../components/BottomModal';
@@ -51,7 +51,7 @@ const ChangeBadge = () => {
 
 const OutputList = ({
   item: { address, txid, value, vout, confirmations = 0 },
-  balanceUnit = BitcoinUnit.BTC,
+  balanceUnit = DoichainUnit.DOI,
   oMemo,
   frozen,
   change,
@@ -63,18 +63,21 @@ const OutputList = ({
 }) => {
   const { colors } = useTheme();
   const { txMetadata } = useContext(BlueStorageContext);
-  const memo = oMemo || txMetadata[txid]?.memo || '';
+  const memo = oMemo || txMetadata[txid]?.memo || "";
   const color = `#${txid.substring(0, 6)}`;
   const amount = formatBalance(value, balanceUnit, true);
 
   const oStyles = StyleSheet.create({
-    container: { borderBottomColor: colors.lightBorder, backgroundColor: colors.elevated },
+    container: {
+      borderBottomColor: colors.lightBorder,
+      backgroundColor: colors.elevated,
+    },
     containerSelected: {
       backgroundColor: colors.ballOutgoingExpired,
-      borderBottomColor: 'rgba(0, 0, 0, 0)',
+      borderBottomColor: "rgba(0, 0, 0, 0)",
     },
-    avatar: { borderColor: 'white', borderWidth: 1, backgroundColor: color },
-    amount: { fontWeight: 'bold', color: colors.foregroundColor },
+    avatar: { borderColor: "white", borderWidth: 1, backgroundColor: color },
+    amount: { fontWeight: "bold", color: colors.foregroundColor },
     memo: { fontSize: 13, marginTop: 3, color: colors.alternativeTextColor },
   });
 
@@ -84,16 +87,26 @@ const OutputList = ({
   }
 
   return (
-    <RNElementsListItem bottomDivider onPress={onPress} containerStyle={selected ? oStyles.containerSelected : oStyles.container}>
+    <RNElementsListItem
+      bottomDivider
+      onPress={onPress}
+      containerStyle={selected ? oStyles.containerSelected : oStyles.container}
+    >
       <Avatar
         rounded
         overlayContainerStyle={oStyles.avatar}
         onPress={selected ? onDeSelect : onSelect}
-        icon={selected ? { name: 'check' } : undefined}
+        icon={selected ? { name: "check" } : undefined}
       />
       <RNElementsListItem.Content>
-        <RNElementsListItem.Title style={oStyles.amount}>{amount}</RNElementsListItem.Title>
-        <RNElementsListItem.Subtitle style={oStyles.memo} numberOfLines={1} ellipsizeMode="middle">
+        <RNElementsListItem.Title style={oStyles.amount}>
+          {amount}
+        </RNElementsListItem.Title>
+        <RNElementsListItem.Subtitle
+          style={oStyles.memo}
+          numberOfLines={1}
+          ellipsizeMode="middle"
+        >
           {memo || address}
         </RNElementsListItem.Subtitle>
       </RNElementsListItem.Content>
@@ -122,7 +135,7 @@ OutputList.propTypes = {
   onDeSelect: PropTypes.func,
 };
 
-const OutputModal = ({ item: { address, txid, value, vout, confirmations = 0 }, balanceUnit = BitcoinUnit.BTC, oMemo }) => {
+const OutputModal = ({ item: { address, txid, value, vout, confirmations = 0 }, balanceUnit = DoichainUnit.DOI, oMemo }) => {
   const { colors } = useTheme();
   const { txMetadata } = useContext(BlueStorageContext);
   const memo = oMemo || txMetadata[txid]?.memo || '';

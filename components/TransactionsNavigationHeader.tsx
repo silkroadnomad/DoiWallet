@@ -3,7 +3,7 @@ import { Image, Text, TouchableOpacity, View, I18nManager, StyleSheet, LayoutAni
 import Clipboard from '@react-native-clipboard/clipboard';
 import LinearGradient from 'react-native-linear-gradient';
 import { HDSegwitBech32Wallet, LightningCustodianWallet, LightningLdkWallet, MultisigHDWallet } from '../class';
-import { BitcoinUnit } from '../models/bitcoinUnits';
+import { DoichainUnit } from '../models/doichainUnits';
 import WalletGradient from '../class/wallet-gradient';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../loc';
 import { BlueStorageContext } from '../blue_modules/storage-context';
@@ -78,7 +78,7 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
     onWalletBalanceVisibilityChange?.(!wallet.hideBalance);
   };
 
-  const updateWalletWithNewUnit = (w: TWallet, newPreferredUnit: BitcoinUnit) => {
+  const updateWalletWithNewUnit = (w: TWallet, newPreferredUnit: DoichainUnit) => {
     w.preferredBalanceUnit = newPreferredUnit;
     return w;
   };
@@ -88,12 +88,12 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
     menuRef.current?.dismissMenu();
     let newWalletPreferredUnit = wallet.getPreferredBalanceUnit();
 
-    if (newWalletPreferredUnit === BitcoinUnit.BTC) {
-      newWalletPreferredUnit = BitcoinUnit.SATS;
-    } else if (newWalletPreferredUnit === BitcoinUnit.SATS) {
-      newWalletPreferredUnit = BitcoinUnit.LOCAL_CURRENCY;
+    if (newWalletPreferredUnit === DoichainUnit.DOI) {
+      newWalletPreferredUnit = DoichainUnit.SWARTZ;
+    } else if (newWalletPreferredUnit === DoichainUnit.SWARTZ) {
+      newWalletPreferredUnit = DoichainUnit.LOCAL_CURRENCY;
     } else {
-      newWalletPreferredUnit = BitcoinUnit.BTC;
+      newWalletPreferredUnit = DoichainUnit.DOI;
     }
 
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -126,7 +126,7 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
     const hideBalance = wallet.hideBalance;
     const balanceUnit = wallet.getPreferredBalanceUnit();
     const balanceFormatted =
-      balanceUnit === BitcoinUnit.LOCAL_CURRENCY
+      balanceUnit === DoichainUnit.LOCAL_CURRENCY
         ? formatBalance(wallet.getBalance(), balanceUnit, true)
         : formatBalanceWithoutSuffix(wallet.getBalance(), balanceUnit, true);
     return !hideBalance && balanceFormatted;
@@ -220,7 +220,7 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
         </ToolTipMenu>
         <TouchableOpacity style={styles.walletPreferredUnitView} onPress={changeWalletBalanceUnit}>
           <Text style={styles.walletPreferredUnitText}>
-            {wallet.getPreferredBalanceUnit() === BitcoinUnit.LOCAL_CURRENCY
+            {wallet.getPreferredBalanceUnit() === DoichainUnit.LOCAL_CURRENCY
               ? preferredFiatCurrency?.endPointKey ?? FiatUnit.USD
               : wallet.getPreferredBalanceUnit()}
           </Text>

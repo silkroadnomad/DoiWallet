@@ -22,7 +22,7 @@
   },
   "azteco": {
     "codeIs": "Jou koepon kode is",
-    "errorBeforeRefeem": "Voordat jy eis moet jy eers 'n Bitcoin beursie aanwys.",
+    "errorBeforeRefeem": "Voordat jy eis moet jy eers 'n Doi beursie aanwys.",
     "errorSomething": "Iets het vout gegaan. Is die koepon steeds geldig?",
     "redeem": "Eis na beursie",
     "redeemButton": "Eis",
@@ -56,7 +56,7 @@
     "opening_channnel_for_from": "Skep kanaal vir beursie {forWalletLabel}, deur befondsing vanaf {fromWalletLabel}",
     "are_you_sure_open_channel": "Is jy seker jy wil hierdie kanaal oop maak?",
     "refill": "Herlaai",
-    "refill_create": "Om voort te gaan, skep asb 'n Bitcoin beursie om vondse mee aan te vul.",
+    "refill_create": "Om voort te gaan, skep asb 'n Doi beursie om vondse mee aan te vul.",
     "refill_external": "Vul aan met Eksterne Beursie",
     "refill_lnd_balance": "Herlaai Lightning beursie",
     "sameWalletAsInvoiceError": "U kan nie ‘n faktuur betaal met die selfde beursie waarmee die faktuur geksep is nie.",
@@ -72,7 +72,7 @@
     "create_fake_storage": "Skep fantasie berging wagwoord",
     "create_password": "Skep ‘n wagwoord",
     "create_password_explanation": "Die wagwoord vir fop berging moet verskil van die wagwoord vir hoof berging",
-    "help": "Onder sekere omstandighede mag jy dalk geforseer word om jou wagwoord te deel teen jou wil. Om jou te beskerm kan Bluewallet ‘n tweede “fop” beursie skep wat as skerm kan dien. Indien jy hierdie wagwoord deel sal die 3de party nie toegang tot jou hoof fondse kry nie.",
+    "help": "Onder sekere omstandighede mag jy dalk geforseer word om jou wagwoord te deel teen jou wil. Om jou te beskerm kan DoiWallet ‘n tweede “fop” beursie skep wat as skerm kan dien. Indien jy hierdie wagwoord deel sal die 3de party nie toegang tot jou hoof fondse kry nie.",
     "help2": "Fop berging is heeltemal funksioneel",
     "password_should_not_match": "Die wagwoord vir fantasie berging moet verskil van die wagwoord vir hoof berging.",
     "passwords_do_not_match": "Wagwoorde vergelyk nie, probeer weer",
@@ -136,7 +136,7 @@
     "list_title": "transaksies"
   },
   "wallets": {
-    "add_bitcoin": "Bitcoin",
+    "add_bitcoin": "Doi",
     "add_create": "Skep",
     "add_import_wallet": "Beursie Invoer",
     "add_lndhub_error": "Die voorgestelde knoop-punt se adres is 'n ongeldige LNDHub knoop-punt.",

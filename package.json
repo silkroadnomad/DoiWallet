@@ -1,5 +1,5 @@
 {
-  "name": "bluewallet",
+  "name": "doiwallet",
   "version": "6.6.0",
   "license": "MIT",
   "repository": {
@@ -108,6 +108,7 @@
     "@react-navigation/drawer": "6.6.15",
     "@react-navigation/native": "6.1.17",
     "@react-navigation/native-stack": "6.9.26",
+    "@realm/react": "^0.6.2",
     "@remobile/react-native-qrcode-local-image": "https://github.com/BlueWallet/react-native-qrcode-local-image",
     "@spsina/bip47": "github:BlueWallet/bip47#0a2f02c90350802f2ec93afa4e6c8843be2d687c",
     "aezeed": "0.0.5",
@@ -186,7 +187,7 @@
     "react-native-webview": "13.8.4",
     "react-native-widget-center": "https://github.com/BlueWallet/react-native-widget-center#a128c38",
     "readable-stream": "3.6.2",
-    "realm": "12.6.2",
+    "realm": "^12.6.2",
     "rn-ldk": "github:BlueWallet/rn-ldk#v0.8.4",
     "rn-nodeify": "10.3.0",
     "scryptsy": "2.1.0",

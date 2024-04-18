@@ -7,6 +7,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import coinSelect, { CoinSelectOutput, CoinSelectReturnInput, CoinSelectTarget, CoinSelectUtxo } from 'coinselect';
 import coinSelectSplit from 'coinselect/split';
+import { DOICHAIN } from '../../blue_modules/network.js';
 import { CreateTransactionResult, CreateTransactionUtxo, Transaction, Utxo } from './types';
 import { ECPairAPI, ECPairFactory, Signer } from 'ecpair';
 
@@ -59,7 +60,7 @@ export class LegacyWallet extends AbstractWallet {
 
   async generate(): Promise<void> {
     const buf = await randomBytes(32);
-    this.secret = ECPair.makeRandom({ rng: () => buf }).toWIF();
+    this.secret = ECPair.makeRandom({ rng: () => buf,  network: DOICHAIN, }).toWIF();
   }
 
   async generateFromEntropy(user: Buffer): Promise<void> {
@@ -81,9 +82,10 @@ export class LegacyWallet extends AbstractWallet {
     if (this._address) return this._address;
     let address;
     try {
-      const keyPair = ECPair.fromWIF(this.secret);
+      const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
       address = bitcoin.payments.p2pkh({
         pubkey: keyPair.publicKey,
+        network: DOICHAIN,
       }).address;
     } catch (err) {
       return false;
@@ -420,14 +422,14 @@ export class LegacyWallet extends AbstractWallet {
     if (targets.length === 0) throw new Error('No destination provided');
     const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
     sequence = sequence || 0xffffffff; // disable RBF by default
-    const psbt = new bitcoin.Psbt();
+    const psbt = new bitcoin.Psbt({ network: DOICHAIN });
     let c = 0;
     const values: Record<number, number> = {};
     let keyPair: Signer | null = null;
 
     if (!skipSigning) {
       // skiping signing related stuff
-      keyPair = ECPair.fromWIF(this.secret); // secret is WIF
+      keyPair = ECPair.fromWIF(this.secret, DOICHAIN); // secret is WIF
     }
 
     inputs.forEach(input => {
@@ -498,7 +500,7 @@ export class LegacyWallet extends AbstractWallet {
    */
   isAddressValid(address: string): boolean {
     try {
-      bitcoin.address.toOutputScript(address); // throws, no?
+      bitcoin.address.toOutputScript(address, DOICHAIN); // throws, no?
 
       if (!address.toLowerCase().startsWith('bc1')) return true;
       const decoded = bitcoin.address.fromBech32(address);
@@ -525,7 +527,7 @@ export class LegacyWallet extends AbstractWallet {
       return (
         bitcoin.payments.p2pkh({
           output: scriptPubKey2,
-          network: bitcoin.networks.bitcoin,
+          network: DOICHAIN,
         }).address ?? false
       );
     } catch (_) {
@@ -587,7 +589,7 @@ export class LegacyWallet extends AbstractWallet {
   signMessage(message: string, address: string, useSegwit = true): string {
     const wif = this._getWIFbyAddress(address);
     if (!wif) throw new Error('Invalid address');
-    const keyPair = ECPair.fromWIF(wif);
+    const keyPair = ECPair.fromWIF(wif, DOICHAIN);
     const privateKey = keyPair.privateKey;
     if (!privateKey) throw new Error('Invalid private key');
     const options = this.segwitType && useSegwit ? { segwitType: this.segwitType } : undefined;

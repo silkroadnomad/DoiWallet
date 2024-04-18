@@ -12,7 +12,7 @@ import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { useTheme } from '../../components/themes';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import SafeArea from '../../components/SafeArea';
-import { Chain } from '../../models/bitcoinUnits';
+import { Chain } from "../../models/doichainUnits";
 import { BlurredBalanceView } from '../../components/BlurredBalanceView';
 
 const SelectWallet = () => {

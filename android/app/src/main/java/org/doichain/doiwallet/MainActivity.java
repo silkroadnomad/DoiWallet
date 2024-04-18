@@ -1,4 +1,4 @@
-package io.bluewallet.bluewallet;
+package org.doichain.doiwallet;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
@@ -6,8 +6,11 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint;
 import com.facebook.react.defaults.DefaultReactActivityDelegate;
+import org.doichain.doiwallet.R;
 
 public class MainActivity extends ReactActivity {
+
+
 
     /**
      * Returns the name of the main component registered from JavaScript.

@@ -46,7 +46,8 @@ import { useTheme } from '../../components/themes';
 import prompt from '../../helpers/prompt';
 import { requestCameraAuthorization, scanQrHelper } from '../../helpers/scan-qr';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../loc';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+import { DOICHAIN } from "../../blue_modules/network.js";
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
@@ -85,7 +86,7 @@ const SendDetails = () => {
   const { isEditable } = routeParams;
   // if utxo is limited we use it to calculate available balance
   const balance = utxo ? utxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance();
-  const allBalance = formatBalanceWithoutSuffix(balance, BitcoinUnit.BTC, true);
+  const allBalance = formatBalanceWithoutSuffix(balance, DoichainUnit.DOI, true);
 
   // if cutomFee is not set, we need to choose highest possible fee for wallet balance
   // if there are no funds for even Slow option, use 1 sat/vbyte fee
@@ -138,7 +139,7 @@ const SendDetails = () => {
         const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
 
         setUnits(u => {
-          u[scrollIndex.current] = BitcoinUnit.BTC; // also resetting current unit to BTC
+          u[scrollIndex.current] = DoichainUnit.DOI; // also resetting current unit to BTC
           return [...u];
         });
 
@@ -159,14 +160,14 @@ const SendDetails = () => {
         if (memo?.trim().length > 0) {
           setTransactionMemo(memo);
         }
-        setAmountUnit(BitcoinUnit.BTC);
+        setAmountUnit(DoichainUnit.DOI);
         setPayjoinUrl(pjUrl);
       } catch (error) {
         console.log(error);
         presentAlert({ title: loc.errors.error, message: loc.send.details_error_decode });
       }
     } else if (routeParams.address) {
-      const { amount, amountSats, unit = BitcoinUnit.BTC } = routeParams;
+      const { amount, amountSats, unit = DoichainUnit.DOI } = routeParams;
       setAddresses(addrs => {
         if (currentAddress) {
           currentAddress.address = routeParams.address;
@@ -278,7 +279,7 @@ const SendDetails = () => {
     for (const opt of options) {
       let targets = [];
       for (const transaction of addresses) {
-        if (transaction.amount === BitcoinUnit.MAX) {
+        if (transaction.amount === DoichainUnit.MAX) {
           // single output with MAX
           targets = [{ address: transaction.address }];
           break;
@@ -434,11 +435,11 @@ const SendDetails = () => {
         return [...addrs];
       });
       setUnits(u => {
-        u[scrollIndex.current] = BitcoinUnit.BTC; // also resetting current unit to BTC
+        u[scrollIndex.current] = DoichainUnit.DOI; // also resetting current unit to BTC
         return [...u];
       });
       setTransactionMemo(options.label || options.message);
-      setAmountUnit(BitcoinUnit.BTC);
+      setAmountUnit(DoichainUnit.DOI);
       setPayjoinUrl(options.pj || '');
       // RN Bug: contentOffset gets reset to 0 when state changes. Remove code once this bug is resolved.
       setTimeout(() => scrollView.current.scrollToIndex({ index: currentIndex, animated: false }), 50);
@@ -510,7 +511,7 @@ const SendDetails = () => {
 
     const targets = [];
     for (const transaction of addresses) {
-      if (transaction.amount === BitcoinUnit.MAX) {
+      if (transaction.amount === DoichainUnit.MAX) {
         // output with MAX
         targets.push({ address: transaction.address });
         continue;
@@ -658,7 +659,7 @@ const SendDetails = () => {
       const res = await DocumentPicker.pickSingle({
         type:
           Platform.OS === 'ios'
-            ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', DocumentPicker.types.plainText, 'public.json']
+            ? ['io.DoiWallet.psbt', 'io.DoiWallet.psbt.txn', DocumentPicker.types.plainText, 'public.json']
             : [DocumentPicker.types.allFiles],
       });
 
@@ -886,7 +887,7 @@ const SendDetails = () => {
   const headerRightActions = () => {
     const actions = [];
     if (isEditable) {
-      const isSendMaxUsed = addresses.some(element => element.amount === BitcoinUnit.MAX);
+      const isSendMaxUsed = addresses.some(element => element.amount === DoichainUnit.MAX);
 
       actions.push([{ id: SendDetails.actionKeys.SendMax, text: loc.send.details_adv_full, disabled: balance === 0 || isSendMaxUsed }]);
       if (wallet.type === HDSegwitBech32Wallet.type) {
@@ -1014,12 +1015,12 @@ const SendDetails = () => {
           onPress: () => {
             Keyboard.dismiss();
             setAddresses(addrs => {
-              addrs[scrollIndex.current].amount = BitcoinUnit.MAX;
-              addrs[scrollIndex.current].amountSats = BitcoinUnit.MAX;
+              addrs[scrollIndex.current].amount = DoichainUnit.MAX;
+              addrs[scrollIndex.current].amountSats = DoichainUnit.MAX;
               return [...addrs];
             });
             setUnits(u => {
-              u[scrollIndex.current] = BitcoinUnit.BTC;
+              u[scrollIndex.current] = DoichainUnit.DOI;
               return [...u];
             });
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -1199,7 +1200,7 @@ const SendDetails = () => {
   };
 
   const renderOptionsModal = () => {
-    const isSendMaxUsed = addresses.some(element => element.amount === BitcoinUnit.MAX);
+    const isSendMaxUsed = addresses.some(element => element.amount === DoichainUnit.MAX);
 
     return (
       <BottomModal deviceWidth={width + width / 2} isVisible={optionsVisible} onClose={hideOptions}>
@@ -1327,15 +1328,17 @@ const SendDetails = () => {
               const addr = addrs[index];
 
               switch (unit) {
-                case BitcoinUnit.SATS:
+                case DoichainUnit.SWARTZ:
                   addr.amountSats = parseInt(addr.amount, 10);
                   break;
-                case BitcoinUnit.BTC:
+                case DoichainUnit.DOI:
                   addr.amountSats = btcToSatoshi(addr.amount);
                   break;
-                case BitcoinUnit.LOCAL_CURRENCY:
+                case DoichainUnit.LOCAL_CURRENCY:
                   // also accounting for cached fiat->sat conversion to avoid rounding error
-                  addr.amountSats = AmountInput.getCachedSatoshis(addr.amount) || btcToSatoshi(fiatToBTC(addr.amount));
+                  addr.amountSats =
+                    AmountInput.getCachedSatoshis(addr.amount) ||
+                    btcToSatoshi(fiatToBTC(addr.amount));
                   break;
               }
 
@@ -1351,13 +1354,13 @@ const SendDetails = () => {
             setAddresses(addrs => {
               item.amount = text;
               switch (units[index] || amountUnit) {
-                case BitcoinUnit.BTC:
+                case DoichainUnit.DOI:
                   item.amountSats = btcToSatoshi(item.amount);
                   break;
-                case BitcoinUnit.LOCAL_CURRENCY:
+                case DoichainUnit.LOCAL_CURRENCY:
                   item.amountSats = btcToSatoshi(fiatToBTC(item.amount));
                   break;
-                case BitcoinUnit.SATS:
+                case DoichainUnit.SWARTZ:
                 default:
                   item.amountSats = parseInt(text, 10);
                   break;
@@ -1375,7 +1378,7 @@ const SendDetails = () => {
         {frozenBalance > 0 && (
           <TouchableOpacity accessibilityRole="button" style={styles.frozenContainer} onPress={handleCoinControl}>
             <BlueText>
-              {loc.formatString(loc.send.details_frozen, { amount: formatBalanceWithoutSuffix(frozenBalance, BitcoinUnit.BTC, true) })}
+              {loc.formatString(loc.send.details_frozen, { amount: formatBalanceWithoutSuffix(frozenBalance, DoichainUnit.DOI, true) })}
             </BlueText>
           </TouchableOpacity>
         )}

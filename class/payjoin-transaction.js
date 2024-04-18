@@ -4,6 +4,7 @@ import { ECPairFactory } from 'ecpair';
 import ecc from '../blue_modules/noble_ecc';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../blue_modules/hapticFeedback';
 const ECPair = ECPairFactory(ecc);
+import { DOICHAIN } from "../blue_modules/network.js";
 
 const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
@@ -23,9 +24,9 @@ export default class PayjoinTransaction {
     for (const [index, input] of unfinalized.data.inputs.entries()) {
       delete input.finalScriptWitness;
 
-      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script);
+      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN);
       const wif = this._wallet._getWifForAddress(address);
-      const keyPair = ECPair.fromWIF(wif);
+      const keyPair = ECPair.fromWIF(wif, DOICHAIN);
 
       unfinalized.signInput(index, keyPair);
     }
@@ -46,10 +47,10 @@ export default class PayjoinTransaction {
     // Do this without relying on private methods
 
     for (const [index, input] of payjoinPsbt.data.inputs.entries()) {
-      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script);
+      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN);
       try {
         const wif = this._wallet._getWifForAddress(address);
-        const keyPair = ECPair.fromWIF(wif);
+        const keyPair = ECPair.fromWIF(wif, DOICHAIN);
         payjoinPsbt.signInput(index, keyPair).finalizeInput(index);
       } catch (e) {}
     }
@@ -81,7 +82,7 @@ export default class PayjoinTransaction {
   }
 
   async isOwnOutputScript(outputScript) {
-    const address = bitcoin.address.fromOutputScript(outputScript);
+    const address = bitcoin.address.fromOutputScript(outputScript, DOICHAIN);
 
     return this._wallet.weOwnAddress(address);
   }

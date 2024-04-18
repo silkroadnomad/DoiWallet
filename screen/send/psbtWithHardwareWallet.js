@@ -20,6 +20,7 @@ import { useTheme } from '../../components/themes';
 import { requestCameraAuthorization } from '../../helpers/scan-qr';
 import loc from '../../loc';
 import SaveFileButton from '../../components/SaveFileButton';
+import { DOICHAIN } from "../../blue_modules/network";
 
 const BlueElectrum = require('../../blue_modules/BlueElectrum');
 
@@ -103,7 +104,7 @@ const PsbtWithHardwareWallet = () => {
     }
 
     if (deepLinkPSBT) {
-      const newPsbt = bitcoin.Psbt.fromBase64(deepLinkPSBT);
+      const newPsbt = bitcoin.Psbt.fromBase64(deepLinkPSBT, { network: DOICHAIN });
       try {
         const Tx = fromWallet.combinePsbt(routeParamsPSBT.current, newPsbt);
         setTxHex(Tx.toHex());
@@ -197,7 +198,7 @@ const PsbtWithHardwareWallet = () => {
   const openSignedTransaction = async () => {
     try {
       const res = await DocumentPicker.pickSingle({
-        type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn'] : [DocumentPicker.types.allFiles],
+        type: Platform.OS === 'ios' ? ['io.DoiWallet.psbt', 'io.bluewallet.psbt.txn'] : [DocumentPicker.types.allFiles],
       });
       const file = await RNFS.readFile(res.uri);
       if (file) {

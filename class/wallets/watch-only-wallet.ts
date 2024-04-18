@@ -7,6 +7,7 @@ import { HDSegwitBech32Wallet } from './hd-segwit-bech32-wallet';
 import { HDSegwitP2SHWallet } from './hd-segwit-p2sh-wallet';
 import { LegacyWallet } from './legacy-wallet';
 import { THDWalletForWatchOnly } from './types';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 const bip32 = BIP32Factory(ecc);
 
@@ -58,7 +59,7 @@ export class WatchOnlyWallet extends LegacyWallet {
     if (this.secret.startsWith('xpub') || this.secret.startsWith('ypub') || this.secret.startsWith('zpub')) return this.isXpubValid();
 
     try {
-      bitcoin.address.toOutputScript(this.getAddress());
+      bitcoin.address.toOutputScript(this.getAddress(), DOICHAIN);
       return true;
     } catch (_) {
       return false;
@@ -273,7 +274,7 @@ export class WatchOnlyWallet extends LegacyWallet {
         xpub = this.secret;
       }
 
-      const hdNode = bip32.fromBase58(xpub);
+      const hdNode = bip32.fromBase58(xpub, DOICHAIN);
       hdNode.derive(0);
       return true;
     } catch (_) {}

@@ -1,4 +1,4 @@
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import { LightningCustodianWallet } from './lightning-custodian-wallet';
 import { randomBytes } from '../rng';
 import * as bip39 from 'bip39';
@@ -7,6 +7,7 @@ import bolt11 from 'bolt11';
 import { SegwitBech32Wallet } from './segwit-bech32-wallet';
 import presentAlert from '../../components/Alert';
 const bitcoin = require('bitcoinjs-lib');
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 export class LightningLdkWallet extends LightningCustodianWallet {
   static type = 'lightningLdk';
@@ -43,7 +44,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
 
   constructor(props: any) {
     super(props);
-    this.preferredBalanceUnit = BitcoinUnit.SATS;
+    this.preferredBalanceUnit = DoichainUnit.SWARTZ;
     this.chain = Chain.OFFCHAIN;
     this.user_invoices_raw = []; // compatibility with other lightning wallet class
   }
@@ -194,7 +195,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
   }
 
   static async _script2address(scriptHex: string) {
-    return bitcoin.address.fromOutputScript(Buffer.from(scriptHex, 'hex'));
+    return bitcoin.address.fromOutputScript(Buffer.from(scriptHex, 'hex'), DOICHAIN);
   }
 
   async selftest() {}
@@ -435,7 +436,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
   }
 
   async setRefundAddress(address: string) {
-    const script = bitcoin.address.toOutputScript(address);
+    const script = bitcoin.address.toOutputScript(address,  DOICHAIN);
     this._refundAddressScriptHex = script.toString('hex');
   }
 

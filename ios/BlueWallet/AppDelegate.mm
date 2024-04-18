@@ -21,7 +21,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
 
-NSUserDefaults *group = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.bluewallet.bluewallet"];
+NSUserDefaults *group = [[NSUserDefaults alloc] initWithSuiteName:@"group.org.doichain.doiwallet"];
   NSString *isDoNotTrackEnabled = [group stringForKey:@"donottrack"];
   if (![isDoNotTrackEnabled isEqualToString:@"1"]) {
       // Set the appType based on the current platform
@@ -104,7 +104,7 @@ NSUserDefaults *group = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.blu
 - (BOOL)application:(UIApplication *)application continueUserActivity:(nonnull NSUserActivity *)userActivity
  restorationHandler:(nonnull void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler
 {
-  NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.bluewallet.bluewallet"];
+  NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.org.doichain.doiwallet"];
   [defaults setValue:@{@"activityType": userActivity.activityType, @"userInfo": userActivity.userInfo} forKey:@"onUserActivityOpen"];
   if (userActivity.activityType == NSUserActivityTypeBrowsingWeb) {
     return [RCTLinkingManager application:application
@@ -126,7 +126,7 @@ NSUserDefaults *group = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.blu
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-  NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.io.bluewallet.bluewallet"];
+  NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:@"group.org.doichain.doiwallet"];
   [defaults removeObjectForKey:@"onUserActivityOpen"];
 }
 

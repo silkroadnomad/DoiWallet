@@ -1,4 +1,4 @@
-package io.bluewallet.bluewallet; // Replace with your package name
+package org.doichain.doiwallet; // Replace with your package name
 
 import android.content.Intent;
 import android.os.Bundle;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import loc, { formatBalanceWithoutSuffix } from '../loc';
-import { BitcoinUnit } from '../models/bitcoinUnits';
+import { DoichainUnit } from '../models/doichainUnits';
 import { useTheme } from './themes';
 
 interface LNNodeBarProps {
@@ -9,7 +9,7 @@ interface LNNodeBarProps {
   canSend: number;
   nodeAlias?: string;
   disabled?: boolean;
-  itemPriceUnit?: BitcoinUnit;
+  itemPriceUnit?: DoichainUnit;
 }
 
 export const LNNodeBar: React.FC<LNNodeBarProps> = ({
@@ -17,7 +17,7 @@ export const LNNodeBar: React.FC<LNNodeBarProps> = ({
   canSend = 0,
   nodeAlias = '',
   disabled = false,
-  itemPriceUnit = BitcoinUnit.SATS,
+  itemPriceUnit = DoichainUnit.DOI,
 }) => {
   const { colors } = useTheme();
   const opacity = { opacity: disabled ? 0.5 : 1.0 };

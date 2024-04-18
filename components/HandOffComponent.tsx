@@ -20,9 +20,9 @@ const HandOffComponent: HandOffComponentWithActivityTypes = props => {
 };
 
 const activityTypes = {
-  ReceiveOnchain: 'io.bluewallet.bluewallet.receiveonchain',
-  Xpub: 'io.bluewallet.bluewallet.xpub',
-  ViewInBlockExplorer: 'io.bluewallet.bluewallet.blockexplorer',
+  ReceiveOnchain: 'org.doichain.doiwallet.receiveonchain',
+  Xpub: 'org.doichain.doiwallet.xpub',
+  ViewInBlockExplorer: 'org.doichain.doiwallet.blockexplorer',
 };
 
 HandOffComponent.activityTypes = activityTypes;

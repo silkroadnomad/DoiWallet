@@ -4,11 +4,12 @@ import * as bitcoin from 'bitcoinjs-lib';
 import URL from 'url';
 
 import { readFileOutsideSandbox } from '../blue_modules/fs';
-import { Chain } from '../models/bitcoinUnits';
+import { Chain } from '../models/doichainUnits';
 import { LightningCustodianWallet, WatchOnlyWallet } from './';
 import Azteco from './azteco';
 import Lnurl from './lnurl';
 import type { TWallet } from './wallets/types';
+import { DOICHAIN } from '../blue_modules/network.js';
 
 const BlueApp = require('../BlueApp');
 const AppStorage = BlueApp.AppStorage;
@@ -28,7 +29,7 @@ class DeeplinkSchemaMatch {
     if (typeof schemaString !== 'string' || schemaString.length <= 0) return false;
     const lowercaseString = schemaString.trim().toLowerCase();
     return (
-      lowercaseString.startsWith('bitcoin:') ||
+      lowercaseString.startsWith('doichain:') ||
       lowercaseString.startsWith('lightning:') ||
       lowercaseString.startsWith('blue:') ||
       lowercaseString.startsWith('bluewallet:') ||
@@ -384,7 +385,7 @@ class DeeplinkSchemaMatch {
     address = address.replace('://', ':').replace('bitcoin:', '').replace('BITCOIN:', '').replace('bitcoin=', '').split('?')[0];
     let isValidBitcoinAddress = false;
     try {
-      bitcoin.address.toOutputScript(address);
+      bitcoin.address.toOutputScript(address, DOICHAIN);
       isValidBitcoinAddress = true;
     } catch (err) {
       isValidBitcoinAddress = false;
@@ -468,7 +469,7 @@ class DeeplinkSchemaMatch {
     }
     let replacedUri = uri;
     for (const replaceMe of ['BITCOIN://', 'bitcoin://', 'BITCOIN:']) {
-      replacedUri = replacedUri.replace(replaceMe, 'bitcoin:');
+      replacedUri = replacedUri.replace(replaceMe, 'doichain:');
     }
 
     return bip21.decode(replacedUri);
@@ -482,8 +483,8 @@ class DeeplinkSchemaMatch {
       if (key === 'amount' && !(Number(options[key]) > 0)) {
         delete options[key];
       }
-    }
-    return bip21.encode(address, options);
+    }    
+    return address // bip21.encode(address, options); 
   }
 
   static decodeBitcoinUri(uri: string) {

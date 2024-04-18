@@ -48,7 +48,7 @@ import { useTheme } from '../../components/themes';
 import prompt from '../../helpers/prompt';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
 import SaveFileButton from '../../components/SaveFileButton';
 
 const styles = StyleSheet.create({
@@ -420,7 +420,7 @@ const WalletDetails = () => {
   };
 
   const exportHistoryContent = useCallback(() => {
-    const headers = [loc.transactions.date, loc.transactions.txid, `${loc.send.create_amount} (${BitcoinUnit.BTC})`, loc.send.create_memo];
+    const headers = [loc.transactions.date, loc.transactions.txid, `${loc.send.create_amount} (${DoichainUnit.DOI})`, loc.send.create_memo];
     if (wallet.chain === Chain.OFFCHAIN) {
       headers.push(loc.lnd.payment);
     }
@@ -429,7 +429,7 @@ const WalletDetails = () => {
     const transactions = wallet.getTransactions();
 
     transactions.forEach(transaction => {
-      const value = formatBalanceWithoutSuffix(transaction.value, BitcoinUnit.BTC, true);
+      const value = formatBalanceWithoutSuffix(transaction.value, DoichainUnit.DOI, true);
       let hash = transaction.hash;
       let memo = txMetadata[transaction.hash]?.memo?.trim() ?? '';
       let status;

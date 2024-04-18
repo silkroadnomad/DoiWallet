@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { useNavigation } from '@react-navigation/native';
 import { Alert, Image, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import { getApplicationName, getBuildNumber, getBundleId, getUniqueIdSync, getVersion, hasGmsSync } from 'react-native-device-info';
+import { getApplicationName, getBuildNumber, getBundleId, getUniqueIdSync, getVersion, hasGmsSync, useFirstInstallTime, } from 'react-native-device-info';
 import { Icon } from 'react-native-elements';
 import Rate, { AndroidMarket } from 'react-native-rate';
 
@@ -107,16 +107,16 @@ const About = () => {
     Linking.openURL('https://t.me/bluewallethat');
   };
   const handleOnGithubPress = () => {
-    Linking.openURL('https://github.com/BlueWallet/BlueWallet');
+    Linking.openURL("https://github.com/Doichain/DoiWallet");
   };
   const handleOnRatePress = () => {
     const options = {
-      AppleAppID: '1376878040',
-      GooglePackageName: 'io.bluewallet.bluewallet',
+      AppleAppID: "1376878040",
+      GooglePackageName: "org.doichain.doiwallet",
       preferredAndroidMarket: AndroidMarket.Google,
-      preferInApp: Platform.OS !== 'android',
+      preferInApp: Platform.OS !== "android",
       openAppStoreIfInAppFails: true,
-      fallbackPlatformURL: 'https://bluewallet.io',
+      fallbackPlatformURL: "https://www.doichain.org",
     };
     Rate.rate(options, success => {
       if (success) {
@@ -124,6 +124,7 @@ const About = () => {
       }
     });
   };
+  const firstInstallTime = useFirstInstallTime().result; 
 
   return (
     <ScrollView testID="AboutScrollView" contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
@@ -137,33 +138,6 @@ const About = () => {
           )}
         </View>
       </BlueCard>
-      <ListItem
-        leftIcon={{
-          name: 'twitter',
-          type: 'font-awesome',
-          color: '#1da1f2',
-        }}
-        onPress={handleOnTwitterPress}
-        title={loc.settings.about_sm_twitter}
-      />
-      <ListItem
-        leftIcon={{
-          name: 'telegram',
-          type: 'font-awesome',
-          color: '#0088cc',
-        }}
-        onPress={handleOnTelegramPress}
-        title={loc.settings.about_sm_telegram}
-      />
-      <ListItem
-        leftIcon={{
-          name: 'discord',
-          type: 'font-awesome-5',
-          color: '#7289da',
-        }}
-        onPress={handleOnDiscordPress}
-        title={loc.settings.about_sm_discord}
-      />
       <BlueCard>
         <View style={styles.buildWith}>
           <BlueSpacing20 />
@@ -202,48 +176,13 @@ const About = () => {
         onPress={handleOnLicensingPress}
         title={loc.settings.about_license}
       />
-      <ListItem
-        leftIcon={{
-          name: 'flask',
-          type: 'font-awesome',
-          color: '#FC0D44',
-        }}
-        chevron
-        onPress={handleOnSelfTestPress}
-        testID="RunSelfTestButton"
-        title={loc.settings.about_selftest}
-      />
-      <ListItem
-        leftIcon={{
-          name: 'flask',
-          type: 'font-awesome',
-          color: '#FC0D44',
-        }}
-        chevron
-        onPress={async () => {
-          const secret = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-          const w = new HDSegwitBech32Wallet();
-          w.setSecret(secret);
-
-          const start = Date.now();
-          let num;
-          for (num = 0; num < 1000; num++) {
-            w._getExternalAddressByIndex(num);
-            if (Date.now() - start > 10 * 1000) {
-              break;
-            }
-          }
-
-          Alert.alert(loc.formatString(loc.settings.performance_score, { num }));
-        }}
-        title={loc.settings.run_performance_test}
-      />
+     
       <BlueSpacing20 />
       <BlueSpacing20 />
       <BlueTextCentered>
         {getApplicationName()} ver {getVersion()} (build {getBuildNumber() + ' ' + branch})
       </BlueTextCentered>
-      <BlueTextCentered>{new Date(getBuildNumber() * 1000).toGMTString()}</BlueTextCentered>
+      <BlueTextCentered>{new Date(firstInstallTime).toGMTString()   }</BlueTextCentered>
       <BlueTextCentered>{getBundleId()}</BlueTextCentered>
       <BlueTextCentered>
         w, h = {width}, {height}

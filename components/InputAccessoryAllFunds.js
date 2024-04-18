@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Text } from 'react-native-elements';
 import { InputAccessoryView, StyleSheet, Keyboard, Platform, View } from 'react-native';
 import loc from '../loc';
-import { BitcoinUnit } from '../models/bitcoinUnits';
+import { DoichainUnit } from "../models/doichainUnits";
 import { BlueButtonLink } from '../BlueComponents';
 import { useTheme } from './themes';
 
@@ -27,10 +27,10 @@ const InputAccessoryAllFunds = ({ balance, canUseAll, onUseAllPressed }) => {
       <View style={styles.left}>
         <Text style={[styles.totalLabel, stylesHook.totalLabel]}>{loc.send.input_total}</Text>
         {canUseAll ? (
-          <BlueButtonLink onPress={onUseAllPressed} style={styles.totalCan} title={`${balance} ${BitcoinUnit.BTC}`} />
+          <BlueButtonLink onPress={onUseAllPressed} style={styles.totalCan} title={`${balance} ${DoichainUnit.DOI}`} />
         ) : (
           <Text style={[styles.totalCanNot, stylesHook.totalCanNot]}>
-            {balance} {BitcoinUnit.BTC}
+            {balance} {DoichainUnit.DOI}
           </Text>
         )}
       </View>

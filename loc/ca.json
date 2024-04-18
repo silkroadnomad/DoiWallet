@@ -30,7 +30,7 @@
   },
   "azteco": {
     "codeIs": "El codi del teu val és",
-    "errorBeforeRefeem": "Abans de canviar, primer heu d’afegir un moneder de Bitcoin.",
+    "errorBeforeRefeem": "Abans de canviar, primer heu d’afegir un moneder de Doi.",
     "errorSomething": "Quelcom ha anat malament. Aquest val continua sent vàlid? ",
     "redeem": "Canviar al moneder",
     "redeemButton": "Canviar",
@@ -87,7 +87,7 @@
     "create_fake_storage": "Crear informació xifrada falsa",
     "create_password": "Crear una contrasenya",
     "create_password_explanation": "La contrasenya no pot ser la mateixa que la del seu moneder principal.",
-    "help": "Sota certes circumstàncies, vostè podria ser obligat a revelar la contrasenya del seu moneder. Per a mantenir les seves monedes segures, BlueWallet pot crear un altre moneder xifrat, amb una altra contrasenya. Si es veu obligat, pot revelar la contrasenya per al fals moneder a un tercer de manera que ells creuran que és el seu moneder principal",
+    "help": "Sota certes circumstàncies, vostè podria ser obligat a revelar la contrasenya del seu moneder. Per a mantenir les seves monedes segures, DoiWallet pot crear un altre moneder xifrat, amb una altra contrasenya. Si es veu obligat, pot revelar la contrasenya per al fals moneder a un tercer de manera que ells creuran que és el seu moneder principal",
     "help2": "El moneder \"false\" és completament funcional. Pot dipositar una quantitat mínima perquè sigui més creïble.",
     "password_should_not_match": "La contrasenya no pot ser la mateixa que la del seu moneder principal.",
     "passwords_do_not_match": "Les contrasenyes no coincideixin. Torni-ho a intentar",
@@ -144,7 +144,7 @@
     "details_scan": "Escanejar",
     "details_total_exceeds_balance": "La quantitat excedeix el balanç disponible.",
     "details_unrecognized_file_format": "Format de fitxer no reconegut",
-    "details_wallet_before_tx": "Abans de crear una transacció, primer heu d’afegir un moneder Bitcoin.",
+    "details_wallet_before_tx": "Abans de crear una transacció, primer heu d’afegir un moneder Doi.",
     "dynamic_init": "Inicialitzant",
     "dynamic_next": "Següent",
     "dynamic_prev": "Anterior",
@@ -166,7 +166,7 @@
     "permission_camera_message": "Necessitem el vostre permís per usar la vostra càmera.",
     "psbt_sign": "Signar una transacció",
     "open_settings": "Obre configuració",
-    "permission_storage_message": "BlueWallet necessita el vostre permís per accedir al vostre emmagatzematge per desar aquest fitxer.",
+    "permission_storage_message": "DoiWallet necessita el vostre permís per accedir al vostre emmagatzematge per desar aquest fitxer.",
     "permission_storage_title": "Permís d'accés a emmagatzematge",
     "psbt_clipboard": "Copiar al portapapers",
     "psbt_tx_export": "Exportar a arxiu",
@@ -256,8 +256,8 @@
     "updating": "Actualitzant..."
   },
   "wallets": {
-    "add_bitcoin": "Bitcoin",
-    "add_bitcoin_explain": "Moneder de Bitcoin senzill i potent",
+    "add_bitcoin": "Doi",
+    "add_bitcoin_explain": "Moneder de Doi senzill i potent",
     "add_create": "Crear",
     "add_import_wallet": "Importar moneder",
     "add_lightning": "Lightning",
@@ -316,7 +316,11 @@
     "ms_help_title5": "Habilitar el mode avançat"
   },
   "units": {
-    "sats": "sats"
+    "DOI": "DOI",
+    "MAX": "MAX",
+    "sat_byte": "swartz/byte",
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_placeholder_address": "Adreça",

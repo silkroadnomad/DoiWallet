@@ -2,7 +2,7 @@
     "USD": {
         "endPointKey": "USD",
         "locale": "en-US",
-        "source": "CoinGecko",
+        "source": "Coinpaprika",
         "symbol": "$"
     },
     "AED": {
@@ -92,13 +92,13 @@
     "EUR": {
         "endPointKey": "EUR",
         "locale": "en-IE",
-        "source": "CoinGecko",
+        "source": "Coinpaprika",
         "symbol": "€"
     },
     "GBP": {
         "endPointKey": "GBP",
         "locale": "en-GB",
-        "source": "CoinGecko",
+        "source": "Coinpaprika",
         "symbol": "£"
     },
     "HRK": {

@@ -1,5 +1,6 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { SegwitBech32Wallet } from './segwit-bech32-wallet';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 export class TaprootWallet extends SegwitBech32Wallet {
   static readonly type = 'taproot';
@@ -19,7 +20,7 @@ export class TaprootWallet extends SegwitBech32Wallet {
   static scriptPubKeyToAddress(scriptPubKey: string): string | false {
     try {
       const publicKey = Buffer.from(scriptPubKey, 'hex');
-      return bitcoin.address.fromOutputScript(publicKey, bitcoin.networks.bitcoin);
+      return bitcoin.address.fromOutputScript(publicKey, DOICHAIN);
     } catch (_) {
       return false;
     }

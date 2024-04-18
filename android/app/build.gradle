@@ -73,9 +73,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "io.bluewallet.bluewallet"
+    namespace "org.doichain.doiwallet"
     defaultConfig {
-        applicationId "io.bluewallet.bluewallet"
+        applicationId "org.doichain.doiwallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

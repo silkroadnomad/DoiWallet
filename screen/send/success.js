@@ -7,7 +7,7 @@ import BigNumber from 'bignumber.js';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 import { BlueCard } from '../../BlueComponents';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from "../../models/doichainUnits";
 import loc from '../../loc';
 import { useTheme } from '../../components/themes';
 import Button from '../../components/Button';
@@ -19,7 +19,7 @@ const Success = () => {
   };
   const { colors } = useTheme();
   const { getParent } = useNavigation();
-  const { amount, fee, amountUnit = BitcoinUnit.BTC, invoiceDescription = '', onDonePressed = pop } = useRoute().params;
+  const { amount, fee, amountUnit = DoichainUnit.DOI, invoiceDescription = '', onDonePressed = pop } = useRoute().params;
   const stylesHook = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,
@@ -93,7 +93,7 @@ export const SuccessView = ({ amount, amountUnit, fee, invoiceDescription, shoul
           </View>
           {fee > 0 && (
             <Text style={styles.feeText}>
-              {loc.send.create_fee}: {new BigNumber(fee).toFixed()} {loc.units[BitcoinUnit.BTC]}
+              {loc.send.create_fee}: {new BigNumber(fee).toFixed()} {loc.units[DoichainUnit.DOI]}
             </Text>
           )}
           <Text numberOfLines={0} style={styles.feeText}>

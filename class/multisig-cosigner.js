@@ -3,6 +3,7 @@ import { MultisigHDWallet } from './wallets/multisig-hd-wallet';
 import BIP32Factory from 'bip32';
 import ecc from '../blue_modules/noble_ecc';
 const bip32 = BIP32Factory(ecc);
+import { DOICHAIN } from "../blue_modules/network.js";
 
 export class MultisigCosigner {
   constructor(data) {
@@ -131,7 +132,7 @@ export class MultisigCosigner {
     try {
       const tempWallet = new MultisigHDWallet();
       xpub = tempWallet._zpubToXpub(key);
-      bip32.fromBase58(xpub);
+      bip32.fromBase58(xpub, DOICHAIN);
       return true;
     } catch (_) {}
 

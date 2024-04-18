@@ -9,7 +9,7 @@ const PREFERRED_CURRENCY_STORAGE_KEY = 'preferredCurrency';
 const PREFERRED_CURRENCY_LOCALE_STORAGE_KEY = 'preferredCurrencyLocale';
 const EXCHANGE_RATES_STORAGE_KEY = 'exchangeRates';
 const LAST_UPDATED = 'LAST_UPDATED';
-const GROUP_IO_BLUEWALLET = 'group.io.bluewallet.bluewallet';
+const GROUP_IO_BLUEWALLET = 'group.org.doichain.doiwallet';
 const BTC_PREFIX = 'BTC_';
 
 export interface CurrencyRate {
@@ -83,7 +83,7 @@ async function updateExchangeRate(): Promise<void> {
   console.log('updating exchange rate...');
 
   try {
-    const rate = await getFiatRate(preferredFiatCurrency.endPointKey);
+    const rate = await getFiatRate(preferredFiatCurrency.endPointKey);     
     exchangeRates[LAST_UPDATED] = Date.now();
     exchangeRates[BTC_PREFIX + preferredFiatCurrency.endPointKey] = rate;
     exchangeRates.LAST_UPDATED_ERROR = false;
@@ -120,6 +120,7 @@ async function initCurrencyDaemon(clearLastUpdatedTime: boolean = false): Promis
 
 function satoshiToLocalCurrency(satoshi: number, format: boolean = true): string {
   const exchangeRateKey = BTC_PREFIX + preferredFiatCurrency.endPointKey;
+
   const exchangeRate = exchangeRates[exchangeRateKey];
 
   if (typeof exchangeRate !== 'number') {
@@ -160,7 +161,6 @@ function BTCToLocalCurrency(bitcoin: BigNumber.Value): string {
 
 async function mostRecentFetchedRate(): Promise<CurrencyRate> {
   const currencyInformation = JSON.parse((await AsyncStorage.getItem(EXCHANGE_RATES_STORAGE_KEY)) || '{}');
-
   const formatter = new Intl.NumberFormat(preferredFiatCurrency.locale, {
     style: 'currency',
     currency: preferredFiatCurrency.endPointKey,

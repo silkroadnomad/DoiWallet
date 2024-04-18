@@ -214,7 +214,7 @@
     "problem_with_psbt": "PSBTに問題"
   },
   "settings": {
-    "about": "BlueWallet について",
+    "about": "DoiWallet について",
     "about_awesome": "Built with the awesome",
     "about_backup": "常に秘密鍵はバックアップしましょう！",
     "about_free": "BlueWalletはフリーでオープンソースのプロジェクトです。ビットコインユーザーによって作られています。",
@@ -572,10 +572,11 @@
     "tip": "ウォレットの閲覧、ラベル付け、フリーズ、コインの選択ができ、管理が向上する機能です。色付きの丸をタップすると複数のコインを選択できます。"
   },
   "units": {
-    "BTC": "BTC",
-    "MAX": "最大",
-    "sat_vbyte": "sat/vByte",
-    "sats": "sats"
+    "DOI": "DOI",
+    "MAX": "MAX",
+    "sat_byte": "swartz/byte",
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "copy_private_key": "秘密鍵をコピー",

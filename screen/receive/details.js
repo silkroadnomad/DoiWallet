@@ -16,7 +16,7 @@ import QRCodeComponent from '../../components/QRCodeComponent';
 import { BlueLoading, BlueButtonLink, BlueText, BlueSpacing20, BlueCard, BlueSpacing40 } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import BottomModal from '../../components/BottomModal';
-import { Chain, BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
 import HandOffComponent from '../../components/HandOffComponent';
 import AmountInput from '../../components/AmountInput';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
@@ -32,6 +32,7 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/h
 import { fiatToBTC, satoshiToBTC } from '../../blue_modules/currency';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+import { DOICHAIN } from '../../blue_modules/network';
 
 const ReceiveDetails = () => {
   const { walletID, address } = useRoute().params;
@@ -39,7 +40,7 @@ const ReceiveDetails = () => {
   const wallet = wallets.find(w => w.getID() === walletID);
   const [customLabel, setCustomLabel] = useState();
   const [customAmount, setCustomAmount] = useState();
-  const [customUnit, setCustomUnit] = useState(BitcoinUnit.BTC);
+  const [customUnit, setCustomUnit] = useState(DoichainUnit.DOI);
   const [bip21encoded, setBip21encoded] = useState();
   const [isCustom, setIsCustom] = useState(false);
   const [isCustomModalVisible, setIsCustomModalVisible] = useState(false);
@@ -133,8 +134,8 @@ const ReceiveDetails = () => {
 
           setDisplayBalance(
             loc.formatString(loc.transactions.pending_with_amount, {
-              amt1: formatBalance(balance.unconfirmed, BitcoinUnit.LOCAL_CURRENCY, true).toString(),
-              amt2: formatBalance(balance.unconfirmed, BitcoinUnit.BTC, true).toString(),
+              amt1: formatBalance(balance.unconfirmed, DoichainUnit.LOCAL_CURRENCY, true).toString(),
+              amt2: formatBalance(balance.unconfirmed, DoichainUnit.DOI, true).toString(),
             }),
           );
           setShowPendingBalance(true);
@@ -151,8 +152,8 @@ const ReceiveDetails = () => {
             setShowAddress(false);
             setDisplayBalance(
               loc.formatString(loc.transactions.received_with_amount, {
-                amt1: formatBalance(balanceToShow, BitcoinUnit.LOCAL_CURRENCY, true).toString(),
-                amt2: formatBalance(balanceToShow, BitcoinUnit.BTC, true).toString(),
+                amt1: formatBalance(balanceToShow, DoichainUnit.LOCAL_CURRENCY, true).toString(),
+                amt2: formatBalance(balanceToShow, DoichainUnit.DOI, true).toString(),
               }),
             );
             fetchAndSaveWalletTransactions(walletID);
@@ -311,7 +312,7 @@ const ReceiveDetails = () => {
   }, []);
 
   const setAddressBIP21Encoded = addr => {
-    const newBip21encoded = DeeplinkSchemaMatch.bip21encode(addr);
+    const newBip21encoded = DeeplinkSchemaMatch.bip21encode(addr);    
     setParams({ address: addr });
     setBip21encoded(newBip21encoded);
     setShowAddress(true);
@@ -347,16 +348,18 @@ const ReceiveDetails = () => {
     setIsCustomModalVisible(false);
     let amount = customAmount;
     switch (customUnit) {
-      case BitcoinUnit.BTC:
+      case DoichainUnit.DOI:
         // nop
         break;
-      case BitcoinUnit.SATS:
+      case DoichainUnit.SWARTZ:
         amount = satoshiToBTC(customAmount);
         break;
-      case BitcoinUnit.LOCAL_CURRENCY:
-        if (AmountInput.conversionCache[amount + BitcoinUnit.LOCAL_CURRENCY]) {
+      case DoichainUnit.LOCAL_CURRENCY:
+        if (AmountInput.conversionCache[amount + DoichainUnit.LOCAL_CURRENCY]) {
           // cache hit! we reuse old value that supposedly doesnt have rounding errors
-          amount = satoshiToBTC(AmountInput.conversionCache[amount + BitcoinUnit.LOCAL_CURRENCY]);
+          amount = satoshiToBTC(
+            AmountInput.conversionCache[amount + DoichainUnit.LOCAL_CURRENCY]
+          );
         } else {
           amount = fiatToBTC(customAmount);
         }
@@ -410,12 +413,12 @@ const ReceiveDetails = () => {
   const getDisplayAmount = () => {
     if (Number(customAmount) > 0) {
       switch (customUnit) {
-        case BitcoinUnit.BTC:
-          return customAmount + ' BTC';
-        case BitcoinUnit.SATS:
-          return satoshiToBTC(customAmount) + ' BTC';
-        case BitcoinUnit.LOCAL_CURRENCY:
-          return fiatToBTC(customAmount) + ' BTC';
+        case DoichainUnit.DOI:
+          return customAmount + " BTC";
+        case DoichainUnit.SWARTZ:
+          return satoshiToBTC(customAmount) + " BTC";
+        case DoichainUnit.LOCAL_CURRENCY:
+          return fiatToBTC(customAmount) + " BTC";
       }
       return customAmount + ' ' + customUnit;
     } else {

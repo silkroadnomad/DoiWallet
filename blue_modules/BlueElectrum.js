@@ -5,6 +5,7 @@ import DefaultPreference from 'react-native-default-preference';
 import loc from '../loc';
 import WidgetCommunication from './WidgetCommunication';
 import presentAlert from '../components/Alert';
+import { DOICHAIN} from './network.js';
 const bitcoin = require('bitcoinjs-lib');
 const ElectrumClient = require('electrum-client');
 const BigNumber = require('bignumber.js');
@@ -48,14 +49,17 @@ async function _getRealm() {
 }
 
 const storageKey = 'ELECTRUM_PEERS';
-const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
+const defaultPeer = { host: 'itchy-jellyfish-89.doi.works', ssl: '50002' };
 const hardcodedPeers = [
-  { host: 'mainnet.foundationdevices.com', ssl: '50002' },
-  { host: 'bitcoin.lukechilds.co', ssl: '50002' },
-  { host: 'electrum.jochen-hoenicke.de', ssl: '50006' },
-  { host: 'electrum1.bluewallet.io', ssl: '443' },
-  { host: 'electrum.acinq.co', ssl: '50002' },
-  { host: 'electrum.bitaroo.net', ssl: '50002' },
+  //{ host: "mainnet.foundationdevices.com", ssl: "50002" },
+  //{ host: "bitcoin.lukechilds.co", ssl: "50002" },
+  //{ host: "electrum.jochen-hoenicke.de", ssl: "50006" },
+  //{ host: "electrum1.bluewallet.io", ssl: "443" },
+  //{ host: "electrum.acinq.co", ssl: "50002" },
+  //{ host: "electrum.bitaroo.net", ssl: "50002" },
+  { host: "itchy-jellyfish-89.doi.works", ssl: "50002" },
+  { host: "big-parrot-60.doi.works", ssl: "50002" },
+  { host: "ugly-bird-70.doi.works", ssl: "50002" },
 ];
 
 /** @type {ElectrumClient} */
@@ -102,7 +106,7 @@ async function connectMain() {
     usingPeer = savedPeer;
   }
 
-  await DefaultPreference.setName('group.io.bluewallet.bluewallet');
+  await DefaultPreference.setName('group.org.doichain.doiwallet');
   try {
     if (usingPeer.host.endsWith('onion')) {
       const randomPeer = await getCurrentPeer();
@@ -236,7 +240,7 @@ async function presentNetworkErrorAlert(usingPeer) {
                   await AsyncStorage.setItem(ELECTRUM_TCP_PORT, '');
                   await AsyncStorage.setItem(ELECTRUM_SSL_PORT, '');
                   try {
-                    await DefaultPreference.setName('group.io.bluewallet.bluewallet');
+                    await DefaultPreference.setName('group.org.doichain.doiwallet');
                     await DefaultPreference.clear(ELECTRUM_HOST);
                     await DefaultPreference.clear(ELECTRUM_SSL_PORT);
                     await DefaultPreference.clear(ELECTRUM_TCP_PORT);
@@ -330,7 +334,7 @@ async function getRandomDynamicPeer() {
  */
 module.exports.getBalanceByAddress = async function (address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address);
+  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   const balance = await mainClient.blockchainScripthash_getBalance(reversedHash.toString('hex'));
@@ -359,7 +363,7 @@ module.exports.getSecondsSinceLastRequest = function () {
  */
 module.exports.getTransactionsByAddress = async function (address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address);
+  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   const history = await mainClient.blockchainScripthash_getHistory(reversedHash.toString('hex'));
@@ -377,7 +381,7 @@ module.exports.getTransactionsByAddress = async function (address) {
  */
 module.exports.getMempoolTransactionsByAddress = async function (address) {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address);
+  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   return mainClient.blockchainScripthash_getMempool(reversedHash.toString('hex'));
@@ -474,7 +478,7 @@ module.exports.multiGetBalanceByAddress = async function (addresses, batchsize) 
     const scripthashes = [];
     const scripthash2addr = {};
     for (const addr of chunk) {
-      const script = bitcoin.address.toOutputScript(addr);
+      const script = bitcoin.address.toOutputScript(addr, DOICHAIN);
       const hash = bitcoin.crypto.sha256(script);
       let reversedHash = Buffer.from(hash).reverse();
       reversedHash = reversedHash.toString('hex');
@@ -520,7 +524,7 @@ module.exports.multiGetUtxoByAddress = async function (addresses, batchsize) {
     const scripthashes = [];
     const scripthash2addr = {};
     for (const addr of chunk) {
-      const script = bitcoin.address.toOutputScript(addr);
+      const script = bitcoin.address.toOutputScript(addr, DOICHAIN);
       const hash = bitcoin.crypto.sha256(script);
       let reversedHash = Buffer.from(hash).reverse();
       reversedHash = reversedHash.toString('hex');
@@ -563,7 +567,7 @@ module.exports.multiGetHistoryByAddress = async function (addresses, batchsize) 
     const scripthashes = [];
     const scripthash2addr = {};
     for (const addr of chunk) {
-      const script = bitcoin.address.toOutputScript(addr);
+      const script = bitcoin.address.toOutputScript(addr, DOICHAIN);
       const hash = bitcoin.crypto.sha256(script);
       let reversedHash = Buffer.from(hash).reverse();
       reversedHash = reversedHash.toString('hex');

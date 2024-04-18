@@ -4,12 +4,13 @@ import bolt11 from 'bolt11';
 import RNFS from 'react-native-fs';
 import RnLdk from 'rn-ldk/src/index';
 import presentAlert from '../../components/Alert';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from '../../models/doichainUnits';
 import { randomBytes } from '../rng';
 import SyncedAsyncStorage from '../synced-async-storage';
 import { HDSegwitBech32Wallet } from './hd-segwit-bech32-wallet';
 import { LightningCustodianWallet } from './lightning-custodian-wallet';
 import { SegwitBech32Wallet } from './segwit-bech32-wallet';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 export class LightningLdkWallet extends LightningCustodianWallet {
   static readonly type = 'lightningLdk';
@@ -51,7 +52,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
 
   constructor() {
     super();
-    this.preferredBalanceUnit = BitcoinUnit.SATS;
+    this.preferredBalanceUnit = DoichainUnit.SWARTZ;
     this.chain = Chain.OFFCHAIN;
     this.user_invoices_raw = []; // compatibility with other lightning wallet class
   }
@@ -243,7 +244,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
   }
 
   static async _script2address(scriptHex: string) {
-    return bitcoin.address.fromOutputScript(Buffer.from(scriptHex, 'hex'));
+    return bitcoin.address.fromOutputScript(Buffer.from(scriptHex, 'hex'), DOICHAIN);
   }
 
   async selftest() {
@@ -656,7 +657,7 @@ export class LightningLdkWallet extends LightningCustodianWallet {
   }
 
   async setRefundAddress(address: string) {
-    const script = bitcoin.address.toOutputScript(address);
+    const script = bitcoin.address.toOutputScript(address, DOICHAIN);
     this._refundAddressScriptHex = script.toString('hex');
     await RnLdk.setRefundAddressScript(this._refundAddressScriptHex);
   }

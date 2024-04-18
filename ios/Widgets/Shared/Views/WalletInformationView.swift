@@ -45,7 +45,7 @@ struct WalletInformationView: View {
           Text(formattedBalance).lineLimit(1).foregroundColor(.textColor).font(Font.system(size:28, weight: .bold, design: .default)).minimumScaleFactor(0.01)
       Spacer()
         
-              Text("Latest transaction").font(Font.system(size: 11, weight: .regular, design: .default)).foregroundColor(.textColorLightGray)
+              Text("Latest transactionaaa").font(Font.system(size: 11, weight: .regular, design: .default)).foregroundColor(.textColorLightGray)
               Text(formattedLatestTransactionTime).lineLimit(1).foregroundColor(.textColor).font(Font.system(size:13, weight: .regular, design: .default)).minimumScaleFactor(0.01)
         
       }).frame(minWidth: 0,

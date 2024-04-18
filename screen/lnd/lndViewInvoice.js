@@ -8,7 +8,7 @@ import { BlueLoading, BlueText, BlueSpacing20, BlueTextCentered } from '../../Bl
 import navigationStyle from '../../components/navigationStyle';
 import loc from '../../loc';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from "../../models/doichainUnits";
 import { SuccessView } from '../send/success';
 import LNDCreateInvoice from './lndCreateInvoice';
 import { useTheme } from '../../components/themes';
@@ -207,16 +207,23 @@ const LNDViewInvoice = () => {
           <View style={styles.root}>
             <SuccessView
               amount={amount}
-              amountUnit={BitcoinUnit.SATS}
+              amountUnit={DoichainUnit.SWARTZ}
               invoiceDescription={description}
               shouldAnimate={invoiceStatusChanged}
             />
             <View style={styles.detailsRoot}>
-              {invoice.payment_preimage && typeof invoice.payment_preimage === 'string' ? (
-                <TouchableOpacity accessibilityRole="button" style={styles.detailsTouch} onPress={navigateToPreImageScreen}>
-                  <Text style={[styles.detailsText, stylesHook.detailsText]}>{loc.send.create_details}</Text>
+              {invoice.payment_preimage &&
+              typeof invoice.payment_preimage === "string" ? (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  style={styles.detailsTouch}
+                  onPress={navigateToPreImageScreen}
+                >
+                  <Text style={[styles.detailsText, stylesHook.detailsText]}>
+                    {loc.send.create_details}
+                  </Text>
                   <Icon
-                    name={I18nManager.isRTL ? 'angle-left' : 'angle-right'}
+                    name={I18nManager.isRTL ? "angle-left" : "angle-right"}
                     size={18}
                     type="font-awesome"
                     color={colors.alternativeTextColor}

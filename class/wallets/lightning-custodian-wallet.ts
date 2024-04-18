@@ -1,7 +1,7 @@
 import { LegacyWallet } from './legacy-wallet';
 import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import { DoichainUnit, Chain } from '../../models/doichainUnits';
 
 export class LightningCustodianWallet extends LegacyWallet {
   static readonly type = 'lightningCustodianWallet';
@@ -21,7 +21,7 @@ export class LightningCustodianWallet extends LegacyWallet {
   transactions_raw: any[] = [];
   user_invoices_raw: any[] = [];
   info_raw = false;
-  preferredBalanceUnit = BitcoinUnit.SATS;
+  preferredBalanceUnit = DoichainUnit.SWARTZ;
   chain = Chain.OFFCHAIN;
   private _api?: Frisbee;
   last_paid_invoice_result?: any;

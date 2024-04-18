@@ -37,7 +37,7 @@ import { presentWalletExportReminder } from '../../helpers/presentWalletExportRe
 import { scanQrHelper } from '../../helpers/scan-qr';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import loc from '../../loc';
-import { Chain } from '../../models/bitcoinUnits';
+import { Chain } from '../../models/doichainUnits';
 import ActionSheet from '../ActionSheet';
 import Biometric from '../../class/biometrics';
 

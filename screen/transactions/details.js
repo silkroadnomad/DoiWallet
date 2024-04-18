@@ -12,7 +12,7 @@ import presentAlert from '../../components/Alert';
 import { useTheme } from '../../components/themes';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import CopyToClipboardButton from '../../components/CopyToClipboardButton';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from "../../models/doichainUnits";
 const dayjs = require('dayjs');
 
 function onlyUnique(value, index, self) {
@@ -123,7 +123,7 @@ const TransactionsDetails = () => {
   };
 
   const handleOnOpenTransactionOnBlockExplorerTapped = () => {
-    const url = `https://mempool.space/tx/${tx.hash}`;
+    const url = `https://explorer.doichain.org/tx/${tx.hash}`;
     Linking.canOpenURL(url)
       .then(supported => {
         if (supported) {
@@ -263,7 +263,7 @@ const TransactionsDetails = () => {
         {tx.fee && (
           <>
             <BlueText style={styles.rowCaption}>{loc.send.create_fee}</BlueText>
-            <BlueText style={styles.rowValue}>{tx.fee + ` ${BitcoinUnit.SATS}`}</BlueText>
+            <BlueText style={styles.rowValue}>{tx.fee + ` ${DoichainUnit.SWARTZ}`}</BlueText>
             <View style={styles.marginBottom18} />
           </>
         )}

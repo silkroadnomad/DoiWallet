@@ -26,7 +26,7 @@ import ListItem from '../../components/ListItem';
 import { useTheme } from '../../components/themes';
 import useAsyncPromise from '../../hooks/useAsyncPromise';
 import loc from '../../loc';
-import { Chain } from '../../models/bitcoinUnits';
+import { Chain } from '../../models/doichainUnits';
 import { AppStorage } from '../../BlueApp';
 import WalletButton from '../../components/WalletButton';
 import A from '../../blue_modules/analytics';

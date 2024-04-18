@@ -32,7 +32,7 @@
     "expired": "Gorffen",
     "payButton": "Talu",
     "refill": "Ail-lenwi",
-    "refill_create": "Er mwyn parhau, ffurfia waled Bitcoin i'w ail-lenwi. ",
+    "refill_create": "Er mwyn parhau, ffurfia waled Doi i'w ail-lenwi. ",
     "refill_external": "Ail-lenwi efo Waled Allanol",
     "refill_lnd_balance": "Ail-lenwi balans waled Mellten",
     "sameWalletAsInvoiceError": "Does dim modd talu anfoneb efo'r un waled ddefnyddwyd i'w greu.",
@@ -90,7 +90,7 @@
     "details_next": "Nesaf",
     "details_note_placeholder": "Hunan Nodyn",
     "details_scan": "Sganio",
-    "details_wallet_before_tx": "Cyn creu trafodyn, mae angen adio waled Bitcoin.",
+    "details_wallet_before_tx": "Cyn creu trafodyn, mae angen adio waled Doi.",
     "dynamic_next": "Nesaf",
     "dynamic_prev": "Blaenorol",
     "dynamic_start": "Dechrau",
@@ -124,7 +124,7 @@
     "general": "Cyffredinol",
     "header": "Gosodiadau",
     "language": "Iaith",
-    "language_isRTL": "Mae angen ail ddechrau BlueWallet i'r newidiadau iaith gael effaith.",
+    "language_isRTL": "Mae angen ail ddechrau DoiWallet i'r newidiadau iaith gael effaith.",
     "lightning_saved": "Mae dy newidiadau wedi cael eu safio'n llwyddianus.",
     "lightning_settings": "Gosodiadau Mellten",
     "network": "Rhwydwaith",
@@ -154,7 +154,7 @@
     "list_title": "Trafodion"
   },
   "wallets": {
-    "add_bitcoin_explain": "Waled Bitcoin syml a cryf",
+    "add_bitcoin_explain": "Waled Doi syml a cryf",
     "add_create": "Creu",
     "add_import_wallet": "Mewnforio waled",
     "add_lightning": "Mellten",
@@ -162,7 +162,7 @@
     "add_title": "Adio waled",
     "add_wallet_name": "Enw",
     "add_wallet_type": "Math",
-    "clipboard_bitcoin": "Mae gen ti gyfeiriad Bitcoin ar dy glipfwrdd. Wyt ti isio ei ddefnyddio ar gyfer trafodyn?",
+    "clipboard_bitcoin": "Mae gen ti gyfeiriad Doi ar dy glipfwrdd. Wyt ti isio ei ddefnyddio ar gyfer trafodyn?",
     "clipboard_lightning": "Mae gen ti anfoneb Mellten ar dy glipfwrdd. Wyt ti isio ei ddefnyddio ar gyfer trafodyn?",
     "details_address": "Cyfeiriad",
     "details_advanced": "Arbenigol",
@@ -208,7 +208,11 @@
     "change": "Newid"
   },
   "units": {
-    "MAX": "Mwyafswm"
+    "DOI": "DOI",
+    "MAX": "MAX",
+    "sat_byte": "swartz/byte",
+    "sats": "swartz",
+    "swartz":"swartz"
   },
   "addresses": {
     "sign_sign": "Arwyddo",

@@ -10,6 +10,7 @@ export const FiatUnitSource = {
   wazirx: 'wazirx',
   Bitstamp: 'Bitstamp',
   BNR: 'BNR',
+  Coinpaprika: 'Coinpaprika',
 } as const;
 
 const RateExtractors = {
@@ -31,7 +32,7 @@ const RateExtractors = {
   CoinDesk: async (ticker: string): Promise<number> => {
     let json;
     try {
-      const res = await fetch(`https://api.coindesk.com/v1/bpi/currentprice/${ticker}.json`);
+      const res = await fetch(`https://api.coindesk.com/v1/bpi/currentprice/${ticker}.json`);      
       json = await res.json();
     } catch (e: any) {
       throw new Error(`Could not update rate for ${ticker}: ${e.message}`);
@@ -46,12 +47,13 @@ const RateExtractors = {
   CoinGecko: async (ticker: string): Promise<number> => {
     let json;
     try {
-      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${ticker.toLowerCase()}`);
-      json = await res.json();
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=Doi&vs_currencies=${ticker.toLowerCase()}`);
+      json = await res.json();       
     } catch (e: any) {
       throw new Error(`Could not update rate for ${ticker}: ${e.message}`);
     }
-    const rate = json?.bitcoin?.[ticker] || json?.bitcoin?.[ticker.toLowerCase()];
+    const rate = json?.Doi?.[ticker] || json?.Doi?.[ticker.toLowerCase()];
+
     if (!rate) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
     return rate;
   },
@@ -162,13 +164,42 @@ const RateExtractors = {
     if (!(rate >= 0)) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
     return rate;
   },
+  Coinpaprika: async (ticker: string): Promise<number> => {    
+/*
+    const api = new Frisbee({ baseURI: 'https://api.coinpaprika.com' });
+    const res = await api.get(`/v1/coins/doi-doicoin/ohlcv/latest`);
+    console.log('\n Result of COINPAPRIKA Api is: ', res) 
+    
+    let rate = res.body.map((p: FiatUnit) => p.close);
+    if (!rate) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
+
+    rate = Number(rate);
+    if (!(rate >= 0)) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
+    return rate;
+*/
+    let json; 
+    try {
+      const res = await fetch(`https://api.coinpaprika.com/v1/coins/doi-doicoin/ohlcv/latest`);
+      json = await res.json();
+      //let aaa = json.body.map((p: TFiatUnits) => p.close);
+      
+    } catch (e: any) {
+      throw new Error(`Could not update rate  ${e.message}`);
+    }
+    let rate = json[0].close;    
+    if (!rate) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
+
+    rate = Number(rate);
+    if (!(rate >= 0)) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
+    return rate;
+  },
 } as const;
 
 export type TFiatUnit = {
   endPointKey: string;
   symbol: string;
   locale: string;
-  source: 'CoinDesk' | 'Yadio' | 'Exir' | 'wazirx' | 'Bitstamp';
+  source: 'CoinDesk' | 'Yadio' | 'Exir' | 'wazirx' | 'Bitstamp' | 'Coinpaprika';
 };
 
 export type TFiatUnits = {

@@ -4,7 +4,7 @@ import { Linking, StyleSheet, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { BitcoinUnit } from '../models/bitcoinUnits';
+import { DoichainUnit } from "../models/doichainUnits";
 import * as NavigationService from '../NavigationService';
 import loc, { formatBalanceWithoutSuffix, transactionTimeToReadable } from '../loc';
 import Lnurl from '../class/lnurl';
@@ -20,7 +20,7 @@ import TransactionPendingIcon from '../components/icons/TransactionPendingIcon';
 import { useTheme } from './themes';
 import ListItem from './ListItem';
 
-export const TransactionListItem = React.memo(({ item, itemPriceUnit = BitcoinUnit.BTC, walletID }) => {
+export const TransactionListItem = React.memo(({ item, itemPriceUnit = DoichainUnit.DOI, walletID }) => {
   const [subtitleNumberOfLines, setSubtitleNumberOfLines] = useState(1);
   const { colors } = useTheme();
   const { navigate } = useNavigation();

@@ -7,8 +7,9 @@ import { Icon } from 'react-native-elements';
 import { BlueCard, BlueDismissKeyboardInputAccessory, BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
 import AmountInput from '../../components/AmountInput';
-import Lnurl from '../../class/lnurl';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
+import Lnurl from '../../class/lnurl'
+
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
 import loc, { formatBalanceWithoutSuffix, formatBalance } from '../../loc';
 import Biometric from '../../class/biometrics';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
@@ -85,10 +86,10 @@ const LnurlPay = () => {
         return;
       }
       switch (unit) {
-        case BitcoinUnit.BTC:
+        case DoichainUnit.DOI:
           newAmount = satoshiToBTC(newAmount);
           break;
-        case BitcoinUnit.LOCAL_CURRENCY:
+        case DoichainUnit.LOCAL_CURRENCY:
           newAmount = satoshiToLocalCurrency(newAmount, false);
           _cacheFiatToSat[newAmount] = originalSatAmount;
           break;
@@ -116,13 +117,13 @@ const LnurlPay = () => {
 
     let amountSats = amount;
     switch (unit) {
-      case BitcoinUnit.SATS:
+      case DoichainUnit.SWARTZ:
         amountSats = parseInt(amountSats, 10); // nop
         break;
-      case BitcoinUnit.BTC:
+      case DoichainUnit.DOI:
         amountSats = btcToSatoshi(amountSats);
         break;
-      case BitcoinUnit.LOCAL_CURRENCY:
+      case DoichainUnit.LOCAL_CURRENCY:
         if (_cacheFiatToSat[amount]) {
           amountSats = _cacheFiatToSat[amount];
         } else {
@@ -187,9 +188,9 @@ const LnurlPay = () => {
         >
           <Text style={[styles.walletWrapLabel, stylesHook.walletWrapLabel]}>{wallet.getLabel()}</Text>
           <Text style={[styles.walletWrapBalance, stylesHook.walletWrapBalance]}>
-            {formatBalanceWithoutSuffix(wallet.getBalance(), BitcoinUnit.SATS, false)}
+            {formatBalanceWithoutSuffix(wallet.getBalance(), DoichainUnit.SWARTZ, false)}
           </Text>
-          <Text style={[styles.walletWrapSats, stylesHook.walletWrapSats]}>{BitcoinUnit.SATS}</Text>
+          <Text style={[styles.walletWrapSats, stylesHook.walletWrapSats]}>{DoichainUnit.SWARTZ}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -9,7 +9,7 @@ import TooltipMenu from '../TooltipMenu';
 import Clipboard from '@react-native-clipboard/clipboard';
 import Share from 'react-native-share';
 import { useTheme } from '../themes';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit } from '../../models/doichainUnits';
 import { BlueStorageContext } from '../../blue_modules/storage-context';
 import Biometric from '../../class/biometrics';
 import presentAlert from '../Alert';
@@ -20,7 +20,7 @@ import confirm from '../../helpers/confirm';
 interface AddressItemProps {
   // todo: fix `any` after addresses.js is converted to the church of holy typescript
   item: any;
-  balanceUnit: BitcoinUnit;
+  balanceUnit: DoichainUnit;
   walletID: string;
   allowSignVerifyMessage: boolean;
 }

@@ -8,7 +8,7 @@ import RNFS from 'react-native-fs';
 import BigNumber from 'bignumber.js';
 import { BlueText } from '../../BlueComponents';
 import navigationStyle from '../../components/navigationStyle';
-import { BitcoinUnit } from '../../models/bitcoinUnits';
+import { DoichainUnit} from "../../models/doichainUnits";
 import loc from '../../loc';
 import { DynamicQRCode } from '../../components/DynamicQRCode';
 import { isDesktop } from '../../blue_modules/environment';
@@ -112,14 +112,45 @@ const SendCreate = () => {
     return (
       <>
         <View>
-          <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_to}</Text>
-          <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>{item.address}</Text>
-          <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_amount}</Text>
-          <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>
-            {satoshiToBTC(item.value)} {BitcoinUnit.BTC}
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_to}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {item.address}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_amount}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {satoshiToBTC(item.value)} {DoichainUnit.DOI}
           </Text>
           {recipients.length > 1 && (
-            <BlueText style={styles.itemOf}>{loc.formatString(loc._.of, { number: index + 1, total: recipients.length })}</BlueText>
+            <BlueText style={styles.itemOf}>
+              {loc.formatString(loc._.of, {
+                number: index + 1,
+                total: recipients.length,
+              })}
+            </BlueText>
           )}
         </View>
       </>
@@ -158,18 +189,72 @@ const SendCreate = () => {
 
   const ListFooterComponent = (
     <View>
-      <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_fee}</Text>
-      <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>
-        {new BigNumber(fee).toFixed()} {BitcoinUnit.BTC}
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_fee}
       </Text>
-      <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_tx_size}</Text>
-      <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>{size} vbytes</Text>
-      <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_satoshi_per_vbyte}</Text>
-      <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>{satoshiPerByte} Sat/vB</Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {new BigNumber(fee).toFixed()} {DoichainUnit.DOI}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_tx_size}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {size} vbytes
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_satoshi_per_vbyte}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {satoshiPerByte} Sat/vB
+      </Text>
       {memo?.length > 0 && (
         <>
-          <Text style={[styles.transactionDetailsTitle, styleHooks.transactionDetailsTitle]}>{loc.send.create_memo}</Text>
-          <Text style={[styles.transactionDetailsSubtitle, styleHooks.transactionDetailsSubtitle]}>{memo}</Text>
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_memo}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {memo}
+          </Text>
         </>
       )}
     </View>

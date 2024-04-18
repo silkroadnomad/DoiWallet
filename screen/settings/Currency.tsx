@@ -22,13 +22,12 @@ const Currency = () => {
   const { setPreferredFiatCurrency } = useContext(BlueStorageContext);
   const [isSavingNewPreferredCurrency, setIsSavingNewPreferredCurrency] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState<FiatUnitType>(FiatUnit.USD);
-  const [currencyRate, setCurrencyRate] = useState<CurrencyRate>({ LastUpdated: null, Rate: null });
+  const [currencyRate, setCurrencyRate] = useState<CurrencyRate>({ LastUpdated: null, Rate: null });  
   const { colors } = useTheme();
   const { setOptions } = useNavigation<any>();
 
   const [search, setSearch] = useState('');
   const data = Object.values(FiatUnit).filter(item => item.endPointKey.toLowerCase().includes(search.toLowerCase()));
-
   const styles = StyleSheet.create({
     flex: {
       flex: 1,
@@ -39,7 +38,7 @@ const Currency = () => {
   const fetchCurrency = async () => {
     let preferredCurrency;
     try {
-      preferredCurrency = await getPreferredCurrency();
+      preferredCurrency = await getPreferredCurrency();      
       if (preferredCurrency === null) {
         throw Error();
       }
@@ -47,7 +46,7 @@ const Currency = () => {
     } catch (_error) {
       setSelectedCurrency(FiatUnit.USD);
     }
-    const mostRecentFetchedRateValue = await mostRecentFetchedRate();
+    const mostRecentFetchedRateValue = await mostRecentFetchedRate();    
     setCurrencyRate(mostRecentFetchedRateValue);
   };
 
@@ -100,7 +99,7 @@ const Currency = () => {
       />
       <BlueCard>
         <BlueText>
-          {loc.settings.currency_source} {selectedCurrency?.source ?? FiatUnitSource.CoinDesk}
+          {loc.settings.currency_source} {FiatUnitSource.Coinpaprika} 
         </BlueText>
         <BlueSpacing10 />
         <BlueText>
