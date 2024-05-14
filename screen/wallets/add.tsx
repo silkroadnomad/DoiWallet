@@ -391,28 +391,7 @@ const WalletsAdd: React.FC = () => {
             onPress={handleOnBitcoinButtonPressed}
             size={styles.button}
           />
-          <WalletButton
-            buttonType="Lightning"
-            active={selectedWalletType === ButtonSelected.OFFCHAIN}
-            onPress={handleOnLightningButtonPressed}
-            size={styles.button}
-          />
-          {backdoorPressed > 10 ? (
-            <LdkButton
-              active={selectedWalletType === ButtonSelected.LDK}
-              onPress={handleOnLdkButtonPressed}
-              style={styles.button}
-              subtext={LightningLdkWallet.getPackageVersion()}
-              text="LDK"
-            />
-          ) : null}
-          <WalletButton
-            buttonType="Vault"
-            testID="ActivateVaultButton"
-            active={selectedWalletType === ButtonSelected.VAULT}
-            onPress={handleOnVaultButtonPressed}
-            size={styles.button}
-          />
+        
         </View>
 
         <View style={styles.advanced}>
