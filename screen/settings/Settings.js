@@ -1,10 +1,9 @@
-import React, { useContext } from 'react';
-import { ScrollView, StyleSheet, Platform } from 'react-native';
-import { BlueHeaderDefaultSub } from '../../BlueComponents';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import React from 'react';
+import { Platform, ScrollView, StyleSheet } from 'react-native';
 import ListItem from '../../components/ListItem';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
+import loc from '../../loc';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const styles = StyleSheet.create({
   root: {
@@ -22,7 +21,7 @@ const Settings = () => {
   const { navigate } = useExtendedNavigation();
   // By simply having it here, it'll re-render the UI if language is changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { language } = useContext(BlueStorageContext);
+  const { language } = useSettings();
 
   return (
     <ScrollView
@@ -31,7 +30,6 @@ const Settings = () => {
       contentInsetAdjustmentBehavior="automatic"
       automaticallyAdjustContentInsets
     >
-      {Platform.OS === 'android' ? <BlueHeaderDefaultSub leftText={loc.settings.header} /> : <></>}
       <ListItem title={loc.settings.general} onPress={() => navigate('GeneralSettings')} testID="GeneralSettings" chevron />
       <ListItem title={loc.settings.currency} onPress={() => navigate('Currency')} testID="Currency" chevron />
       <ListItem title={loc.settings.language} onPress={() => navigate('Language')} testID="Language" chevron />

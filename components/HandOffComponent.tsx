@@ -1,30 +1,15 @@
 import React from 'react';
+import { HandOffComponentProps } from './types';
 
-interface HandOffComponentProps {
-  url?: string;
-  title?: string;
-  type: (typeof HandOffComponent.activityTypes)[keyof typeof HandOffComponent.activityTypes];
-  userInfo?: object;
-}
-
-interface HandOffComponentWithActivityTypes extends React.FC<HandOffComponentProps> {
-  activityTypes: {
-    ReceiveOnchain: string;
-    Xpub: string;
-    ViewInBlockExplorer: string;
-  };
-}
-
-const HandOffComponent: HandOffComponentWithActivityTypes = props => {
+const HandOffComponent: React.FC<HandOffComponentProps> = props => {
+  console.debug('HandOffComponent: props', props);
   return null;
 };
 
-const activityTypes = {
-  ReceiveOnchain: 'org.doichain.doiwallet.receiveonchain',
-  Xpub: 'org.doichain.doiwallet.xpub',
-  ViewInBlockExplorer: 'org.doichain.doiwallet.blockexplorer',
-};
+export const setIsHandOffUseEnabled = async (value: boolean) => {};
 
-HandOffComponent.activityTypes = activityTypes;
+export const getIsHandOffUseEnabled = async (): Promise<boolean> => {
+  return false;
+};
 
 export default HandOffComponent;

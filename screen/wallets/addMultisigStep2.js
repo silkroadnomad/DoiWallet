@@ -1,4 +1,5 @@
-import React, { useContext, useRef, useState, useEffect, useCallback } from 'react';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -14,37 +15,37 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { Icon } from '@rneui/themed';
+
+import A from '../../blue_modules/analytics';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { encodeUR } from '../../blue_modules/ur';
 import { BlueButtonLink, BlueFormMultiInput, BlueSpacing10, BlueSpacing20, BlueText, BlueTextCentered } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
 import { HDSegwitBech32Wallet, MultisigCosigner, MultisigHDWallet } from '../../class';
-import loc from '../../loc';
-import { SquareButton } from '../../components/SquareButton';
+import presentAlert from '../../components/Alert';
 import BottomModal from '../../components/BottomModal';
+import Button from '../../components/Button';
 import MultipleStepsListItem, {
   MultipleStepsListItemButtohType,
   MultipleStepsListItemDashType,
 } from '../../components/MultipleStepsListItem';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { encodeUR } from '../../blue_modules/ur';
 import QRCodeComponent from '../../components/QRCodeComponent';
-import presentAlert from '../../components/Alert';
-import confirm from '../../helpers/confirm';
-import { scanQrHelper } from '../../helpers/scan-qr';
-import { useTheme } from '../../components/themes';
-import Button from '../../components/Button';
-import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
-import usePrivacy from '../../hooks/usePrivacy';
-import prompt from '../../helpers/prompt';
-import A from '../../blue_modules/analytics';
 import SaveFileButton from '../../components/SaveFileButton';
+import { SquareButton } from '../../components/SquareButton';
+import { useTheme } from '../../components/themes';
+import confirm from '../../helpers/confirm';
+import prompt from '../../helpers/prompt';
+import { scanQrHelper } from '../../helpers/scan-qr';
+import usePrivacy from '../../hooks/usePrivacy';
+import loc from '../../loc';
+import { useStorage } from '../../hooks/context/useStorage';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const staticCache = {};
 
 const WalletsAddMultisigStep2 = () => {
-  const { addWallet, saveToDisk, isElectrumDisabled, isAdvancedModeEnabled, sleep, currentSharedCosigner, setSharedCosigner } =
-    useContext(BlueStorageContext);
+  const { addWallet, saveToDisk, isElectrumDisabled, sleep, currentSharedCosigner, setSharedCosigner } = useStorage();
+  const { isAdvancedModeEnabled } = useSettings();
   const { colors } = useTheme();
 
   const navigation = useNavigation();
@@ -62,15 +63,9 @@ const WalletsAddMultisigStep2 = () => {
   const [vaultKeyData, setVaultKeyData] = useState({ keyIndex: 1, xpub: '', seed: '', isLoading: false }); // string rendered in modal
   const [importText, setImportText] = useState('');
   const [askPassphrase, setAskPassphrase] = useState(false);
-  const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
   const openScannerButton = useRef();
   const data = useRef(new Array(n));
   const { enableBlur, disableBlur } = usePrivacy();
-
-  useEffect(() => {
-    isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -191,7 +186,6 @@ const WalletsAddMultisigStep2 = () => {
       setIsLoading(true);
       setIsMnemonicsModalVisible(true);
 
-      // filling cache
       setTimeout(() => {
         // filling cache
         setXpubCacheForMnemonics(w.getSecret());
@@ -229,7 +223,7 @@ const WalletsAddMultisigStep2 = () => {
     } else {
       const path = getPath();
 
-      const xpub = getXpubCacheForMnemonics(cosigner[0]);
+      const xpub = getXpubCacheForMnemonics(cosigner[0], cosigner[3]);
       const fp = getFpCacheForMnemonics(cosigner[0], cosigner[3]);
       setCosignerXpub(MultisigCosigner.exportToJson(fp, xpub, path));
       setCosignerXpubURv2(encodeUR(MultisigCosigner.exportToJson(fp, xpub, path))[0]);
@@ -238,17 +232,17 @@ const WalletsAddMultisigStep2 = () => {
     }
   };
 
-  const getXpubCacheForMnemonics = seed => {
+  const getXpubCacheForMnemonics = (seed, passphrase) => {
     const path = getPath();
-    return staticCache[seed + path] || setXpubCacheForMnemonics(seed);
+    return staticCache[seed + path + passphrase] || setXpubCacheForMnemonics(seed, passphrase);
   };
 
-  const setXpubCacheForMnemonics = seed => {
+  const setXpubCacheForMnemonics = (seed, passphrase) => {
     const path = getPath();
     const w = new MultisigHDWallet();
     w.setDerivationPath(path);
-    staticCache[seed + path] = w.convertXpubToMultisignatureXpub(MultisigHDWallet.seedToXpub(seed, path));
-    return staticCache[seed + path];
+    staticCache[seed + path + passphrase] = w.convertXpubToMultisignatureXpub(MultisigHDWallet.seedToXpub(seed, path, passphrase));
+    return staticCache[seed + path + passphrase];
   };
 
   const getFpCacheForMnemonics = (seed, passphrase) => {
@@ -467,7 +461,7 @@ const WalletsAddMultisigStep2 = () => {
   const scanOrOpenFile = () => {
     setIsProvideMnemonicsModalVisible(false);
     InteractionManager.runAfterInteractions(async () => {
-      const scanned = await scanQrHelper(navigation.navigate, name, true);
+      const scanned = await scanQrHelper(name, true);
       onBarScanned({ data: scanned });
     });
   };
@@ -608,7 +602,7 @@ const WalletsAddMultisigStep2 = () => {
             <BlueTextCentered>{loc.multisig.type_your_mnemonics}</BlueTextCentered>
             <BlueSpacing20 />
             <BlueFormMultiInput value={importText} onChangeText={setImportText} />
-            {isAdvancedModeEnabledRender && (
+            {isAdvancedModeEnabled && (
               <>
                 <BlueSpacing10 />
                 <View style={styles.row}>
@@ -816,12 +810,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     justifyContent: 'space-between',
   },
-});
-
-WalletsAddMultisigStep2.navigationOptions = navigationStyle({
-  title: null,
-  gestureEnabled: false,
-  swipeEnabled: false,
 });
 
 export default WalletsAddMultisigStep2;

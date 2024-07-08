@@ -59,6 +59,7 @@ jest.mock('react-native-device-info', () => {
     getDeviceType: jest.fn().mockReturnValue(false),
     hasGmsSync: jest.fn().mockReturnValue(true),
     hasHmsSync: jest.fn().mockReturnValue(false),
+    isTablet: jest.fn().mockReturnValue(false),
   };
 });
 
@@ -187,12 +188,6 @@ jest.mock('react-native-share', () => {
   };
 });
 
-jest.mock('../blue_modules/WidgetCommunication', () => {
-  return {
-    reloadAllTimelines: jest.fn(),
-  };
-});
-
 const mockKeychain = {
   SECURITY_LEVEL_ANY: 'MOCK_SECURITY_LEVEL_ANY',
   SECURITY_LEVEL_SECURE_SOFTWARE: 'MOCK_SECURITY_LEVEL_SECURE_SOFTWARE',
@@ -204,7 +199,5 @@ const mockKeychain = {
 jest.mock('react-native-keychain', () => mockKeychain);
 
 jest.mock('react-native-tcp-socket', () => mockKeychain);
-
-jest.mock('../components/TooltipMenu.ios.js', () => require('../components/TooltipMenu.js'));
 
 global.alert = () => {};

@@ -1,20 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, Share, StyleSheet } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Share, StyleSheet, View } from 'react-native';
 import { BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import QRCodeComponent from '../../components/QRCodeComponent';
 import presentAlert from '../../components/Alert';
-import { useTheme } from '../../components/themes';
 import Button from '../../components/Button';
-import SafeArea from '../../components/SafeArea';
 import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+import QRCodeComponent from '../../components/QRCodeComponent';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import loc from '../../loc';
+import { useStorage } from '../../hooks/context/useStorage';
 
 const LNDViewAdditionalInvoiceInformation = () => {
   const { walletID } = useRoute().params;
-  const { wallets } = useContext(BlueStorageContext);
+  const { wallets } = useStorage();
   const wallet = wallets.find(w => w.getID() === walletID);
   const [walletInfo, setWalletInfo] = useState();
   const { colors } = useTheme();
@@ -102,8 +101,3 @@ const styles = StyleSheet.create({
 });
 
 export default LNDViewAdditionalInvoiceInformation;
-
-LNDViewAdditionalInvoiceInformation.navigationOptions = navigationStyle({}, opts => ({
-  ...opts,
-  title: loc.lndViewInvoice.additional_info,
-}));

@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { StyleProp, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
+import { Icon } from '@rneui/themed';
+
 import { useTheme } from './themes';
 
 // Define an interface for the props
@@ -41,17 +42,17 @@ export const Button = forwardRef<TouchableOpacity, ButtonProps>((props, ref) => 
   };
 
   const buttonView = (
-    <View style={[buttonStyle, props.style, styles.content]}>
+    <>
       {props.icon && <Icon name={props.icon.name} type={props.icon.type} color={props.icon.color} />}
       {props.title && <Text style={textStyle}>{props.title}</Text>}
-    </View>
+    </>
   );
 
   return props.onPress ? (
     <TouchableOpacity
       ref={ref}
       testID={props.testID}
-      style={[buttonStyle, props.style]}
+      style={[buttonStyle, props.style, styles.content]}
       accessibilityRole="button"
       onPress={props.onPress}
       disabled={props.disabled}
@@ -59,7 +60,7 @@ export const Button = forwardRef<TouchableOpacity, ButtonProps>((props, ref) => 
       {buttonView}
     </TouchableOpacity>
   ) : (
-    buttonView
+    <View style={[buttonStyle, props.style, styles.content]}>{buttonView}</View>
   );
 });
 

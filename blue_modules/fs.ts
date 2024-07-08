@@ -1,14 +1,19 @@
+import LocalQRCode from '@remobile/react-native-qrcode-local-image';
 import { Alert, Linking, PermissionsAndroid, Platform } from 'react-native';
-import RNFS from 'react-native-fs';
-import Share from 'react-native-share';
-import loc from '../loc';
 import DocumentPicker from 'react-native-document-picker';
+import RNFS from 'react-native-fs';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { isDesktop } from './environment';
+import Share from 'react-native-share';
+
 import presentAlert from '../components/Alert';
+import loc from '../loc';
+import { isDesktop } from './environment';
 import { readFile } from './react-native-bw-file-access';
 
-const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
+const _sanitizeFileName = (fileName: string) => {
+  // Remove any path delimiters and non-alphanumeric characters except for -, _, and .
+  return fileName.replace(/[^a-zA-Z0-9\-_.]/g, '');
+};
 
 const _shareOpen = async (filePath: string, showShareDialog: boolean = false) => {
   return await Share.open({
@@ -20,7 +25,10 @@ const _shareOpen = async (filePath: string, showShareDialog: boolean = false) =>
   })
     .catch(error => {
       console.log(error);
-      presentAlert({ message: error.message });
+      // If user cancels sharing, we dont want to show an error. for some reason we get 'CANCELLED' string as error
+      if (error.message !== 'CANCELLED') {
+        presentAlert({ message: error.message });
+      }
     })
     .finally(() => {
       RNFS.unlink(filePath);
@@ -32,8 +40,9 @@ const _shareOpen = async (filePath: string, showShareDialog: boolean = false) =>
  * or perhabs messaging app). Provided filename should be just a file name, NOT a path
  */
 export const writeFileAndExport = async function (fileName: string, contents: string, showShareDialog: boolean = true) {
+  const sanitizedFileName = _sanitizeFileName(fileName);
   if (Platform.OS === 'ios') {
-    const filePath = RNFS.TemporaryDirectoryPath + `/${fileName}`;
+    const filePath = RNFS.TemporaryDirectoryPath + `/${sanitizedFileName}`;
     await RNFS.writeFile(filePath, contents);
     await _shareOpen(filePath, showShareDialog);
   } else if (Platform.OS === 'android') {
@@ -48,14 +57,14 @@ export const writeFileAndExport = async function (fileName: string, contents: st
     // In Android 13 no WRITE_EXTERNAL_STORAGE permission is needed
     // @see https://stackoverflow.com/questions/76311685/permissionandroid-request-always-returns-never-ask-again-without-any-prompt-r
     if (granted === PermissionsAndroid.RESULTS.GRANTED || Platform.Version >= 30) {
-      const filePath = RNFS.DownloadDirectoryPath + `/${fileName}`;
+      const filePath = RNFS.DownloadDirectoryPath + `/${sanitizedFileName}`;
       try {
         await RNFS.writeFile(filePath, contents);
         console.log(`file saved to ${filePath}`);
         if (showShareDialog) {
           await _shareOpen(filePath);
         } else {
-          presentAlert({ message: loc.formatString(loc.send.file_saved_at_path, { fileName }) });
+          presentAlert({ message: loc.formatString(loc.send.file_saved_at_path, { fileName: sanitizedFileName }) });
         }
       } catch (e: any) {
         console.log(e);
@@ -81,7 +90,7 @@ export const writeFileAndExport = async function (fileName: string, contents: st
 /**
  * Opens & reads *.psbt files, and returns base64 psbt. FALSE if something went wrong (wont throw).
  */
-export const openSignedTransaction = async function (): Promise<string | boolean> {
+export const openSignedTransaction = async function (): Promise<string | false> {
   try {
     const res = await DocumentPicker.pickSingle({
       type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn'] : [DocumentPicker.types.allFiles],
@@ -112,7 +121,7 @@ const _readPsbtFileIntoBase64 = async function (uri: string): Promise<string> {
   }
 };
 
-export const showImagePickerAndReadImage = () => {
+export const showImagePickerAndReadImage = (): Promise<string | undefined> => {
   return new Promise((resolve, reject) =>
     launchImageLibrary(
       {

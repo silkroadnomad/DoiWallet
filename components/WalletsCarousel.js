@@ -1,29 +1,29 @@
-import React, { useRef, useCallback, useImperativeHandle, forwardRef, useContext } from 'react';
 import PropTypes from 'prop-types';
+import React, { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
 import {
   Animated,
-  Image,
+  FlatList,
   I18nManager,
+  Image,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
-  Dimensions,
-  FlatList,
-  Pressable,
 } from 'react-native';
-
 import LinearGradient from 'react-native-linear-gradient';
-import loc, { formatBalance, transactionTimeToReadable } from '../loc';
+import { BlueSpacing10 } from '../BlueComponents';
 import { LightningCustodianWallet, LightningLdkWallet, MultisigHDWallet } from '../class';
 import WalletGradient from '../class/wallet-gradient';
-import { BlueSpacing10 } from '../BlueComponents';
-import { BlueStorageContext, WalletTransactionsStatus } from '../blue_modules/storage-context';
-import { isTablet, isDesktop } from '../blue_modules/environment';
-import { useTheme } from './themes';
+import { useIsLargeScreen } from '../hooks/useIsLargeScreen';
+import loc, { formatBalance, transactionTimeToReadable } from '../loc';
 import { BlurredBalanceView } from './BlurredBalanceView';
+import { useSettings } from '../hooks/context/useSettings';
+import { useTheme } from './themes';
+import { useStorage } from '../hooks/context/useStorage';
+import { WalletTransactionsStatus } from './Context/StorageProvider';
 
 const nStyles = StyleSheet.create({
   container: {
@@ -56,7 +56,7 @@ const NewWalletPanel = ({ onPress }) => {
   const { colors } = useTheme();
   const { width } = useWindowDimensions();
   const itemWidth = width * 0.82 > 375 ? 375 : width * 0.82;
-  const isLargeScreen = Platform.OS === 'android' ? isTablet() : (width >= Dimensions.get('screen').width / 2 && isTablet()) || isDesktop;
+  const isLargeScreen = useIsLargeScreen();
   const nStylesHooks = StyleSheet.create({
     container: isLargeScreen
       ? {
@@ -102,6 +102,9 @@ const iStyles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     minHeight: 164,
+  },
+  balanceContainer: {
+    height: 40,
   },
   image: {
     width: 99,
@@ -151,13 +154,13 @@ const iStyles = StyleSheet.create({
   },
 });
 
-export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelectedWallet, customStyle }) => {
+export const WalletCarouselItem = React.memo(({ item, _, onPress, handleLongPress, isSelectedWallet, customStyle, horizontal }) => {
   const scaleValue = new Animated.Value(1.0);
   const { colors } = useTheme();
-  const { walletTransactionUpdateStatus } = useContext(BlueStorageContext);
+  const { walletTransactionUpdateStatus } = useStorage();
   const { width } = useWindowDimensions();
   const itemWidth = width * 0.82 > 375 ? 375 : width * 0.82;
-  const isLargeScreen = Platform.OS === 'android' ? isTablet() : (width >= Dimensions.get('screen').width / 2 && isTablet()) || isDesktop;
+  const isLargeScreen = useIsLargeScreen();
   const onPressedIn = () => {
     Animated.spring(scaleValue, { duration: 50, useNativeDriver: true, toValue: 0.9 }).start();
   };
@@ -193,7 +196,7 @@ export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelect
   return (
     <Animated.View
       style={[
-        isLargeScreen ? iStyles.rootLargeDevice : customStyle ?? { ...iStyles.root, width: itemWidth },
+        isLargeScreen || !horizontal ? [iStyles.rootLargeDevice, customStyle] : customStyle ?? { ...iStyles.root, width: itemWidth },
         { opacity, transform: [{ scale: scaleValue }] },
       ]}
     >
@@ -202,7 +205,9 @@ export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelect
         testID={item.getLabel()}
         onPressIn={onPressedIn}
         onPressOut={onPressedOut}
-        onLongPress={handleLongPress}
+        onLongPress={() => {
+          handleLongPress();
+        }}
         onPress={() => {
           onPressedOut();
           setTimeout(() => {
@@ -217,21 +222,23 @@ export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelect
             <Text numberOfLines={1} style={[iStyles.label, { color: colors.inverseForegroundColor }]}>
               {item.getLabel()}
             </Text>
-            {item.hideBalance ? (
-              <>
-                <BlueSpacing10 />
-                <BlurredBalanceView />
-              </>
-            ) : (
-              <Text
-                numberOfLines={1}
-                key={balance} // force component recreation on balance change. To fix right-to-left languages, like Farsi
-                adjustsFontSizeToFit
-                style={[iStyles.balance, { color: colors.inverseForegroundColor }]}
-              >
-                {balance}
-              </Text>
-            )}
+            <View style={iStyles.balanceContainer}>
+              {item.hideBalance ? (
+                <>
+                  <BlueSpacing10 />
+                  <BlurredBalanceView />
+                </>
+              ) : (
+                <Text
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  key={balance} // force component recreation on balance change. To fix right-to-left languages, like Farsi
+                  style={[iStyles.balance, { color: colors.inverseForegroundColor }]}
+                >
+                  {`${balance} `}
+                </Text>
+              )}
+            </View>
             <Text style={iStyles.br} />
             <Text numberOfLines={1} style={[iStyles.latestTx, { color: colors.inverseForegroundColor }]}>
               {loc.wallets.list_latest_transaction}
@@ -245,7 +252,7 @@ export const WalletCarouselItem = ({ item, _, onPress, handleLongPress, isSelect
       </Pressable>
     </Animated.View>
   );
-};
+});
 
 WalletCarouselItem.propTypes = {
   item: PropTypes.any,
@@ -270,8 +277,8 @@ const cStyles = StyleSheet.create({
 const ListHeaderComponent = () => <View style={cStyles.separatorStyle} />;
 
 const WalletsCarousel = forwardRef((props, ref) => {
-  const { preferredFiatCurrency, language } = useContext(BlueStorageContext);
-  const { horizontal, data, handleLongPress, onPress, selectedWallet } = props;
+  const { preferredFiatCurrency, language } = useSettings();
+  const { horizontal, data, handleLongPress, onPress, selectedWallet, scrollEnabled } = props;
   const renderItem = useCallback(
     ({ item, index }) =>
       item ? (
@@ -281,12 +288,13 @@ const WalletsCarousel = forwardRef((props, ref) => {
           index={index}
           handleLongPress={handleLongPress}
           onPress={onPress}
+          horizontal={horizontal}
         />
       ) : (
         <NewWalletPanel onPress={onPress} />
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [horizontal, selectedWallet, handleLongPress, onPress, preferredFiatCurrency, language],
+    [horizontal, selectedWallet, preferredFiatCurrency, language],
   );
   const flatListRef = useRef();
 
@@ -332,6 +340,7 @@ const WalletsCarousel = forwardRef((props, ref) => {
       directionalLockEnabled
       showsHorizontalScrollIndicator={false}
       initialNumToRender={10}
+      scrollEnabled={scrollEnabled}
       ListHeaderComponent={ListHeaderComponent}
       style={{ minHeight: sliderHeight + 12 }}
       onScrollToIndexFailed={onScrollToIndexFailed}

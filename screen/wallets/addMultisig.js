@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import LottieView from 'lottie-react-native';
-import { Icon } from 'react-native-elements';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import LottieView from 'lottie-react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
+
 import { BlueSpacing20 } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import BottomModal from '../../components/BottomModal';
 import { MultisigHDWallet } from '../../class';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { useTheme } from '../../components/themes';
+import BottomModal from '../../components/BottomModal';
 import Button from '../../components/Button';
 import ListItem from '../../components/ListItem';
 import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import loc from '../../loc';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const WalletsAddMultisig = () => {
   const { colors } = useTheme();
@@ -23,8 +23,7 @@ const WalletsAddMultisig = () => {
   const [n, setN] = useState(3);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [format, setFormat] = useState(MultisigHDWallet.FORMAT_P2WSH);
-  const { isAdvancedModeEnabled } = useContext(BlueStorageContext);
-  const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
+  const { isAdvancedModeEnabled } = useSettings();
 
   const stylesHook = StyleSheet.create({
     root: {
@@ -63,11 +62,6 @@ const WalletsAddMultisig = () => {
         loadingAnimation.current?.play();
       }, 100);
     }
-  }, []);
-
-  useEffect(() => {
-    isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onLetsStartPress = () => {
@@ -227,7 +221,7 @@ const WalletsAddMultisig = () => {
           </Text>
         </Text>
       </View>
-      {isAdvancedModeEnabledRender && (
+      {isAdvancedModeEnabled && (
         <View>
           <ListItem
             testID="VaultAdvancedCustomize"
@@ -345,10 +339,6 @@ WalletsAddMultisig.getCurrentFormatReadable = f => {
       throw new Error('This should never happen');
   }
 };
-
-WalletsAddMultisig.navigationOptions = navigationStyle({
-  title: '',
-});
 
 WalletsAddMultisig.initialParams = {
   walletLabel: loc.multisig.default_label,

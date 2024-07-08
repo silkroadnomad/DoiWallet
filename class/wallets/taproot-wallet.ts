@@ -1,4 +1,5 @@
 import * as bitcoin from 'bitcoinjs-lib';
+
 import { SegwitBech32Wallet } from './segwit-bech32-wallet';
 import { DOICHAIN } from '../../blue_modules/network.js';
 

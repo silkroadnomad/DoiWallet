@@ -1,20 +1,21 @@
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import { Platform, findNodeHandle } from 'react-native';
-import Frisbee from 'frisbee';
-import { getApplicationName, getVersion, getSystemName, getSystemVersion, hasGmsSync, hasHmsSync } from 'react-native-device-info';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import loc from '../loc';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import Frisbee from 'frisbee';
+import { findNodeHandle, Platform } from 'react-native';
+import { getApplicationName, getSystemName, getSystemVersion, getVersion, hasGmsSync, hasHmsSync } from 'react-native-device-info';
 import { requestNotifications } from 'react-native-permissions';
 import PushNotification from 'react-native-push-notification';
-import ActionSheet from '../screen/ActionSheet';
 
-const constants = require('./constants');
+import loc from '../loc';
+import ActionSheet from '../screen/ActionSheet';
+import { groundControlUri } from './constants';
+
 const PUSH_TOKEN = 'PUSH_TOKEN';
 const GROUNDCONTROL_BASE_URI = 'GROUNDCONTROL_BASE_URI';
 const NOTIFICATIONS_STORAGE = 'NOTIFICATIONS_STORAGE';
 const NOTIFICATIONS_NO_AND_DONT_ASK_FLAG = 'NOTIFICATIONS_NO_AND_DONT_ASK_FLAG';
 let alreadyConfigured = false;
-let baseURI = constants.groundControlUri;
+let baseURI = groundControlUri;
 
 function Notifications(props) {
   async function _setPushToken(token) {
@@ -151,7 +152,7 @@ function Notifications(props) {
           message: loc.notifications.would_you_like_to_receive_notifications,
           options,
           cancelButtonIndex: 0, // Assuming 'no and don't ask' is still treated as the cancel action
-          anchor: findNodeHandle(anchor.current),
+          anchor: anchor ? findNodeHandle(anchor.current) : undefined,
         },
         buttonIndex => {
           switch (buttonIndex) {
@@ -254,11 +255,11 @@ function Notifications(props) {
   };
 
   Notifications.getDefaultUri = function () {
-    return constants.groundControlUri;
+    return groundControlUri;
   };
 
   Notifications.saveUri = async function (uri) {
-    baseURI = uri || constants.groundControlUri; // settign the url to use currently. if not set - use default
+    baseURI = uri || groundControlUri; // setting the url to use currently. if not set - use default
     return AsyncStorage.setItem(GROUNDCONTROL_BASE_URI, uri);
   };
 

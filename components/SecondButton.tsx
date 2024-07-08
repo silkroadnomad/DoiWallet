@@ -1,7 +1,8 @@
 import React, { forwardRef } from 'react';
-import { useTheme } from './themes';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
+import { Icon } from '@rneui/themed';
+
+import { useTheme } from './themes';
 
 type IconProps = {
   name: string;
@@ -34,7 +35,13 @@ export const SecondButton = forwardRef<TouchableOpacity, SecondButtonProps>((pro
   );
 
   return props.onPress ? (
-    <TouchableOpacity accessibilityRole="button" style={[styles.button, { backgroundColor }]} {...props} ref={ref}>
+    <TouchableOpacity
+      disabled={props.disabled}
+      accessibilityRole="button"
+      style={[styles.button, { backgroundColor }]}
+      {...props}
+      ref={ref}
+    >
       {buttonView}
     </TouchableOpacity>
   ) : (

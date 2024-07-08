@@ -1,24 +1,24 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { BlueLoading, BlueDismissKeyboardInputAccessory, BlueSpacing20, BlueText } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
 import BigNumber from 'bignumber.js';
-import AddressInput from '../../components/AddressInput';
-import AmountInput from '../../components/AmountInput';
 import { DoichainUnit } from '../../models/doichainUnits';
-import loc from '../../loc';
-import { HDSegwitBech32Wallet, LightningLdkWallet } from '../../class';
-import { ArrowPicker } from '../../components/ArrowPicker';
 import { Psbt } from 'bitcoinjs-lib';
-import Biometric from '../../class/biometrics';
-import presentAlert from '../../components/Alert';
-import { useTheme } from '../../components/themes';
-import Button from '../../components/Button';
-import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
-import SafeArea from '../../components/SafeArea';
+import React, { useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { btcToSatoshi, fiatToBTC } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { BlueDismissKeyboardInputAccessory, BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
+import { HDSegwitBech32Wallet, LightningLdkWallet } from '../../class';
+import AddressInput from '../../components/AddressInput';
+import presentAlert from '../../components/Alert';
+import AmountInput from '../../components/AmountInput';
+import { ArrowPicker } from '../../components/ArrowPicker';
+import Button from '../../components/Button';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import { unlockWithBiometrics, useBiometrics } from '../../hooks/useBiometrics';
+import loc from '../../loc';
+
+import { useStorage } from '../../hooks/context/useStorage';
 
 type LdkOpenChannelProps = RouteProp<
   {
@@ -34,8 +34,8 @@ type LdkOpenChannelProps = RouteProp<
 >;
 
 const LdkOpenChannel = (props: any) => {
-  const { wallets, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
-  const [isBiometricUseCapableAndEnabled, setIsBiometricUseCapableAndEnabled] = useState(false);
+  const { wallets, fetchAndSaveWalletTransactions } = useStorage();
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const { colors }: { colors: any } = useTheme();
   const { navigate, setParams } = useNavigation();
   const {
@@ -76,14 +76,10 @@ const LdkOpenChannel = (props: any) => {
     })();
   }, [psbt]);
 
-  useEffect(() => {
-    Biometric.isBiometricUseCapableAndEnabled().then(setIsBiometricUseCapableAndEnabled);
-  }, []);
-
   const finalizeOpenChannel = async () => {
     setIsLoading(true);
-    if (isBiometricUseCapableAndEnabled) {
-      if (!(await Biometric.unlockWithBiometrics())) {
+    if (await isBiometricUseCapableAndEnabled()) {
+      if (!(await unlockWithBiometrics())) {
         setIsLoading(false);
         return;
       }
@@ -301,20 +297,5 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
-
-LdkOpenChannel.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    closeButtonFunc: ({ navigation }) => navigation.getParent().pop(),
-  },
-  (options, { theme, navigation, route }) => {
-    return {
-      ...options,
-      headerTitle: loc.lnd.new_channel,
-      headerLargeTitle: true,
-      statusBarStyle: 'auto',
-    };
-  },
-);
 
 export default LdkOpenChannel;

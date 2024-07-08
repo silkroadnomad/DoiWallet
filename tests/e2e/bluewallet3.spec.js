@@ -1,4 +1,4 @@
-import { helperDeleteWallet, sleep, hashIt, sup, helperImportWallet, yo } from './helperz';
+import { hashIt, helperDeleteWallet, helperImportWallet, sleep, sup, yo } from './helperz';
 
 beforeAll(async () => {
   // reinstalling the app just for any case to clean up app's storage
@@ -35,6 +35,7 @@ describe('BlueWallet UI Tests - import Watch-only wallet (zpub)', () => {
       // in case emulator has no google services and doesnt support pushes
       // we just dont show this popup
       await element(by.text(`No, and do not ask me again.`)).tap();
+      await element(by.text(`No, and do not ask me again.`)).tap(); // sometimes the first click doesnt work (detox issue, not app's)
     } catch (_) {}
     await expect(element(by.id('BitcoinAddressQRCodeContainer'))).toBeVisible();
     await expect(element(by.text('bc1qc8wun6lf9vcajpddtgdpd2pdrp0kwp29j6upgv'))).toBeVisible();

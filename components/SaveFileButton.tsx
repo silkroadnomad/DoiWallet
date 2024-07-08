@@ -1,9 +1,11 @@
-import React, { ReactNode } from 'react';
-import { Platform, StyleProp, ViewStyle } from 'react-native';
-import ToolTipMenu from './TooltipMenu';
+import React, { ReactNode, useCallback } from 'react';
+import { StyleProp, ViewStyle } from 'react-native';
+
+import * as fs from '../blue_modules/fs';
 import loc from '../loc';
 import { ActionIcons } from '../typings/ActionIcons';
-const fs = require('../blue_modules/fs');
+import ToolTipMenu from './TooltipMenu';
+import { Action } from './types';
 
 interface SaveFileButtonProps {
   fileName: string;
@@ -11,35 +13,51 @@ interface SaveFileButtonProps {
   children?: ReactNode;
   style?: StyleProp<ViewStyle>;
   afterOnPress?: () => void;
-  beforeOnPress?: () => Promise<void>; // Changed this line
+  beforeOnPress?: () => Promise<void>;
+  onMenuWillHide?: () => void;
+  onMenuWillShow?: () => void;
 }
 
-const SaveFileButton: React.FC<SaveFileButtonProps> = ({ fileName, fileContent, children, style, beforeOnPress, afterOnPress }) => {
-  const actions = [
-    { id: 'save', text: loc._.save, icon: actionIcons.Save },
-    { id: 'share', text: loc.receive.details_share, icon: actionIcons.Share },
-  ];
+const SaveFileButton: React.FC<SaveFileButtonProps> = ({
+  fileName,
+  fileContent,
+  children,
+  style,
+  beforeOnPress,
+  afterOnPress,
+  onMenuWillHide,
+  onMenuWillShow,
+}) => {
+  const handlePressMenuItem = useCallback(
+    async (actionId: string) => {
+      if (beforeOnPress) {
+        await beforeOnPress();
+      }
+      const action = actions.find(a => a.id === actionId);
 
-  const handlePressMenuItem = async (actionId: string) => {
-    if (beforeOnPress) {
-      await beforeOnPress(); // Now properly awaiting a function that returns a promise
-    }
-    const action = actions.find(a => a.id === actionId);
-
-    if (action?.id === 'save') {
-      await fs.writeFileAndExport(fileName, fileContent, false, Platform.OS !== 'android').finally(() => {
-        afterOnPress?.(); // Safely call afterOnPress if it exists
-      });
-    } else if (action?.id === 'share') {
-      await fs.writeFileAndExport(fileName, fileContent, true).finally(() => {
-        afterOnPress?.(); // Safely call afterOnPress if it exists
-      });
-    }
-  };
+      if (action?.id === 'save') {
+        await fs.writeFileAndExport(fileName, fileContent, false).finally(() => {
+          afterOnPress?.();
+        });
+      } else if (action?.id === 'share') {
+        await fs.writeFileAndExport(fileName, fileContent, true).finally(() => {
+          afterOnPress?.();
+        });
+      }
+    },
+    [afterOnPress, beforeOnPress, fileContent, fileName],
+  );
 
   return (
-    // @ts-ignore: Tooltip must be refactored to use TSX}
-    <ToolTipMenu isButton isMenuPrimaryAction actions={actions} onPressMenuItem={handlePressMenuItem} buttonStyle={style}>
+    <ToolTipMenu
+      onMenuWillHide={onMenuWillHide}
+      onMenuWillShow={onMenuWillShow}
+      isButton
+      isMenuPrimaryAction
+      actions={actions}
+      onPressMenuItem={handlePressMenuItem}
+      buttonStyle={style as ViewStyle} // Type assertion to match ViewStyle
+    >
       {children}
     </ToolTipMenu>
   );
@@ -49,11 +67,13 @@ export default SaveFileButton;
 
 const actionIcons: { [key: string]: ActionIcons } = {
   Share: {
-    iconType: 'SYSTEM',
     iconValue: 'square.and.arrow.up',
   },
   Save: {
-    iconType: 'SYSTEM',
     iconValue: 'square.and.arrow.down',
   },
 };
+const actions: Action[] = [
+  { id: 'save', text: loc._.save, icon: actionIcons.Save },
+  { id: 'share', text: loc.receive.details_share, icon: actionIcons.Share },
+];

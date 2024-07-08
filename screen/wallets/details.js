@@ -1,5 +1,5 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -7,7 +7,6 @@ import {
   InteractionManager,
   Keyboard,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -18,14 +17,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import RNFS from 'react-native-fs';
-import { PERMISSIONS, RESULTS, request } from 'react-native-permissions';
-import Share from 'react-native-share';
-import { BlueCard, BlueLoading, BlueSpacing10, BlueSpacing20, BlueText } from '../../BlueComponents';
-import { isDesktop } from '../../blue_modules/environment';
+import { writeFileAndExport } from '../../blue_modules/fs';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import Notifications from '../../blue_modules/notifications';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { BlueCard, BlueLoading, BlueSpacing10, BlueSpacing20, BlueText } from '../../BlueComponents';
 import {
   HDAezeedWallet,
   HDSegwitBech32Wallet,
@@ -36,20 +31,25 @@ import {
   SegwitP2SHWallet,
   WatchOnlyWallet,
 } from '../../class';
-import Biometric from '../../class/biometrics';
 import { AbstractHDElectrumWallet } from '../../class/wallets/abstract-hd-electrum-wallet';
 import { LightningCustodianWallet } from '../../class/wallets/lightning-custodian-wallet';
 import presentAlert from '../../components/Alert';
 import Button from '../../components/Button';
+import HeaderRightButton from '../../components/HeaderRightButton';
 import ListItem from '../../components/ListItem';
+import SaveFileButton from '../../components/SaveFileButton';
 import { SecondButton } from '../../components/SecondButton';
-import navigationStyle from '../../components/navigationStyle';
 import { useTheme } from '../../components/themes';
 import prompt from '../../helpers/prompt';
+import { unlockWithBiometrics, useBiometrics } from '../../hooks/useBiometrics';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
+
 import { DoichainUnit, Chain } from "../../models/doichainUnits";
-import SaveFileButton from '../../components/SaveFileButton';
+import { useSettings } from '../../hooks/context/useSettings';
+import { useStorage } from '../../hooks/context/useStorage';
+import { popToTop } from '../../NavigationService';
+
 
 const styles = StyleSheet.create({
   scrollViewContent: {
@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   delete: {
-    color: '#d0021b',
     fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',
@@ -108,21 +107,11 @@ const styles = StyleSheet.create({
   marginRight16: {
     marginRight: 16,
   },
-  save: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 80,
-    borderRadius: 8,
-    height: 34,
-  },
-  saveText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
 });
 
 const WalletDetails = () => {
-  const { saveToDisk, wallets, deleteWallet, setSelectedWalletID, txMetadata } = useContext(BlueStorageContext);
+  const { saveToDisk, wallets, deleteWallet, setSelectedWalletID, txMetadata } = useStorage();
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const { walletID } = useRoute().params;
   const [isLoading, setIsLoading] = useState(false);
   const [backdoorPressed, setBackdoorPressed] = useState(0);
@@ -130,11 +119,10 @@ const WalletDetails = () => {
   const wallet = useRef(wallets.find(w => w.getID() === walletID)).current;
   const [walletName, setWalletName] = useState(wallet.getLabel());
   const [useWithHardwareWallet, setUseWithHardwareWallet] = useState(wallet.useWithHardwareWalletEnabled());
-  const { isAdvancedModeEnabled } = useContext(BlueStorageContext);
-  const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
+  const { isAdvancedModeEnabled } = useSettings();
   const [isBIP47Enabled, setIsBIP47Enabled] = useState(wallet.isBIP47Enabled());
   const [hideTransactionsInWalletsList, setHideTransactionsInWalletsList] = useState(!wallet.getHideTransactionsInWalletsList());
-  const { goBack, setOptions, popToTop, navigate } = useExtendedNavigation();
+  const { goBack, setOptions, navigate } = useExtendedNavigation();
   const { colors } = useTheme();
   const [masterFingerprint, setMasterFingerprint] = useState();
   const walletTransactionsLength = useMemo(() => wallet.getTransactions().length, [wallet]);
@@ -147,14 +135,18 @@ const WalletDetails = () => {
     }
   }, [wallet]);
   const [lightningWalletInfo, setLightningWalletInfo] = useState({});
+  const [isToolTipMenuVisible, setIsToolTipMenuVisible] = useState(false);
+
+  const onMenuWillShow = () => setIsToolTipMenuVisible(true);
+  const onMenuWillHide = () => setIsToolTipMenuVisible(false);
 
   useEffect(() => {
-    if (isAdvancedModeEnabledRender && wallet.allowMasterFingerprint()) {
+    if (isAdvancedModeEnabled && wallet.allowMasterFingerprint()) {
       InteractionManager.runAfterInteractions(() => {
         setMasterFingerprint(wallet.getMasterFingerprintHex());
       });
     }
-  }, [isAdvancedModeEnabledRender, wallet]);
+  }, [isAdvancedModeEnabled, wallet]);
   const stylesHook = StyleSheet.create({
     textLabel1: {
       color: colors.feeText,
@@ -171,11 +163,8 @@ const WalletDetails = () => {
 
       backgroundColor: colors.inputBackgroundColor,
     },
-    save: {
-      backgroundColor: colors.lightButton,
-    },
-    saveText: {
-      color: colors.buttonTextColor,
+    delete: {
+      color: isToolTipMenuVisible ? colors.buttonDisabledTextColor : '#d0021b',
     },
   });
   useEffect(() => {
@@ -184,7 +173,7 @@ const WalletDetails = () => {
     }
   }, [wallet]);
 
-  const save = () => {
+  const handleSave = useCallback(() => {
     setIsLoading(true);
     if (walletName.trim().length > 0) {
       wallet.setLabel(walletName.trim());
@@ -205,27 +194,19 @@ const WalletDetails = () => {
         console.log(error.message);
         setIsLoading(false);
       });
-  };
+  }, [walletName, saveToDisk, wallet, hideTransactionsInWalletsList, useWithHardwareWallet, isBIP47Enabled, goBack]);
 
-  useLayoutEffect(() => {
-    isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
+  const SaveButton = useMemo(
+    () => <HeaderRightButton title={loc.wallets.details_save} onPress={handleSave} disabled={isLoading} testID="Save" />,
+    [isLoading, handleSave],
+  );
 
+  useEffect(() => {
     setOptions({
-      // eslint-disable-next-line react/no-unstable-nested-components
-      headerRight: () => (
-        <TouchableOpacity
-          accessibilityRole="button"
-          testID="Save"
-          disabled={isLoading}
-          style={[styles.save, stylesHook.save]}
-          onPress={save}
-        >
-          <Text style={[styles.saveText, stylesHook.saveText]}>{loc.wallets.details_save}</Text>
-        </TouchableOpacity>
-      ),
+      headerRight: () => SaveButton,
+      headerBackTitleVisible: true,
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading, colors, walletName, useWithHardwareWallet, hideTransactionsInWalletsList, isBIP47Enabled]);
+  }, [SaveButton, setOptions]);
 
   useEffect(() => {
     if (wallets.some(w => w.getID() === walletID)) {
@@ -289,7 +270,7 @@ const WalletDetails = () => {
     navigate('ViewEditMultisigCosignersRoot', {
       screen: 'ViewEditMultisigCosigners',
       params: {
-        walletId: wallet.getID(),
+        walletID,
       },
     });
   };
@@ -319,13 +300,7 @@ const WalletDetails = () => {
       walletID: wallet.getID(),
     });
 
-  const navigateToPaymentCodes = () =>
-    navigate('PaymentCodeRoot', {
-      screen: 'PaymentCodesList',
-      params: {
-        walletID: wallet.getID(),
-      },
-    });
+  const navigateToContacts = () => navigate('PaymentCodeList', { walletID });
 
   const exportInternals = async () => {
     if (backdoorPressed < 10) return setBackdoorPressed(backdoorPressed + 1);
@@ -352,46 +327,8 @@ const WalletDetails = () => {
       null,
       2,
     );
-    if (Platform.OS === 'ios') {
-      const filePath = RNFS.TemporaryDirectoryPath + `/${fileName}`;
-      await RNFS.writeFile(filePath, contents);
-      Share.open({
-        url: 'file://' + filePath,
-        saveToFiles: isDesktop,
-        failOnCancel: false,
-      })
-        .catch(error => {
-          console.log(error);
-        })
-        .finally(() => {
-          RNFS.unlink(filePath);
-        });
-    } else if (Platform.OS === 'android') {
-      const granted = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
-      if (granted === RESULTS.GRANTED) {
-        console.log('Storage Permission: Granted');
-        const filePath = RNFS.DownloadDirectoryPath + `/${fileName}`;
-        try {
-          await RNFS.writeFile(filePath, contents);
-          presentAlert({ message: loc.formatString(loc.send.txSaved, { filePath: fileName }) });
-        } catch (e) {
-          console.log(e);
-          presentAlert({ message: e.message });
-        }
-      } else {
-        console.log('Storage Permission: Denied');
-        Alert.alert(loc.send.permission_storage_title, loc.send.permission_storage_denied_message, [
-          {
-            text: loc.send.open_settings,
-            onPress: () => {
-              Linking.openSettings();
-            },
-            style: 'default',
-          },
-          { text: loc._.cancel, onPress: () => {}, style: 'cancel' },
-        ]);
-      }
-    }
+
+    await writeFileAndExport(fileName, contents, false);
   };
 
   const purgeTransactions = async () => {
@@ -464,10 +401,10 @@ const WalletDetails = () => {
         {
           text: loc.wallets.details_yes_delete,
           onPress: async () => {
-            const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+            const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();
 
             if (isBiometricsEnabled) {
-              if (!(await Biometric.unlockWithBiometrics())) {
+              if (!(await unlockWithBiometrics())) {
                 return;
               }
             }
@@ -594,7 +531,11 @@ const WalletDetails = () => {
                 </Text>
                 <View style={styles.hardware}>
                   <BlueText onPress={() => setBackdoorBip47Pressed(prevState => prevState + 1)}>{loc.wallets.details_display}</BlueText>
-                  <Switch value={hideTransactionsInWalletsList} onValueChange={setHideTransactionsInWalletsList} />
+                  <Switch
+                    disabled={isToolTipMenuVisible}
+                    value={hideTransactionsInWalletsList}
+                    onValueChange={setHideTransactionsInWalletsList}
+                  />
                 </View>
               </>
               <>
@@ -625,7 +566,7 @@ const WalletDetails = () => {
                     </View>
                   </>
                 )}
-                {isAdvancedModeEnabledRender && (
+                {isAdvancedModeEnabled && (
                   <View style={styles.row}>
                     {wallet.allowMasterFingerprint() && (
                       <View style={styles.marginRight16}>
@@ -647,17 +588,29 @@ const WalletDetails = () => {
               </View>
             </BlueCard>
             {(wallet instanceof AbstractHDElectrumWallet || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
-              <ListItem onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />
+              <ListItem disabled={isToolTipMenuVisible} onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />
             )}
-            {wallet.allowBIP47() && isBIP47Enabled && <ListItem onPress={navigateToPaymentCodes} title="Show payment codes" chevron />}
+            {wallet.allowBIP47() && wallet.isBIP47Enabled() && (
+              <ListItem disabled={isToolTipMenuVisible} onPress={navigateToContacts} title={loc.bip47.contacts} chevron />
+            )}
             <BlueCard style={styles.address}>
               <View>
                 <BlueSpacing20 />
-                <Button onPress={navigateToWalletExport} testID="WalletExport" title={loc.wallets.details_export_backup} />
+                <Button
+                  disabled={isToolTipMenuVisible}
+                  onPress={navigateToWalletExport}
+                  testID="WalletExport"
+                  title={loc.wallets.details_export_backup}
+                />
                 {walletTransactionsLength > 0 && (
                   <>
                     <BlueSpacing20 />
-                    <SaveFileButton fileName={fileName} fileContent={exportHistoryContent()}>
+                    <SaveFileButton
+                      onMenuWillHide={onMenuWillHide}
+                      onMenuWillShow={onMenuWillShow}
+                      fileName={fileName}
+                      fileContent={exportHistoryContent()}
+                    >
                       <SecondButton title={loc.wallets.details_export_history} />
                     </SaveFileButton>
                   </>
@@ -666,6 +619,7 @@ const WalletDetails = () => {
                   <>
                     <BlueSpacing20 />
                     <SecondButton
+                      disabled={isToolTipMenuVisible}
                       onPress={navigateToMultisigCoordinationSetup}
                       testID="MultisigCoordinationSetup"
                       title={loc.multisig.export_coordination_setup.replace(/^\w/, c => c.toUpperCase())}
@@ -677,6 +631,7 @@ const WalletDetails = () => {
                   <>
                     <BlueSpacing20 />
                     <SecondButton
+                      disabled={isToolTipMenuVisible}
                       onPress={navigateToViewEditCosigners}
                       testID="ViewEditCosigners"
                       title={loc.multisig.view_edit_cosigners}
@@ -687,25 +642,48 @@ const WalletDetails = () => {
                 {wallet.allowXpub() && (
                   <>
                     <BlueSpacing20 />
-                    <SecondButton onPress={navigateToXPub} testID="XPub" title={loc.wallets.details_show_xpub} />
+                    <SecondButton
+                      disabled={isToolTipMenuVisible}
+                      onPress={navigateToXPub}
+                      testID="XPub"
+                      title={loc.wallets.details_show_xpub}
+                    />
                   </>
                 )}
                 {wallet.allowSignVerifyMessage() && (
                   <>
                     <BlueSpacing20 />
-                    <SecondButton onPress={navigateToSignVerify} testID="SignVerify" title={loc.addresses.sign_title} />
+                    <SecondButton
+                      disabled={isToolTipMenuVisible}
+                      onPress={navigateToSignVerify}
+                      testID="SignVerify"
+                      title={loc.addresses.sign_title}
+                    />
                   </>
                 )}
                 {wallet.type === LightningLdkWallet.type && (
                   <>
                     <BlueSpacing20 />
-                    <SecondButton onPress={navigateToLdkViewLogs} testID="LdkLogs" title={loc.lnd.view_logs} />
+                    <SecondButton
+                      disabled={isToolTipMenuVisible}
+                      onPress={navigateToLdkViewLogs}
+                      testID="LdkLogs"
+                      title={loc.lnd.view_logs}
+                    />
                   </>
                 )}
                 <BlueSpacing20 />
                 <BlueSpacing20 />
-                <TouchableOpacity accessibilityRole="button" onPress={handleDeleteButtonTapped} testID="DeleteButton">
-                  <Text textBreakStrategy="simple" style={styles.delete}>{`${loc.wallets.details_delete}${'  '}`}</Text>
+                <TouchableOpacity
+                  disabled={isToolTipMenuVisible}
+                  accessibilityRole="button"
+                  onPress={handleDeleteButtonTapped}
+                  testID="DeleteButton"
+                >
+                  <Text
+                    textBreakStrategy="simple"
+                    style={[styles.delete, stylesHook.delete]}
+                  >{`${loc.wallets.details_delete}${'  '}`}</Text>
                 </TouchableOpacity>
                 <BlueSpacing20 />
                 <BlueSpacing20 />
@@ -717,11 +695,5 @@ const WalletDetails = () => {
     </ScrollView>
   );
 };
-
-WalletDetails.navigationOptions = navigationStyle({}, opts => ({
-  ...opts,
-  headerTitle: loc.wallets.details_title,
-  statusBarStyle: 'auto',
-}));
 
 export default WalletDetails;

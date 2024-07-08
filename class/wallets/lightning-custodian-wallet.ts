@@ -1,7 +1,8 @@
-import { LegacyWallet } from './legacy-wallet';
-import Frisbee from 'frisbee';
 import bolt11 from 'bolt11';
+import Frisbee from 'frisbee';
+
 import { DoichainUnit, Chain } from '../../models/doichainUnits';
+import { LegacyWallet } from './legacy-wallet';
 
 export class LightningCustodianWallet extends LegacyWallet {
   static readonly type = 'lightningCustodianWallet';

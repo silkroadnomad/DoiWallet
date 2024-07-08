@@ -1,24 +1,25 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Text, Keyboard, TouchableOpacity, SectionList } from 'react-native';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { Psbt } from 'bitcoinjs-lib';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, SectionList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BlueLoading, BlueSpacing10, BlueSpacing20, BlueTextCentered } from '../../BlueComponents';
+import { LightningLdkWallet } from '../../class';
+import { TWallet } from '../../class/wallets/types';
+import presentAlert from '../../components/Alert';
 
-import { BlueSpacing20, BlueSpacing10, BlueLoading, BlueTextCentered } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { Chain } from '../../models/doichainUnits';
-import loc, { formatBalance } from '../../loc';
-import LNNodeBar from '../../components/LNNodeBar';
 import BottomModal from '../../components/BottomModal';
 import Button from '../../components/Button';
-import { LightningLdkWallet } from '../../class';
-import presentAlert from '../../components/Alert';
-import { useTheme } from '../../components/themes';
-import StyledButton, { StyledButtonType } from '../../components/StyledButton';
+import LNNodeBar from '../../components/LNNodeBar';
+import navigationStyle from '../../components/navigationStyle';
 import SafeArea from '../../components/SafeArea';
+import StyledButton, { StyledButtonType } from '../../components/StyledButton';
+import { useTheme } from '../../components/themes';
 import confirm from '../../helpers/confirm';
 import selectWallet from '../../helpers/select-wallet';
-import { TWallet } from '../../class/wallets/types';
+import loc, { formatBalance } from '../../loc';
+
+import { useStorage } from '../../hooks/context/useStorage';
 
 const LdkNodeInfoChannelStatus = { ACTIVE: 'Active', INACTIVE: 'Inactive', PENDING: 'PENDING', STATUS: 'status' };
 
@@ -34,7 +35,7 @@ type LdkInfoRouteProps = RouteProp<
 
 const LdkInfo = () => {
   const { walletID } = useRoute<LdkInfoRouteProps>().params;
-  const { wallets } = useContext(BlueStorageContext);
+  const { wallets } = useStorage();
   const refreshDataInterval = useRef<NodeJS.Timer>();
   const sectionList = useRef<SectionList | null>();
   const wallet = wallets.find(w => w.getID() === walletID) as LightningLdkWallet;

@@ -1,5 +1,6 @@
 import BIP32Factory from 'bip32';
 import * as bitcoin from 'bitcoinjs-lib';
+
 import ecc from '../../blue_modules/noble_ecc';
 import { AbstractWallet } from './abstract-wallet';
 import { HDLegacyP2PKHWallet } from './hd-legacy-p2pkh-wallet';
@@ -18,6 +19,7 @@ export class WatchOnlyWallet extends LegacyWallet {
   public readonly type = WatchOnlyWallet.type;
   // @ts-ignore: override
   public readonly typeReadable = WatchOnlyWallet.typeReadable;
+  public isWatchOnlyWarningVisible = true;
 
   public _hdWalletInstance?: THDWalletForWatchOnly;
   use_with_hardware_wallet = false;

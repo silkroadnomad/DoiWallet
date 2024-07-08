@@ -1,6 +1,7 @@
 import * as bitcoin from 'bitcoinjs-lib';
 import { CoinSelectTarget } from 'coinselect';
 import { ECPairFactory } from 'ecpair';
+
 import ecc from '../../blue_modules/noble_ecc';
 import { LegacyWallet } from './legacy-wallet';
 import { CreateTransactionResult, CreateTransactionUtxo } from './types';
@@ -103,7 +104,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
     for (const u of utxos) {
       u.script = { length: 50 };
     }
-    const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
+    const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate);
     sequence = sequence || 0xffffffff; // disable RBF by default
     const psbt = new bitcoin.Psbt({ network: DOICHAIN });
     let c = 0;

@@ -1,7 +1,7 @@
-import { extractTextFromElementById, hashIt, helperImportWallet, sleep, sup, yo } from './helperz';
+import assert from 'assert';
+import * as bitcoin from 'bitcoinjs-lib';
 
-const bitcoin = require('bitcoinjs-lib');
-const assert = require('assert');
+import { extractTextFromElementById, hashIt, helperImportWallet, sleep, sup, yo } from './helperz';
 
 /**
  * in this suite each test requires that there is one specific wallet present, thus, we import it
@@ -469,11 +469,10 @@ describe('BlueWallet UI Tests - import BIP84 wallet', () => {
     await element(by.text('Save')).tap();
     await element(by.text('OK')).tap();
 
-    // back to wallet screen
-    await device.pressBack();
-    await device.pressBack();
-
-    // open CoinControl
+    // Terminate and reopen the app to confirm the note is persisted
+    await device.launchApp({ newInstance: true });
+    await yo('WalletsList');
+    await element(by.text('Imported HD SegWit (BIP84 Bech32 Native)')).tap();
     await element(by.id('SendButton')).tap();
     await element(by.id('advancedOptionsMenuButton')).tap();
     await element(by.id('CoinControl')).tap();

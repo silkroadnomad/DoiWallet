@@ -1,15 +1,15 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef } from 'react';
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native';
+import React, { useCallback, useMemo, useReducer, useRef } from 'react';
 import { ActivityIndicator, InteractionManager, ScrollView, StyleSheet, View } from 'react-native';
-import { useFocusEffect, useRoute, RouteProp } from '@react-navigation/native';
 import { BlueSpacing20, BlueText } from '../../BlueComponents';
+import { TWallet } from '../../class/wallets/types';
 import { DynamicQRCode } from '../../components/DynamicQRCode';
-import loc from '../../loc';
+import SaveFileButton from '../../components/SaveFileButton';
 import { SquareButton } from '../../components/SquareButton';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { useTheme } from '../../components/themes';
 import usePrivacy from '../../hooks/usePrivacy';
-import { TWallet } from '../../class/wallets/types';
-import SaveFileButton from '../../components/SaveFileButton';
+import loc from '../../loc';
+import { useStorage } from '../../hooks/context/useStorage';
 
 type RootStackParamList = {
   ExportMultisigCoordinationSetup: {
@@ -64,7 +64,7 @@ const ExportMultisigCoordinationSetup: React.FC = () => {
   const { isLoading, isShareButtonTapped, qrCodeContents } = state;
   const { params } = useRoute<RouteProp<RootStackParamList, 'ExportMultisigCoordinationSetup'>>();
   const walletID = params.walletID;
-  const { wallets } = useContext(BlueStorageContext);
+  const { wallets } = useStorage();
   const wallet: TWallet | undefined = wallets.find(w => w.getID() === walletID);
   const dynamicQRCode = useRef<any>();
   const { colors } = useTheme();
@@ -115,7 +115,7 @@ const ExportMultisigCoordinationSetup: React.FC = () => {
         disableBlur();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet]),
+    }, [walletID]),
   );
 
   const exportTxtFileBeforeOnPress = async () => {

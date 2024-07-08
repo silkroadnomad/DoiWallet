@@ -1,20 +1,20 @@
-import React, { useState, useCallback, useContext, useRef, useEffect } from 'react';
-import { InteractionManager, ScrollView, ActivityIndicator, View, StyleSheet, AppState } from 'react-native';
-import { useNavigation, useFocusEffect, useRoute } from '@react-navigation/native';
-import { BlueSpacing20, BlueText, BlueCard } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, InteractionManager, ScrollView, StyleSheet, View } from 'react-native';
+import { BlueCard, BlueSpacing20, BlueText } from '../../BlueComponents';
 import { LegacyWallet, LightningCustodianWallet, SegwitBech32Wallet, SegwitP2SHWallet, WatchOnlyWallet } from '../../class';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import QRCodeComponent from '../../components/QRCodeComponent';
-import HandOffComponent from '../../components/HandOffComponent';
-import { useTheme } from '../../components/themes';
-import SafeArea from '../../components/SafeArea';
-import usePrivacy from '../../hooks/usePrivacy';
 import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+import HandOffComponent from '../../components/HandOffComponent';
+import QRCodeComponent from '../../components/QRCodeComponent';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import usePrivacy from '../../hooks/usePrivacy';
+import loc from '../../loc';
+import { useStorage } from '../../hooks/context/useStorage';
+import { HandOffActivityType } from '../../components/types';
 
 const WalletExport = () => {
-  const { wallets, saveToDisk } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk } = useStorage();
   const { walletID } = useRoute().params;
   const [isLoading, setIsLoading] = useState(true);
   const { goBack } = useNavigation();
@@ -116,11 +116,7 @@ const WalletExport = () => {
               </BlueText>
             )}
             {wallet.type === WatchOnlyWallet.type && (
-              <HandOffComponent
-                title={loc.wallets.xpub_title}
-                type={HandOffComponent.activityTypes.Xpub}
-                userInfo={{ xpub: wallet.getSecret() }}
-              />
+              <HandOffComponent title={loc.wallets.xpub_title} type={HandOffActivityType.Xpub} userInfo={{ xpub: wallet.getSecret() }} />
             )}
           </React.Fragment>
         ))}
@@ -154,14 +150,5 @@ const styles = StyleSheet.create({
     writingDirection: 'ltr',
   },
 });
-
-WalletExport.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerBackVisible: false,
-    statusBarStyle: 'light',
-  },
-  opts => ({ ...opts, title: loc.wallets.export_title }),
-);
 
 export default WalletExport;

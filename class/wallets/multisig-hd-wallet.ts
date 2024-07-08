@@ -3,18 +3,19 @@ import * as bip39 from 'bip39';
 import * as bitcoin from 'bitcoinjs-lib';
 import { Psbt, Transaction } from 'bitcoinjs-lib';
 import b58 from 'bs58check';
+import { CoinSelectReturnInput, CoinSelectTarget } from 'coinselect';
 import createHash from 'create-hash';
 import { ECPairFactory } from 'ecpair';
 import * as mn from 'electrum-mnemonic';
+
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import ecc from '../../blue_modules/noble_ecc';
 import { decodeUR } from '../../blue_modules/ur';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
-import { CoinSelectReturnInput, CoinSelectTarget } from 'coinselect';
 import { CreateTransactionResult, CreateTransactionUtxo } from './types';
 import { DOICHAIN } from "../../blue_modules/network";
 
 const ECPair = ECPairFactory(ecc);
-const BlueElectrum = require('../../blue_modules/BlueElectrum');
 const bip32 = BIP32Factory(ecc);
 
 type SeedOpts = {
@@ -82,7 +83,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   private _isLegacy: boolean = false;
   private _nodes: BIP32Interface[][] = [];
   public _derivationPath: string = '';
-  public gap_limit: number = 10;
+  public gap_limit: number = 20;
 
   isLegacy() {
     return this._isLegacy;
@@ -260,15 +261,15 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   /**
    * Stored cosigner can be EITHER xpub (or Zpub or smth), OR mnemonic phrase. This method converts it to xpub
    *
-   * @param cosigner {string} Zpub (or similar) or mnemonic seed
+   * @param index {number}
    * @returns {string} xpub
    * @private
    */
-  _getXpubFromCosigner(cosigner: string) {
+  protected _getXpubFromCosignerIndex(index: number) {
+    let cosigner: string = this._cosigners[index];
     if (MultisigHDWallet.isXprvString(cosigner)) cosigner = MultisigHDWallet.convertXprvToXpub(cosigner);
     let xpub = cosigner;
     if (!MultisigHDWallet.isXpubString(cosigner)) {
-      const index = this._cosigners.indexOf(cosigner);
       xpub = MultisigHDWallet.seedToXpub(
         cosigner,
         this._cosignersCustomPaths[index] || this._derivationPath,
@@ -290,13 +291,15 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
   _getAddressFromNode(nodeIndex: number, index: number) {
     const pubkeys = [];
-    for (const [cosignerIndex, cosigner] of this._cosigners.entries()) {
+    for (const [cosignerIndex] of this._cosigners.entries()) {
       this._nodes[nodeIndex] = this._nodes[nodeIndex] || [];
       let _node;
 
       if (!this._nodes[nodeIndex][cosignerIndex]) {
-        const xpub = this._getXpubFromCosigner(cosigner);
+
+        const xpub = this._getXpubFromCosignerIndex(cosignerIndex);
         const hdNode = bip32.fromBase58(xpub, DOICHAIN);
+
         _node = hdNode.derive(nodeIndex);
         this._nodes[nodeIndex][cosignerIndex] = _node;
       } else {
@@ -726,7 +729,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   _addPsbtInput(psbt: Psbt, input: CoinSelectReturnInput, sequence: number, masterFingerprintBuffer?: Buffer) {
     const bip32Derivation = []; // array per each pubkey thats gona be used
     const pubkeys = [];
-    for (const [cosignerIndex, cosigner] of this._cosigners.entries()) {
+    for (const [cosignerIndex] of this._cosigners.entries()) {
       if (!input.address) {
         throw new Error('Could not find address in input');
       }
@@ -741,8 +744,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
         throw new Error('Could not find derivation path for address ' + input.address);
       }
 
-      const xpub = this._getXpubFromCosigner(cosigner);
-      const hdNode0 = bip32.fromBase58(xpub, DOICHAIN);
+
+      const xpub = this._getXpubFromCosignerIndex(cosignerIndex);
+      const hdNode0 = bip32.fromBase58(xpub , DOICHAIN);
+
       const splt = path.split('/');
       const internal = +splt[splt.length - 2];
       const index = +splt[splt.length - 1];
@@ -838,7 +843,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   _getOutputDataForChange(address: string): TOutputData {
     const bip32Derivation: TBip32Derivation = []; // array per each pubkey thats gona be used
     const pubkeys = [];
-    for (const [cosignerIndex, cosigner] of this._cosigners.entries()) {
+    for (const [cosignerIndex] of this._cosigners.entries()) {
       const path = this._getDerivationPathByAddressWithCustomPath(
         address,
         this._cosignersCustomPaths[cosignerIndex] || this._derivationPath,
@@ -850,7 +855,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
         throw new Error('Could not find derivation path for address ' + address);
       }
 
-      const xpub = this._getXpubFromCosigner(cosigner);
+      const xpub = this._getXpubFromCosignerIndex(cosignerIndex);
       const hdNode0 = bip32.fromBase58(xpub, DOICHAIN);
       const splt = path.split('/');
       const internal = +splt[splt.length - 2];
@@ -958,7 +963,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       }
     }
 
-    const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate, changeAddress);
+    const { inputs, outputs, fee } = this.coinselect(utxos, targets, feeRate);
     sequence = sequence || AbstractHDElectrumWallet.defaultRBFSequence;
 
     let psbt = new bitcoin.Psbt({ network: DOICHAIN });
@@ -1073,7 +1078,6 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     // now we need to fetch txhash for each input as required by PSBT
     const txhexes = await BlueElectrum.multiGetTransactionByTxid(
       this.getUtxo(true).map(x => x.txid),
-      50,
       false,
     );
 

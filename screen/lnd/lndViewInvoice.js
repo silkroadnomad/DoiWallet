@@ -1,28 +1,28 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { View, Text, ScrollView, BackHandler, TouchableOpacity, StyleSheet, I18nManager, Image } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigationState, useRoute } from '@react-navigation/native';
+import { BackHandler, I18nManager, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
 import Share from 'react-native-share';
-import { Icon } from 'react-native-elements';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { BlueLoading, BlueSpacing20, BlueText, BlueTextCentered } from '../../BlueComponents';
+import Button from '../../components/Button';
+import CopyTextToClipboard from '../../components/CopyTextToClipboard';
 import QRCodeComponent from '../../components/QRCodeComponent';
-import { useNavigation, useNavigationState, useRoute } from '@react-navigation/native';
-import { BlueLoading, BlueText, BlueSpacing20, BlueTextCentered } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
 import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
 import { DoichainUnit } from "../../models/doichainUnits";
 import { SuccessView } from '../send/success';
 import LNDCreateInvoice from './lndCreateInvoice';
-import { useTheme } from '../../components/themes';
-import Button from '../../components/Button';
-import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
-import SafeArea from '../../components/SafeArea';
-import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+import { useStorage } from '../../hooks/context/useStorage';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 
 const LNDViewInvoice = () => {
   const { invoice, walletID } = useRoute().params;
-  const { wallets, setSelectedWalletID, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
+  const { wallets, setSelectedWalletID, fetchAndSaveWalletTransactions } = useStorage();
   const wallet = wallets.find(w => w.getID() === walletID);
   const { colors, closeImage } = useTheme();
-  const { goBack, navigate, setParams, setOptions, getParent } = useNavigation();
+  const { goBack, navigate, setParams, setOptions, getParent } = useExtendedNavigation();
   const [isLoading, setIsLoading] = useState(typeof invoice === 'string');
   const [isFetchingInvoices, setIsFetchingInvoices] = useState(true);
   const [invoiceStatusChanged, setInvoiceStatusChanged] = useState(false);
@@ -318,17 +318,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 16,
   },
-});
-
-LNDViewInvoice.navigationOptions = navigationStyle({}, (options, { theme }) => {
-  return {
-    ...options,
-    statusBarStyle: 'auto',
-    headerTitle: loc.lndViewInvoice.lightning_invoice,
-    headerStyle: {
-      backgroundColor: theme.colors.customHeader,
-    },
-  };
 });
 
 export default LNDViewInvoice;

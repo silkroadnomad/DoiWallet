@@ -14,7 +14,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
   
   static let identifier = "NumericKeypadInterfaceController"
   private var amount: [String] = ["0"]
-  var keyPadType: NumericKeypadType = .BTC
+  var keyPadType: NumericKeypadType = .DOI
   struct NotificationName {
     static let keypadDataChanged = Notification.Name(rawValue: "Notification.NumericKeypadInterfaceController.keypadDataChanged")
   }
@@ -22,8 +22,8 @@ class NumericKeypadInterfaceController: WKInterfaceController {
     static let keypadDataChanged = Notification(name: NotificationName.keypadDataChanged)
   }
   enum NumericKeypadType: String {
-    case BTC = "BTC"
-    case SATS = "sats"
+    case DOI = "DOI"
+    case SWARTZ = "SWARTZ"
   }
   
   @IBOutlet weak var periodButton: WKInterfaceButton!
@@ -32,7 +32,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
     super.awake(withContext: context)
     if let context = context as? SpecifyInterfaceController.SpecificQRCodeContent {
       amount = context.amountStringArray
-      keyPadType = context.bitcoinUnit
+      keyPadType = context.doichainUnit
     }
     periodButton.setEnabled(keyPadType == .SATS)
   }

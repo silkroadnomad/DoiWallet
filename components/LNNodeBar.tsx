@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+
 import loc, { formatBalanceWithoutSuffix } from '../loc';
 import { DoichainUnit } from '../models/doichainUnits';
 import { useTheme } from './themes';

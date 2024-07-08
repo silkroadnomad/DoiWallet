@@ -1,41 +1,40 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   ActivityIndicator,
+  I18nManager,
   Image,
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
-  Platform,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  I18nManager,
 } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
-
-import { BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import AmountInput from '../../components/AmountInput';
-import * as NavigationService from '../../NavigationService';
+import { Icon } from '@rneui/themed';
 import { DoichainUnit, Chain } from "../../models/doichainUnits";
-import loc, { formatBalance, formatBalanceWithoutSuffix, formatBalancePlain } from '../../loc';
-import Lnurl from '../../class/lnurl';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import Notifications from '../../blue_modules/notifications';
-import presentAlert from '../../components/Alert';
 import { parse } from 'url'; // eslint-disable-line n/no-deprecated-api
-import { requestCameraAuthorization } from '../../helpers/scan-qr';
-import { useTheme } from '../../components/themes';
-import Button from '../../components/Button';
-import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import { btcToSatoshi, fiatToBTC, satoshiToBTC } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import Notifications from '../../blue_modules/notifications';
+import { BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueComponents';
+import Lnurl from '../../class/lnurl';
+import presentAlert from '../../components/Alert';
+import AmountInput from '../../components/AmountInput';
+import Button from '../../components/Button';
+import { useTheme } from '../../components/themes';
 import { presentWalletExportReminder } from '../../helpers/presentWalletExportReminder';
+import { requestCameraAuthorization } from '../../helpers/scan-qr';
+import loc, { formatBalance, formatBalancePlain, formatBalanceWithoutSuffix } from '../../loc';
+
+import * as NavigationService from '../../NavigationService';
+import { useStorage } from '../../hooks/context/useStorage';
 
 const LNDCreateInvoice = () => {
-  const { wallets, saveToDisk, setSelectedWalletID } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, setSelectedWalletID } = useStorage();
   const { walletID, uri } = useRoute().params;
   const wallet = useRef(wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN));
   const createInvoiceRef = useRef();
@@ -529,11 +528,3 @@ const styles = StyleSheet.create({
 
 export default LNDCreateInvoice;
 LNDCreateInvoice.routeName = 'LNDCreateInvoice';
-LNDCreateInvoice.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerBackVisible: false,
-    statusBarStyle: 'light',
-  },
-  opts => ({ ...opts, title: loc.receive.header }),
-);

@@ -1,14 +1,15 @@
-import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useReducer } from 'react';
-import { StyleSheet, LayoutAnimation, FlatList, ViewStyle, InteractionManager } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
-import { useIsFocused, NavigationProp, ParamListBase } from '@react-navigation/native';
-import { BlueHeaderDefaultMain } from '../../BlueComponents';
-import WalletsCarousel from '../../components/WalletsCarousel';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { useTheme } from '../../components/themes';
+import { NavigationProp, ParamListBase, useIsFocused } from '@react-navigation/native';
+import React, { memo, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { FlatList, InteractionManager, LayoutAnimation, StyleSheet, ViewStyle } from 'react-native';
+
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import { TWallet } from '../../class/wallets/types';
+import { Header } from '../../components/Header';
+import { useTheme } from '../../components/themes';
+import WalletsCarousel from '../../components/WalletsCarousel';
+import loc from '../../loc';
+import { useStorage } from '../../hooks/context/useStorage';
 
 enum WalletActionType {
   SetWallets = 'SET_WALLETS',
@@ -19,7 +20,6 @@ enum WalletActionType {
 
 interface WalletState {
   wallets: TWallet[];
-  selectedWalletID: string | null;
   isFocused: boolean;
 }
 
@@ -63,15 +63,10 @@ interface DrawerListProps {
 const walletReducer = (state: WalletState, action: WalletAction): WalletState => {
   switch (action.type) {
     case WalletActionType.SetWallets: {
-      const isSelectedWalletInNewSet = action.wallets.some(wallet => wallet.getID() === state.selectedWalletID);
       return {
         ...state,
         wallets: action.wallets,
-        selectedWalletID: isSelectedWalletInNewSet ? state.selectedWalletID : null,
       };
-    }
-    case WalletActionType.SelectWallet: {
-      return { ...state, selectedWalletID: action.walletID };
     }
     case WalletActionType.SetFocus: {
       return { ...state, isFocused: action.isFocused };
@@ -84,13 +79,12 @@ const walletReducer = (state: WalletState, action: WalletAction): WalletState =>
 const DrawerList: React.FC<DrawerListProps> = memo(({ navigation }) => {
   const initialState: WalletState = {
     wallets: [],
-    selectedWalletID: null,
     isFocused: false,
   };
 
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const walletsCarousel = useRef<FlatList<TWallet>>(null);
-  const { wallets } = useContext(BlueStorageContext);
+  const { wallets, selectedWalletID } = useStorage();
   const { colors } = useTheme();
   const isFocused = useIsFocused();
 
@@ -103,6 +97,7 @@ const DrawerList: React.FC<DrawerListProps> = memo(({ navigation }) => {
   );
 
   useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     dispatch({ type: WalletActionType.SetWallets, wallets });
     dispatch({ type: WalletActionType.SetFocus, isFocused });
   }, [wallets, isFocused]);
@@ -121,7 +116,7 @@ const DrawerList: React.FC<DrawerListProps> = memo(({ navigation }) => {
           });
         });
       } else {
-        navigation.navigate('Navigation', { screen: 'AddWalletRoot' });
+        navigation.navigate('AddWalletRoot');
       }
     },
     [navigation],
@@ -147,7 +142,7 @@ const DrawerList: React.FC<DrawerListProps> = memo(({ navigation }) => {
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
     >
-      <BlueHeaderDefaultMain leftText={loc.wallets.list_title} onNewWalletPress={onNewWalletPress} isDrawerList />
+      <Header leftText={loc.wallets.list_title} onNewWalletPress={onNewWalletPress} isDrawerList />
       <WalletsCarousel
         // @ts-ignore: refactor later
         data={state.wallets.concat(false as any)}
@@ -156,7 +151,7 @@ const DrawerList: React.FC<DrawerListProps> = memo(({ navigation }) => {
         handleLongPress={handleLongPress}
         ref={walletsCarousel}
         testID="WalletsList"
-        selectedWallet={state.selectedWalletID}
+        selectedWallet={selectedWalletID}
         scrollEnabled={state.isFocused}
       />
     </DrawerContentScrollView>

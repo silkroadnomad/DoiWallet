@@ -1,6 +1,7 @@
-import { DimensionValue, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Text } from 'react-native-elements';
 import React from 'react';
+import { DimensionValue, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '@rneui/themed';
+
 import { useTheme } from './themes';
 
 interface LdkButtonProps {

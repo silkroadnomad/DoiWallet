@@ -1,9 +1,9 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Alert,
+  findNodeHandle,
   FlatList,
   InteractionManager,
   Keyboard,
@@ -15,10 +15,10 @@ import {
   Switch,
   Text,
   View,
-  findNodeHandle,
 } from 'react-native';
-import { Badge, Icon } from 'react-native-elements';
-
+import { Badge, Icon } from '@rneui/themed';
+import { isDesktop, isTablet } from '../../blue_modules/environment';
+import { encodeUR } from '../../blue_modules/ur';
 import {
   BlueButtonLink,
   BlueFormMultiInput,
@@ -29,12 +29,7 @@ import {
   BlueText,
   BlueTextCentered,
 } from '../../BlueComponents';
-import { ViewEditMultisigCosignersStackParamsList } from '../../Navigation';
-import * as NavigationService from '../../NavigationService';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-import { encodeUR } from '../../blue_modules/ur';
 import { HDSegwitBech32Wallet, MultisigCosigner, MultisigHDWallet } from '../../class';
-import Biometric from '../../class/biometrics';
 import presentAlert from '../../components/Alert';
 import BottomModal from '../../components/BottomModal';
 import Button from '../../components/Button';
@@ -43,29 +38,31 @@ import MultipleStepsListItem, {
   MultipleStepsListItemDashType,
 } from '../../components/MultipleStepsListItem';
 import QRCodeComponent from '../../components/QRCodeComponent';
+import SaveFileButton from '../../components/SaveFileButton';
 import { SquareButton } from '../../components/SquareButton';
 import SquareEnumeratedWords, { SquareEnumeratedWordsContentAlign } from '../../components/SquareEnumeratedWords';
-import navigationStyle from '../../components/navigationStyle';
 import { useTheme } from '../../components/themes';
+import prompt from '../../helpers/prompt';
 import { scanQrHelper } from '../../helpers/scan-qr';
+import { unlockWithBiometrics, useBiometrics } from '../../hooks/useBiometrics';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import usePrivacy from '../../hooks/usePrivacy';
 import loc from '../../loc';
-import { isDesktop } from '../../blue_modules/environment';
 import ActionSheet from '../ActionSheet';
-import SaveFileButton from '../../components/SaveFileButton';
-import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
-import prompt from '../../helpers/prompt';
+import { useStorage } from '../../hooks/context/useStorage';
+import { useSettings } from '../../hooks/context/useSettings';
 
-type Props = NativeStackScreenProps<ViewEditMultisigCosignersStackParamsList, 'ViewEditMultisigCosigners'>;
-
-const ViewEditMultisigCosigners = ({ route }: Props) => {
+const ViewEditMultisigCosigners: React.FC = () => {
   const hasLoaded = useRef(false);
   const { colors } = useTheme();
-  const { wallets, setWalletsWithNewOrder, isElectrumDisabled, isAdvancedModeEnabled } = useContext(BlueStorageContext);
+  const { wallets, setWalletsWithNewOrder, isElectrumDisabled } = useStorage();
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
+  const { isAdvancedModeEnabled } = useSettings();
   const { navigate, dispatch, addListener } = useExtendedNavigation();
   const openScannerButtonRef = useRef();
-  const { walletId } = route.params;
-  const w = useRef(wallets.find(wallet => wallet.getID() === walletId));
+  const route = useRoute();
+  const { walletID } = route.params as { walletID: string };
+  const w = useRef(wallets.find(wallet => wallet.getID() === walletID));
   const tempWallet = useRef(new MultisigHDWallet());
   const [wallet, setWallet] = useState<MultisigHDWallet>();
   const [isLoading, setIsLoading] = useState(true);
@@ -78,9 +75,8 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
   const [exportString, setExportString] = useState('{}'); // used in exportCosigner()
   const [exportStringURv2, setExportStringURv2] = useState(''); // used in QR
   const [exportFilename, setExportFilename] = useState('bw-cosigner.json');
-  const [vaultKeyData, setVaultKeyData] = useState({ keyIndex: 1, xpub: '', seed: '', path: '', fp: '', isLoading: false }); // string rendered in modal
+  const [vaultKeyData, setVaultKeyData] = useState({ keyIndex: 1, xpub: '', seed: '', passphrase: '', path: '', fp: '', isLoading: false }); // string rendered in modal
   const [askPassphrase, setAskPassphrase] = useState(false);
-  const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
   const data = useRef<any[]>();
   /* discardChangesRef is only so the action sheet can be shown on mac catalyst when a 
     user tries to leave the screen with unsaved changes.
@@ -121,7 +117,7 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
   });
   useFocusEffect(
     useCallback(() => {
-      const unsubscribe = addListener('beforeRemove', e => {
+      const unsubscribe = addListener('beforeRemove', (e: { preventDefault: () => void; data: { action: any } }) => {
         // Check if there are unsaved changes
         if (isSaveButtonDisabled) {
           // If there are no unsaved changes, let the user leave the screen
@@ -167,11 +163,6 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
     }, [isSaveButtonDisabled, addListener, dispatch]),
   );
 
-  useEffect(() => {
-    isAdvancedModeEnabled().then(setIsAdvancedModeEnabledRender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const saveFileButtonAfterOnPress = () => {
     setIsShareModalVisible(false);
   };
@@ -182,10 +173,10 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
     }
     setIsLoading(true);
 
-    const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+    const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();
 
     if (isBiometricsEnabled) {
-      if (!(await Biometric.unlockWithBiometrics())) {
+      if (!(await unlockWithBiometrics())) {
         setIsLoading(false);
         return;
       }
@@ -193,13 +184,12 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
 
     // eslint-disable-next-line prefer-const
     let newWallets = wallets.filter(newWallet => {
-      return newWallet.getID() !== walletId;
+      return newWallet.getID() !== walletID;
     }) as MultisigHDWallet[];
     if (!isElectrumDisabled) {
       await wallet?.fetchBalance();
     }
     newWallets.push(wallet);
-    // @ts-ignore  wtf
     navigate('WalletsList');
     setTimeout(() => {
       setWalletsWithNewOrder(newWallets);
@@ -231,7 +221,7 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
         task.cancel();
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [walletId]),
+    }, [walletID]),
   );
 
   const hideMnemonicsModal = () => {
@@ -275,6 +265,9 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
                 entries={vaultKeyData.seed.split(' ')}
                 appendNumber
               />
+              {vaultKeyData.passphrase.length > 1 && (
+                <Text style={[styles.textDestination, stylesHook.textDestination]}>{vaultKeyData.passphrase}</Text>
+              )}
             </>
           )}
           <BlueSpacing20 />
@@ -344,6 +337,7 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
                     setVaultKeyData({
                       keyIndex,
                       seed: '',
+                      passphrase: '',
                       xpub,
                       fp,
                       path,
@@ -385,12 +379,14 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
                   onPress: () => {
                     const keyIndex = el.index + 1;
                     const seed = wallet.getCosigner(keyIndex);
+                    const passphrase = wallet.getCosignerPassphrase(keyIndex);
                     setVaultKeyData({
                       keyIndex,
                       seed,
                       xpub: '',
                       fp: '',
                       path: '',
+                      passphrase: passphrase ?? '',
                       isLoading: false,
                     });
                     setIsMnemonicsModalVisible(true);
@@ -400,7 +396,7 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
                       presentAlert({ message: 'Cannot find derivation path for this cosigner' });
                       return;
                     }
-                    const xpub = wallet.convertXpubToMultisignatureXpub(MultisigHDWallet.seedToXpub(seed, path));
+                    const xpub = wallet.convertXpubToMultisignatureXpub(MultisigHDWallet.seedToXpub(seed, path, passphrase));
                     setExportString(MultisigCosigner.exportToJson(fp, xpub, path));
                     setExportStringURv2(encodeUR(MultisigCosigner.exportToJson(fp, xpub, path))[0]);
                     setExportFilename('bw-cosigner-' + fp + '.json');
@@ -514,7 +510,7 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
 
   const scanOrOpenFile = async () => {
     setIsProvideMnemonicsModalVisible(false);
-    const scanned = await scanQrHelper(NavigationService.navigate, route.name, true);
+    const scanned = await scanQrHelper(route.name, true);
     setImportText(String(scanned));
     setIsProvideMnemonicsModalVisible(true);
   };
@@ -531,16 +527,14 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
   };
 
   const renderProvideMnemonicsModal = () => {
-    // @ts-ignore weird, property exists on type definition. might be some ts bugs
-    const isPad: boolean = Platform.isPad;
     return (
       <BottomModal avoidKeyboard isVisible={isProvideMnemonicsModalVisible} onClose={hideProvideMnemonicsModal} coverScreen={false}>
-        <KeyboardAvoidingView enabled={!isPad} behavior={Platform.OS === 'ios' ? 'position' : 'padding'} keyboardVerticalOffset={120}>
+        <KeyboardAvoidingView enabled={!isTablet} behavior={Platform.OS === 'ios' ? 'position' : 'padding'} keyboardVerticalOffset={120}>
           <View style={[styles.modalContent, stylesHook.modalContent]}>
             <BlueTextCentered>{loc.multisig.type_your_mnemonics}</BlueTextCentered>
             <BlueSpacing20 />
             <BlueFormMultiInput value={importText} onChangeText={setImportText} />
-            {isAdvancedModeEnabledRender && (
+            {isAdvancedModeEnabled && (
               <>
                 <BlueSpacing10 />
                 <View style={styles.row}>
@@ -563,12 +557,9 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
   };
 
   const renderShareModal = () => {
-    // @ts-ignore weird, property exists on typedefinition. might be some ts bugs
-    const isPad: boolean = Platform.isPad;
-
     return (
       <BottomModal isVisible={isShareModalVisible} onClose={hideShareModal} doneButton coverScreen={false}>
-        <KeyboardAvoidingView enabled={!isPad} behavior={Platform.OS === 'ios' ? 'position' : undefined}>
+        <KeyboardAvoidingView enabled={!isTablet} behavior={Platform.OS === 'ios' ? 'position' : undefined}>
           <View style={[styles.modalContent, stylesHook.modalContent, styles.alignItemsCenter]}>
             <Text style={[styles.headerText, stylesHook.textDestination]}>
               {loc.multisig.this_is_cosigners_xpub} {Platform.OS === 'ios' ? loc.multisig.this_is_cosigners_xpub_airdrop : ''}
@@ -629,13 +620,11 @@ const ViewEditMultisigCosigners = ({ route }: Props) => {
   };
 
   const footer = <Button disabled={vaultKeyData.isLoading || isSaveButtonDisabled} title={loc._.save} onPress={onSave} />;
-  // @ts-ignore weird, property exists on typedefinition. might be some ts bugs
-  const isPad: boolean = Platform.isPad;
 
   return (
     <View style={[styles.root, stylesHook.root]} ref={discardChangesRef}>
       <KeyboardAvoidingView
-        enabled={!isPad}
+        enabled={!isTablet}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={62}
         style={[styles.mainBlock, styles.root]}
@@ -726,13 +715,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
 });
-
-ViewEditMultisigCosigners.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerBackVisible: false,
-  },
-  opts => ({ ...opts, headerTitle: loc.multisig.manage_keys }),
-);
 
 export default ViewEditMultisigCosigners;
