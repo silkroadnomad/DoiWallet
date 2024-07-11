@@ -10,7 +10,7 @@ import {
 import Notifications from '../blue_modules/notifications';
 import { MultisigHDWallet } from '../class';
 import loc, { formatBalance, transactionTimeToReadable } from '../loc';
-import { Chain } from "./models/doichainUnits";
+import { Chain } from "../models/doichainUnits";
 import { FiatUnit } from '../models/fiatUnit';
 import { useSettings } from '../hooks/context/useSettings';
 import { useStorage } from '../hooks/context/useStorage';
