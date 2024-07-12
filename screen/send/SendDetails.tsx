@@ -752,7 +752,7 @@ const SendDetails = () => {
       const res = await DocumentPicker.pickSingle({
         type:
           Platform.OS === 'ios'
-            ? ['io.DoiWallet.psbt', 'io.DoiWallet.psbt.txn', DocumentPicker.types.plainText, 'public.json']
+            ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn', DocumentPicker.types.plainText, 'public.json']
             : [DocumentPicker.types.allFiles],
       });
 
@@ -1278,7 +1278,7 @@ const SendDetails = () => {
                 <View style={styles.feeModalRow}>
                   <Text style={disabled ? stylesHook.feeModalItemTextDisabled : stylesHook.feeModalValue}>{fee && formatFee(fee)}</Text>
                   <Text style={disabled ? stylesHook.feeModalItemTextDisabled : stylesHook.feeModalValue}>
-                    {rate} {loc.units.sat_vbyte}
+                    {rate} {loc.units.sat_byte}
                   </Text>
                 </View>
               </TouchableOpacity>
