@@ -724,7 +724,7 @@ const SendDetails = () => {
 
       // we construct PSBT object and pass to next screen
       // so user can do smth with it:
-      const psbt = bitcoin.Psbt.fromBase64(ret.data);
+      const psbt = bitcoin.Psbt.fromBase64(ret.data, { network: DOICHAIN });
       navigation.navigate('PsbtWithHardwareWallet', {
         memo: transactionMemo,
         fromWallet: wallet,
@@ -760,7 +760,7 @@ const SendDetails = () => {
         // we assume that transaction is already signed, so all we have to do is get txhex and pass it to next screen
         // so user can broadcast:
         const file = await RNFS.readFile(res.uri, 'ascii');
-        const psbt = bitcoin.Psbt.fromBase64(file);
+        const psbt = bitcoin.Psbt.fromBase64(file, { network: DOICHAIN });
         const txhex = psbt.extractTransaction().toHex();
         navigation.navigate('PsbtWithHardwareWallet', { memo: transactionMemo, fromWallet: wallet, txhex });
         setIsLoading(false);
@@ -772,7 +772,7 @@ const SendDetails = () => {
         // looks like transaction is UNsigned, so we construct PSBT object and pass to next screen
         // so user can do smth with it:
         const file = await RNFS.readFile(res.uri, 'ascii');
-        const psbt = bitcoin.Psbt.fromBase64(file);
+        const psbt = bitcoin.Psbt.fromBase64(file, { network: DOICHAIN });
         navigation.navigate('PsbtWithHardwareWallet', { memo: transactionMemo, fromWallet: wallet, psbt });
         setIsLoading(false);
         setOptionsVisible(false);
@@ -821,7 +821,7 @@ const SendDetails = () => {
     try {
       const base64 = base64arg || (await fs.openSignedTransaction());
       if (!base64) return;
-      const psbt = bitcoin.Psbt.fromBase64(base64); // if it doesnt throw - all good, its valid
+      const psbt = bitcoin.Psbt.fromBase64(base64, { network: DOICHAIN }); // if it doesnt throw - all good, its valid
 
       if ((wallet as MultisigHDWallet)?.howManySignaturesCanWeMake() > 0 && (await askCosignThisTransaction())) {
         hideOptions();
@@ -926,7 +926,7 @@ const SendDetails = () => {
     let tx;
     let psbt;
     try {
-      psbt = bitcoin.Psbt.fromBase64(scannedData);
+      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
       tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
     } catch (e: any) {
       presentAlert({ title: loc.errors.error, message: e.message });
@@ -1593,7 +1593,7 @@ const SendDetails = () => {
               </View>
             )}
           </TouchableOpacity>
-          {renderCreateButton()}
+          {renderCreateButton()}        
           {renderFeeSelectionModal()}
           {renderOptionsModal()}
         </KeyboardAvoidingView>

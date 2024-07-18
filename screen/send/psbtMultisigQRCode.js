@@ -23,7 +23,7 @@ const PsbtMultisigQRCode = () => {
   const dynamicQRCode = useRef();
   const isFocused = useIsFocused();
 
-  const psbt = bitcoin.Psbt.fromBase64(psbtBase64);
+  const psbt = bitcoin.Psbt.fromBase64(psbtBase64, { network: DOICHAIN });
   const stylesHook = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,

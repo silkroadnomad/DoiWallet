@@ -30,7 +30,7 @@ const PsbtMultisig = () => {
   const { walletID, psbtBase64, memo, receivedPSBTBase64, launchedBy } = useRoute().params;
   /** @type MultisigHDWallet */
   const wallet = wallets.find(w => w.getID() === walletID);
-  const [psbt, setPsbt] = useState(bitcoin.Psbt.fromBase64(psbtBase64));
+  const [psbt, setPsbt] = useState(bitcoin.Psbt.fromBase64(psbtBase64, { network: DOICHAIN }));
   const data = new Array(wallet.getM());
   const stylesHook = StyleSheet.create({
     root: {
@@ -156,7 +156,7 @@ const PsbtMultisig = () => {
 
   const _combinePSBT = () => {
     try {
-      const receivedPSBT = bitcoin.Psbt.fromBase64(receivedPSBTBase64);
+      const receivedPSBT = bitcoin.Psbt.fromBase64(receivedPSBTBase64, { network: DOICHAIN });
       const newPsbt = psbt.combine(receivedPSBT);
       setPsbt(newPsbt);
     } catch (error) {
