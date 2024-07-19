@@ -1,10 +1,12 @@
+import { useRoute } from '@react-navigation/native';
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import { useRoute, useTheme } from '@react-navigation/native';
+import { StyleSheet, View } from 'react-native';
 
-import { BlueCopyTextToClipboard, SafeBlueArea, BlueSpacing20, BlueTextCentered } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
+import { BlueSpacing20, BlueTextCentered } from '../../BlueComponents';
+import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+import QRCodeComponent from '../../components/QRCodeComponent';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
 import loc from '../../loc';
 
 const LNDViewAdditionalInvoicePreImage = () => {
@@ -18,25 +20,17 @@ const LNDViewAdditionalInvoicePreImage = () => {
   });
 
   return (
-    <SafeBlueArea style={stylesHook.root}>
+    <SafeArea style={stylesHook.root}>
       <View style={styles.wrapper}>
         <BlueTextCentered>{loc.lndViewInvoice.preimage}:</BlueTextCentered>
         <BlueSpacing20 />
         <View style={styles.qrCodeContainer}>
-          <QRCode
-            value={preImageData}
-            logo={require('../../img/qr-code.png')}
-            size={300}
-            logoSize={90}
-            color="#000000"
-            logoBackgroundColor={colors.brandingColor}
-            backgroundColor="#FFFFFF"
-          />
+          <QRCodeComponent value={preImageData} size={300} logoSize={90} />
         </View>
         <BlueSpacing20 />
-        <BlueCopyTextToClipboard text={preImageData} />
+        <CopyTextToClipboard text={preImageData} />
       </View>
-    </SafeBlueArea>
+    </SafeArea>
   );
 };
 
@@ -50,12 +44,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 16,
-    borderWidth: 6,
-    borderRadius: 8,
-    borderColor: '#FFFFFF',
   },
 });
 
 export default LNDViewAdditionalInvoicePreImage;
-
-LNDViewAdditionalInvoicePreImage.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.lndViewInvoice.additional_info }));

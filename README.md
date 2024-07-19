@@ -2,14 +2,13 @@
 
 [![GitHub tag](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/BlueWallet/BlueWallet/master/package.json&query=$.version&label=Version)](https://github.com/BlueWallet/BlueWallet)
 [![CircleCI](https://circleci.com/gh/BlueWallet/BlueWallet.svg?style=svg)](https://circleci.com/gh/BlueWallet/BlueWallet)
-[![e2e on master](https://travis-ci.com/BlueWallet/BlueWallet.svg?branch=master)](https://travis-ci.com/BlueWallet/BlueWallet)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 ![](https://img.shields.io/github/license/BlueWallet/BlueWallet.svg)
 
 Thin Bitcoin Wallet.
 Built with React Native and Electrum.
 
-[![Appstore](https://bluewallet.io/uploads/app-store-badge-blue.svg)](https://itunes.apple.com/us/app/bluewallet-doi-wallet/id1376878040?l=ru&ls=1&mt=8)
+[![Appstore](https://bluewallet.io/uploads/app-store-badge-blue.svg)](https://itunes.apple.com/us/app/bluewallet-bitcoin-wallet/id1376878040?l=ru&ls=1&mt=8)
 [![Playstore](https://bluewallet.io/uploads/play-store-badge-blue.svg)](https://play.google.com/store/apps/details?id=org.doichain.doiwallet)
 
 Website: [bluewallet.io](https://bluewallet.io)
@@ -77,28 +76,23 @@ In another terminal window within the BlueWallet folder:
 ```
 npx react-native run-ios
 ```
+**To debug BlueWallet on the iOS Simulator, you must choose a Rosetta-compatible iOS Simulator. This can be done by navigating to the Product menu in Xcode, selecting Destination Architectures, and then opting for "Show Both." This action will reveal the simulators that support Rosetta.
+**
 
 * To run on macOS using Mac Catalyst:
 
 ```
-npm run maccatalystpatches
+npx pod-install
+npm start
 ```
 
-Once the patches are applied, open Xcode and select "My Mac" as destination. If you are running macOS Catalina, you may need to remove all iOS 14 Widget targets.
-
+Open ios/BlueWallet.xcworkspace. Once the project loads, select the scheme/target BlueWallet-NoLDK. Click Run.
 
 ## TESTS
 
 ```bash
 npm run test
 ```
-
-
-## MOTIVATION TO BUILD IT
-
-I was not satisfied with existing iOS Bitcoin apps, especially with BreadWallet (the one I mainly used) where development stalled and they could not even deliver such features as SegWit, RBF and custom fees (at the times where custom fees were especially needed).
-So I knew I could create one to use myself and let others use it.
-I had experience with awesome doi-js lib (javascript), and since I dont own any Macs, don't plan to and not going to learn ObjC/Swift - ReactNative (where you also write in javascript) was an obvious choice.
 
 
 ## LICENSE
@@ -111,7 +105,7 @@ Grab an issue from [the backlog](https://github.com/BlueWallet/BlueWallet/projec
 
 ## Translations
 
-We accepts translations via [Transifex](https://www.transifex.com/bluewallet/bluewallet/)
+We accept translations via [Transifex](https://www.transifex.com/bluewallet/bluewallet/)
 
 To participate you need to:
 1. Sign up to Transifex
@@ -129,15 +123,12 @@ Builds automated and tested with BrowserStack
 
 <a href="https://www.browserstack.com/"><img src="https://i.imgur.com/syscHCN.png" width="160px"></a>
 
+Bugs reported via BugSnag
+
+<a href="https://www.bugsnag.com"><img src="https://images.typeform.com/images/QKuaAssrFCq7/image/default" width="160px"></a>
+
+
 ## RESPONSIBLE DISCLOSURE
 
 Found critical bugs/vulnerabilities? Please email them bluewallet@bluewallet.io
 Thanks!
-
-## How to make a release
-
-[Apple](https://github.com/Doichain/DoiWallet/blob/master/RELEASE.md)
-
-
-
-[Android](https://github.com/Doichain/DoiWallet/blob/master/RELEASE.md)

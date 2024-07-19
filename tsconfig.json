@@ -12,7 +12,8 @@
     "target": "esnext",
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "useUnknownInCatchVariables": false,
+    "module": "esnext",
   },
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"]
+  "extends": "@tsconfig/react-native/tsconfig.json",
+  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js", "components/react-native-draggable-flatlist", "scripts/maccatalystpatches"],
 }

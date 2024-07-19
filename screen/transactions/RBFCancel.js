@@ -1,16 +1,18 @@
-/* global alert */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ActivityIndicator, View, ScrollView } from 'react-native';
-import { BlueSpacing20, SafeBlueArea, BlueText } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { BlueSpacing20, BlueText } from '../../BlueComponents';
 import { HDSegwitBech32Transaction, HDSegwitBech32Wallet } from '../../class';
-import CPFP from './CPFP';
+import presentAlert from '../../components/Alert';
+import navigationStyle from '../../components/navigationStyle';
+import SafeArea from '../../components/SafeArea';
 import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import CPFP from './CPFP';
+import { StorageContext } from '../../components/Context/StorageProvider';
+import { popToTop } from '../../NavigationService';
 
 export default class RBFCancel extends CPFP {
-  static contextType = BlueStorageContext;
+  static contextType = StorageContext;
   async componentDidMount() {
     console.log('transactions/RBFCancel - componentDidMount');
     this.setState({
@@ -36,14 +38,14 @@ export default class RBFCancel extends CPFP {
       const info = await tx.getInfo();
       console.log({ info });
       return this.setState({ nonReplaceable: false, feeRate: info.feeRate + 1, isLoading: false, tx });
-      // 1 swartz makes a lot of difference, since sometimes because of rounding created tx's fee might be insufficient
+      // 1 sat makes a lot of difference, since sometimes because of rounding created tx's fee might be insufficient
     } else {
       return this.setState({ nonReplaceable: true, isLoading: false });
     }
   }
 
   async createTransaction() {
-    const newFeeRate = parseInt(this.state.newFeeRate);
+    const newFeeRate = parseInt(this.state.newFeeRate, 10);
     if (newFeeRate > this.state.feeRate) {
       /** @type {HDSegwitBech32Transaction} */
       const tx = this.state.tx;
@@ -54,7 +56,7 @@ export default class RBFCancel extends CPFP {
         this.setState({ isLoading: false });
       } catch (_) {
         this.setState({ isLoading: false });
-        alert(loc.errors.error + ': ' + _.message);
+        presentAlert({ message: loc.errors.error + ': ' + _.message });
       }
     }
   }
@@ -70,7 +72,7 @@ export default class RBFCancel extends CPFP {
       this.context.txMetadata[this.state.newTxid].memo = 'Cancelled transaction';
     }
     this.context.sleep(4000).then(() => this.context.fetchAndSaveWalletTransactions(this.state.wallet.getID()));
-    this.props.navigation.navigate('Success', { onDonePressed: () => this.props.navigation.popToTop(), amount: undefined });
+    this.props.navigation.navigate('Success', { onDonePressed: () => popToTop(), amount: undefined });
   }
 
   render() {
@@ -88,7 +90,7 @@ export default class RBFCancel extends CPFP {
 
     if (this.state.nonReplaceable) {
       return (
-        <SafeBlueArea>
+        <SafeArea>
           <BlueSpacing20 />
           <BlueSpacing20 />
           <BlueSpacing20 />
@@ -96,21 +98,20 @@ export default class RBFCancel extends CPFP {
           <BlueSpacing20 />
 
           <BlueText h4>{loc.transactions.cancel_no}</BlueText>
-        </SafeBlueArea>
+        </SafeArea>
       );
     }
 
     return (
-      <SafeBlueArea>
+      <SafeArea>
         <ScrollView>{this.renderStage1(loc.transactions.cancel_explain)}</ScrollView>
-      </SafeBlueArea>
+      </SafeArea>
     );
   }
 }
 
 RBFCancel.propTypes = {
   navigation: PropTypes.shape({
-    popToTop: PropTypes.func,
     navigate: PropTypes.func,
     state: PropTypes.shape({
       params: PropTypes.shape({

@@ -1,28 +1,29 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
-import { Icon } from 'react-native-elements';
-import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from 'react';
+import { Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
 
-import { BlueButton, BlueListItem, BlueSpacing20 } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import BottomModal from '../../components/BottomModal';
+import { BlueSpacing20 } from '../../BlueComponents';
 import { MultisigHDWallet } from '../../class';
+import BottomModal from '../../components/BottomModal';
+import Button from '../../components/Button';
+import ListItem from '../../components/ListItem';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
 import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const WalletsAddMultisig = () => {
   const { colors } = useTheme();
   const { navigate } = useNavigation();
   const loadingAnimation = useRef();
-  const { walletLabel = loc.multisig.default_label } = useRoute().params;
+  const { walletLabel } = useRoute().params;
   const [m, setM] = useState(2);
   const [n, setN] = useState(3);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [format, setFormat] = useState(MultisigHDWallet.FORMAT_P2WSH);
-  const { isAdancedModeEnabled } = useContext(BlueStorageContext);
-  const [isAdvancedModeEnabledRender, setIsAdvancedModeEnabledRender] = useState(false);
+  const { isAdvancedModeEnabled } = useSettings();
 
   const stylesHook = StyleSheet.create({
     root: {
@@ -33,10 +34,6 @@ const WalletsAddMultisig = () => {
     textdesc: {
       color: colors.alternativeTextColor,
     },
-    whiteBackground: { backgroundColor: colors.background },
-    itemNameWrapper: { backgroundColor: colors.elevated },
-    nativeName: { color: colors.foregroundColor },
-    filteTextWrapper: { color: colors.foregroundColor, right: 0, position: 'absolute' },
     modalContentShort: {
       backgroundColor: colors.elevated,
     },
@@ -55,8 +52,16 @@ const WalletsAddMultisig = () => {
   });
 
   useEffect(() => {
-    isAdancedModeEnabled().then(setIsAdvancedModeEnabledRender);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (loadingAnimation.current) {
+      /*
+      https://github.com/lottie-react-native/lottie-react-native/issues/832#issuecomment-1008209732
+      Temporary workaround until Lottie is fixed.
+      */
+      setTimeout(() => {
+        loadingAnimation.current?.reset();
+        loadingAnimation.current?.play();
+      }, 100);
+    }
   }, []);
 
   const onLetsStartPress = () => {
@@ -101,9 +106,9 @@ const WalletsAddMultisig = () => {
 
   const renderModal = () => {
     return (
-      <BottomModal isVisible={isModalVisible} onClose={closeModal} doneButton>
-        <KeyboardAvoidingView enabled={!Platform.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
-          <View style={[styles.modalContentShort, stylesHook.modalContentShort]}>
+      <BottomModal isVisible={isModalVisible} onClose={closeModal} doneButton propagateSwipe>
+        <View style={[styles.modalContentShort, stylesHook.modalContentShort]}>
+          <ScrollView>
             <Text style={[styles.textHeader, stylesHook.textHeader]}>{loc.multisig.quorum_header}</Text>
             <Text style={[styles.textSubtitle, stylesHook.textSubtitle]}>{loc.multisig.required_keys_out_of_total}</Text>
             <View style={styles.rowCenter}>
@@ -112,13 +117,13 @@ const WalletsAddMultisig = () => {
                   <Icon
                     name="chevron-up"
                     size={22}
-                    type="octicon"
+                    type="font-awesome-5"
                     color={n === m || m === 7 ? colors.buttonDisabledTextColor : '#007AFF'}
                   />
                 </TouchableOpacity>
                 <Text style={[styles.textM, stylesHook.textHeader]}>{m}</Text>
                 <TouchableOpacity accessibilityRole="button" onPress={decreaseM} disabled={m === 2} style={styles.chevron}>
-                  <Icon name="chevron-down" size={22} type="octicon" color={m === 2 ? colors.buttonDisabledTextColor : '#007AFF'} />
+                  <Icon name="chevron-down" size={22} type="font-awesome-5" color={m === 2 ? colors.buttonDisabledTextColor : '#007AFF'} />
                 </TouchableOpacity>
               </View>
 
@@ -128,11 +133,17 @@ const WalletsAddMultisig = () => {
 
               <View style={styles.column}>
                 <TouchableOpacity accessibilityRole="button" disabled={n === 7} onPress={increaseN} style={styles.chevron}>
-                  <Icon name="chevron-up" size={22} type="octicon" color={n === 7 ? colors.buttonDisabledTextColor : '#007AFF'} />
+                  <Icon name="chevron-up" size={22} type="font-awesome-5" color={n === 7 ? colors.buttonDisabledTextColor : '#007AFF'} />
                 </TouchableOpacity>
                 <Text style={[styles.textM, stylesHook.textHeader]}>{n}</Text>
-                <TouchableOpacity accessibilityRole="button" onPress={decreaseN} disabled={n === m} style={styles.chevron}>
-                  <Icon name="chevron-down" size={22} type="octicon" color={n === m ? colors.buttonDisabledTextColor : '#007AFF'} />
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  onPress={decreaseN}
+                  disabled={n === m}
+                  style={styles.chevron}
+                  testID="DecreaseN"
+                >
+                  <Icon name="chevron-down" size={22} type="font-awesome-5" color={n === m ? colors.buttonDisabledTextColor : '#007AFF'} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -141,29 +152,29 @@ const WalletsAddMultisig = () => {
 
             <Text style={[styles.textHeader, stylesHook.textHeader]}>{loc.multisig.wallet_type}</Text>
             <BlueSpacing20 />
-            <BlueListItem
+            <ListItem
               bottomDivider={false}
               onPress={setFormatP2wsh}
               title={`${loc.multisig.native_segwit_title} (${MultisigHDWallet.FORMAT_P2WSH})`}
               checkmark={isP2wsh()}
               containerStyle={[styles.borderRadius6, styles.item, isP2wsh() ? stylesHook.selectedItem : stylesHook.deSelectedItem]}
             />
-            <BlueListItem
+            <ListItem
               bottomDivider={false}
               onPress={setFormatP2shP2wsh}
               title={`${loc.multisig.wrapped_segwit_title} (${MultisigHDWallet.FORMAT_P2SH_P2WSH})`}
               checkmark={isP2shP2wsh()}
               containerStyle={[styles.borderRadius6, styles.item, isP2shP2wsh() ? stylesHook.selectedItem : stylesHook.deSelectedItem]}
             />
-            <BlueListItem
+            <ListItem
               bottomDivider={false}
               onPress={setFormatP2sh}
               title={`${loc.multisig.legacy_title} (${MultisigHDWallet.FORMAT_P2SH})`}
               checkmark={isP2sh()}
               containerStyle={[styles.borderRadius6, styles.item, isP2sh() ? stylesHook.selectedItem : stylesHook.deSelectedItem]}
             />
-          </View>
-        </KeyboardAvoidingView>
+          </ScrollView>
+        </View>
       </BottomModal>
     );
   };
@@ -184,11 +195,10 @@ const WalletsAddMultisig = () => {
   };
 
   return (
-    <SafeAreaView style={stylesHook.root}>
-      <StatusBar barStyle="light-content" />
+    <SafeArea style={stylesHook.root}>
       <View style={styles.descriptionContainer}>
         <View style={styles.imageWrapper}>
-          <LottieView source={require('../../img/msvault.json')} autoPlay ref={loadingAnimation} loop={false} />
+          <LottieView source={require('../../img/msvault.json')} style={styles.lottie} autoPlay ref={loadingAnimation} loop={false} />
         </View>
         <BlueSpacing20 />
         <Text style={[styles.textdesc, stylesHook.textdesc]}>
@@ -211,9 +221,10 @@ const WalletsAddMultisig = () => {
           </Text>
         </Text>
       </View>
-      {isAdvancedModeEnabledRender && (
-        <View style={styles.advancedOptionsContainer}>
-          <BlueListItem
+      {isAdvancedModeEnabled && (
+        <View>
+          <ListItem
+            testID="VaultAdvancedCustomize"
             onPress={showAdvancedOptionsModal}
             title={loc.multisig.vault_advanced_customize}
             subtitle={`${getCurrentlySelectedFormat('format')}, ${getCurrentlySelectedFormat('quorum')}`}
@@ -222,21 +233,19 @@ const WalletsAddMultisig = () => {
         </View>
       )}
       <View style={styles.buttonContainer}>
-        <BlueButton buttonTextColor={colors.buttonAlternativeTextColor} title={loc.multisig.lets_start} onPress={onLetsStartPress} />
+        <Button
+          testID="LetsStart"
+          buttonTextColor={colors.buttonAlternativeTextColor}
+          title={loc.multisig.lets_start}
+          onPress={onLetsStartPress}
+        />
       </View>
       {renderModal()}
-    </SafeAreaView>
+    </SafeArea>
   );
 };
 
 const styles = StyleSheet.create({
-  modalFlatList: { width: '100%' },
-  itemNameWrapper: { flexDirection: 'row', paddingTop: 20, paddingBottom: 0 },
-  textWrapper: { paddingLeft: 10, flex: 1, flexDirection: 'row' },
-  nativeName: { fontSize: 16 },
-  filteTextWrapper: { right: 0, position: 'absolute' },
-  filterText: { fontSize: 16, color: 'gray' },
-  advancedOptionsContainer: {},
   item: {
     paddingHorizontal: 0,
   },
@@ -246,39 +255,20 @@ const styles = StyleSheet.create({
     flex: 0.8,
   },
   modalContentShort: {
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     justifyContent: 'center',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     borderColor: 'rgba(0, 0, 0, 0.1)',
     minHeight: 350,
   },
-  formatSelectorTextWrapper: {
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderColor: 0,
-  },
   borderRadius6: {
     borderRadius: 6,
-  },
-  formatSelectorTextWrapperSelected: {
-    backgroundColor: '#EEF0F4',
-    borderRadius: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderColor: 0,
+    minHeight: 54,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    margin: 24,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  formatSelectorText: {
-    color: '#13244D',
-    fontSize: 16,
-    fontWeight: '500',
+    padding: 24,
   },
   column: {
     paddingRight: 20,
@@ -312,6 +302,10 @@ const styles = StyleSheet.create({
     fontSize: 30,
     color: '#9AA0AA',
   },
+  lottie: {
+    width: 233,
+    height: 176,
+  },
   textHeader: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -323,8 +317,7 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     borderWidth: 0,
-    flexDirection: 'row',
-    height: 160,
+    alignItems: 'center',
   },
   rowCenter: {
     flexDirection: 'row',
@@ -347,8 +340,8 @@ WalletsAddMultisig.getCurrentFormatReadable = f => {
   }
 };
 
-WalletsAddMultisig.navigationOptions = navigationStyle({
-  headerTitle: null,
-});
+WalletsAddMultisig.initialParams = {
+  walletLabel: loc.multisig.default_label,
+};
 
 export default WalletsAddMultisig;

@@ -1,4 +1,3 @@
-/* eslint-disable */
 const DOICHAIN_MAINNET = {
   name: "mainnet",
   messagePrefix: "\x19Doichain Signed Message:\n",
@@ -24,7 +23,7 @@ const DOICHAIN_TESTNET = {
   scriptHash: 196,
   wif: 239,
 };
-const DOICHAIN_REGTEST = {  
+const DOICHAIN_REGTEST = {
   name: "regtest",
   messagePrefix: "\x19Doichain-Regtest Signed Message:\n",
   bech32: "ncrt",
@@ -37,5 +36,4 @@ const DOICHAIN_REGTEST = {
   wif: 239,
 };
 
-
-export const DOICHAIN =  DOICHAIN_MAINNET;
+export const DOICHAIN = DOICHAIN_MAINNET;

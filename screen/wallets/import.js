@@ -1,37 +1,40 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Platform, View, Keyboard, StatusBar, StyleSheet, Alert } from 'react-native';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
-import {
-  BlueFormMultiInput,
-  BlueButtonLink,
-  BlueFormLabel,
-  BlueDoneAndDismissKeyboardInputAccessory,
-  BlueButton,
-  SafeBlueArea,
-  BlueSpacing20,
-} from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import Privacy from '../../blue_modules/Privacy';
-import WalletImport from '../../class/wallet-import';
-import loc from '../../loc';
-import { isDesktop, isMacCatalina } from '../../blue_modules/environment';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { Keyboard, Platform, StyleSheet, Switch, TouchableWithoutFeedback, View } from 'react-native';
 
-const fs = require('../../blue_modules/fs');
+import {
+  BlueButtonLink,
+  BlueDoneAndDismissKeyboardInputAccessory,
+  BlueFormLabel,
+  BlueFormMultiInput,
+  BlueSpacing20,
+  BlueText,
+} from '../../BlueComponents';
+import Button from '../../components/Button';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import { requestCameraAuthorization } from '../../helpers/scan-qr';
+import usePrivacy from '../../hooks/usePrivacy';
+import loc from '../../loc';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const WalletsImport = () => {
-  const [isToolbarVisibleForAndroid, setIsToolbarVisibleForAndroid] = useState(false);
-  const route = useRoute();
-  const { isImportingWallet } = useContext(BlueStorageContext);
-  const label = (route.params && route.params.label) || '';
-  const triggerImport = (route.params && route.params.triggerImport) || false;
-  const [importText, setImportText] = useState(label);
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const route = useRoute();
+  const label = route?.params?.label ?? '';
+  const triggerImport = route?.params?.triggerImport ?? false;
+  const { isAdvancedModeEnabled } = useSettings();
+  const [importText, setImportText] = useState(label);
+  const [isToolbarVisibleForAndroid, setIsToolbarVisibleForAndroid] = useState(false);
+  const [, setSpeedBackdoor] = useState(0);
+  const [searchAccounts, setSearchAccounts] = useState(false);
+  const [askPassphrase, setAskPassphrase] = useState(false);
+  const { enableBlur, disableBlur } = usePrivacy();
+
   const styles = StyleSheet.create({
     root: {
-      paddingTop: 40,
+      paddingTop: 10,
       backgroundColor: colors.elevated,
     },
     center: {
@@ -39,18 +42,31 @@ const WalletsImport = () => {
       marginHorizontal: 16,
       backgroundColor: colors.elevated,
     },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginHorizontal: 16,
+      marginTop: 10,
+      justifyContent: 'space-between',
+    },
   });
 
+  const onBlur = () => {
+    const valueWithSingleWhitespace = importText.replace(/^\s+|\s+$|\s+(?=\s)/g, '');
+    setImportText(valueWithSingleWhitespace);
+    return valueWithSingleWhitespace;
+  };
+
   useEffect(() => {
-    Privacy.enableBlur();
+    enableBlur();
     Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => setIsToolbarVisibleForAndroid(true));
     Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setIsToolbarVisibleForAndroid(false));
     return () => {
-      Keyboard.removeListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide');
-      Keyboard.removeListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow');
-      Privacy.disableBlur();
+      Keyboard.removeAllListeners(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow');
+      Keyboard.removeAllListeners(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide');
+      disableBlur();
     };
-  }, []);
+  }, [disableBlur, enableBlur]);
 
   useEffect(() => {
     if (triggerImport) importButtonPressed();
@@ -58,68 +74,17 @@ const WalletsImport = () => {
   }, []);
 
   const importButtonPressed = () => {
-    if (importText.trim().length === 0) {
+    const textToImport = onBlur();
+    if (textToImport.trim().length === 0) {
       return;
     }
-    importMnemonic(importText);
+    importMnemonic(textToImport);
   };
 
-  /**
-   *
-   * @param importText
-   */
-  const importMnemonic = async importText => {
-    if (isImportingWallet && isImportingWallet.isFailure === false) {
-      return;
-    }
-
-    let res;
-    try {
-      res = await WalletImport.askPasswordIfNeeded(importText);
-    } catch (e) {
-      // prompt cancelled
-      return;
-    }
-    const { text, password } = res;
-
-    WalletImport.addPlaceholderWallet(text);
-    navigation.dangerouslyGetParent().pop();
-    await new Promise(resolve => setTimeout(resolve, 500)); // giving some time to animations
-    try {
-      await WalletImport.processImportText(text, password);
-      WalletImport.removePlaceholderWallet();
-    } catch (error) {
-      console.log(error);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      Alert.alert(
-        loc.wallets.add_details,
-        loc.wallets.list_import_problem,
-        [
-          {
-            text: loc.wallets.list_tryagain,
-            onPress: () => {
-              navigation.navigate('AddWalletRoot', { screen: 'ImportWallet', params: { label: importText } });
-              WalletImport.removePlaceholderWallet();
-            },
-            style: 'default',
-          },
-          {
-            text: loc._.cancel,
-            onPress: () => {
-              WalletImport.removePlaceholderWallet();
-            },
-            style: 'cancel',
-          },
-        ],
-        { cancelable: false },
-      );
-    }
+  const importMnemonic = text => {
+    navigation.navigate('ImportWalletDiscovery', { importText: text, askPassphrase, searchAccounts });
   };
 
-  /**
-   *
-   * @param value
-   */
   const onBarScanned = value => {
     if (value && value.data) value = value.data + ''; // no objects here, only strings
     setImportText(value);
@@ -127,47 +92,74 @@ const WalletsImport = () => {
   };
 
   const importScan = () => {
-    if (isMacCatalina) {
-      fs.showActionSheet().then(onBarScanned);
-    } else {
+    requestCameraAuthorization().then(() =>
       navigation.navigate('ScanQRCodeRoot', {
         screen: 'ScanQRCode',
         params: {
           launchedBy: route.name,
-          onBarScanned: onBarScanned,
+          onBarScanned,
           showFileImportButton: true,
         },
-      });
-    }
+      }),
+    );
   };
 
-  return (
-    <SafeBlueArea style={styles.root}>
-      <StatusBar barStyle="light-content" />
-      <BlueSpacing20 />
-      <BlueFormLabel>{loc.wallets.import_explanation}</BlueFormLabel>
-      <BlueSpacing20 />
-      <BlueFormMultiInput
-        testID="MnemonicInput"
-        value={importText}
-        contextMenuHidden={!isDesktop}
-        onChangeText={setImportText}
-        inputAccessoryViewID={BlueDoneAndDismissKeyboardInputAccessory.InputAccessoryViewID}
-      />
+  const speedBackdoorTap = () => {
+    setSpeedBackdoor(v => {
+      v += 1;
+      if (v < 5) return v;
+      navigation.navigate('ImportSpeed');
+      return 0;
+    });
+  };
+
+  const renderOptionsAndImportButton = (
+    <>
+      {isAdvancedModeEnabled && (
+        <>
+          <View style={styles.row}>
+            <BlueText>{loc.wallets.import_passphrase}</BlueText>
+            <Switch testID="AskPassphrase" value={askPassphrase} onValueChange={setAskPassphrase} />
+          </View>
+          <View style={styles.row}>
+            <BlueText>{loc.wallets.import_search_accounts}</BlueText>
+            <Switch testID="SearchAccounts" value={searchAccounts} onValueChange={setSearchAccounts} />
+          </View>
+        </>
+      )}
 
       <BlueSpacing20 />
       <View style={styles.center}>
         <>
-          <BlueButton
-            testID="DoImport"
+          <Button
             disabled={importText.trim().length === 0}
             title={loc.wallets.import_do_import}
+            testID="DoImport"
             onPress={importButtonPressed}
           />
           <BlueSpacing20 />
           <BlueButtonLink title={loc.wallets.import_scan_qr} onPress={importScan} testID="ScanImport" />
         </>
       </View>
+    </>
+  );
+
+  return (
+    <SafeArea style={styles.root}>
+      <BlueSpacing20 />
+      <TouchableWithoutFeedback accessibilityRole="button" onPress={speedBackdoorTap} testID="SpeedBackdoor">
+        <BlueFormLabel>{loc.wallets.import_explanation}</BlueFormLabel>
+      </TouchableWithoutFeedback>
+      <BlueSpacing20 />
+      <BlueFormMultiInput
+        value={importText}
+        onBlur={onBlur}
+        onChangeText={setImportText}
+        testID="MnemonicInput"
+        inputAccessoryViewID={BlueDoneAndDismissKeyboardInputAccessory.InputAccessoryViewID}
+      />
+
+      {Platform.select({ android: !isToolbarVisibleForAndroid && renderOptionsAndImportButton, default: renderOptionsAndImportButton })}
       {Platform.select({
         ios: (
           <BlueDoneAndDismissKeyboardInputAccessory
@@ -193,10 +185,8 @@ const WalletsImport = () => {
           />
         ),
       })}
-    </SafeBlueArea>
+    </SafeArea>
   );
 };
-
-WalletsImport.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.wallets.import_title }));
 
 export default WalletsImport;

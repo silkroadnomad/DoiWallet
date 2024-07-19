@@ -1,10 +1,9 @@
-import { HDSegwitBech32Wallet } from '../../class';
-const assert = require('assert');
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
-const BlueElectrum = require('../../blue_modules/BlueElectrum'); // so it connects ASAP
+import assert from 'assert';
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 300 * 1000;
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+import { HDSegwitBech32Wallet } from '../../class';
+
+jest.setTimeout(90 * 1000);
 
 afterAll(async () => {
   // after all tests we close socket so the test suite can actually terminate
@@ -14,7 +13,7 @@ afterAll(async () => {
 beforeAll(async () => {
   // awaiting for Electrum to be connected. For RN Electrum would naturally connect
   // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
+  await BlueElectrum.connectMain();
 });
 
 describe('Bech32 Segwit HD (BIP84)', () => {
@@ -80,7 +79,7 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     await hd.fetchUtxo();
     const utxo = hd.getUtxo();
     assert.strictEqual(utxo.length, 4);
-    assert.ok(utxo[0].txId);
+    assert.ok(utxo[0].txid);
     assert.ok(utxo[0].vout === 0 || utxo[0].vout === 1);
     assert.ok(utxo[0].value);
     assert.ok(utxo[0].address);
@@ -97,7 +96,10 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     if (disableBatching) BlueElectrum.setBatchingEnabled();
   });
 
-  it('can catch up with externally modified wallet', async () => {
+  // skpped because its a very specific testcase, and slow
+  // unskip and test manually
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('can catch up with externally modified wallet', async () => {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -132,6 +134,7 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.strictEqual(hd.getTransactions().length, oldTransactions.length);
   });
 
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can work with faulty zpub', async () => {
     // takes too much time, skipped
     if (!process.env.FAULTY_ZPUB) {
@@ -212,10 +215,12 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.strictEqual(txFound, 4);
 
     await hd.fetchUtxo();
-    assert.strictEqual(hd.getUtxo().length, 2);
-    assert.strictEqual(hd.getDerivedUtxoFromOurTransaction().length, 2);
-    const u1 = hd.getUtxo()[0];
-    const u2 = hd.getDerivedUtxoFromOurTransaction()[0];
+    assert.strictEqual(hd.getUtxo().length, 4);
+    assert.strictEqual(hd.getDerivedUtxoFromOurTransaction().length, 4);
+    const u1 = hd.getUtxo().find(utxo => utxo.txid === '8b0ab2c7196312e021e0d3dc73f801693826428782970763df6134457bd2ec20');
+    const u2 = hd
+      .getDerivedUtxoFromOurTransaction()
+      .find(utxo => utxo.txid === '8b0ab2c7196312e021e0d3dc73f801693826428782970763df6134457bd2ec20');
     delete u1.confirmations;
     delete u2.confirmations;
     delete u1.height;
@@ -231,7 +236,7 @@ describe('Bech32 Segwit HD (BIP84)', () => {
       changeAddress,
     );
 
-    assert.strictEqual(Math.round(fee / tx.byteLength()), 13);
+    assert.strictEqual(Math.round(fee / tx.virtualSize()), 13);
 
     let totalInput = 0;
     for (const inp of inputs) {

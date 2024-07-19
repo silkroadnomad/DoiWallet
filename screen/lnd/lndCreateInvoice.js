@@ -1,53 +1,55 @@
-/* global alert */
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import {
   ActivityIndicator,
+  I18nManager,
   Image,
   Keyboard,
   KeyboardAvoidingView,
-  StatusBar,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
-  Platform,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  I18nManager,
 } from 'react-native';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { Icon } from 'react-native-elements';
-import { useFocusEffect, useNavigation, useRoute, useTheme } from '@react-navigation/native';
-
-import { BlueAlertWalletExportReminder, BlueButton, BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import AmountInput from '../../components/AmountInput';
-import * as NavigationService from '../../NavigationService';
-import { LightningCustodianWallet } from '../../class/wallets/lightning-custodian-wallet';
-import { DoichainUnit, Chain } from '../../models/doichainUnits';
-import loc, { formatBalanceWithoutSuffix, formatBalancePlain } from '../../loc';
-import Lnurl from '../../class/lnurl';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { Icon } from '@rneui/themed';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+import { parse } from 'url'; // eslint-disable-line n/no-deprecated-api
+import { btcToSatoshi, fiatToBTC, satoshiToBTC } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import Notifications from '../../blue_modules/notifications';
-import { isTorCapable } from '../../blue_modules/environment';
-const currency = require('../../blue_modules/currency');
-const torrific = require('../../blue_modules/torrific');
+import { BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueComponents';
+import Lnurl from '../../class/lnurl';
+import presentAlert from '../../components/Alert';
+import AmountInput from '../../components/AmountInput';
+import Button from '../../components/Button';
+import { useTheme } from '../../components/themes';
+import { presentWalletExportReminder } from '../../helpers/presentWalletExportReminder';
+import { requestCameraAuthorization } from '../../helpers/scan-qr';
+import loc, { formatBalance, formatBalancePlain, formatBalanceWithoutSuffix } from '../../loc';
+
+import * as NavigationService from '../../NavigationService';
+import { useStorage } from '../../hooks/context/useStorage';
 
 const LNDCreateInvoice = () => {
-  const { wallets, saveToDisk, setSelectedWallet } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, setSelectedWalletID } = useStorage();
   const { walletID, uri } = useRoute().params;
-  const wallet = useRef(
-    wallets.find(item => item.getID() === walletID) || wallets.find(item => item.type === LightningCustodianWallet.type),
-  );
+  const wallet = useRef(wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN));
+  const createInvoiceRef = useRef();
   const { name } = useRoute();
   const { colors } = useTheme();
-  const { navigate, dangerouslyGetParent, goBack, pop, setParams } = useNavigation();
-  const [unit, setUnit] = useState(wallet.current?.getPreferredBalanceUnit() || DoichainUnit.DOI);
+  const { navigate, getParent, goBack, pop, setParams } = useNavigation();
+  const [unit, setUnit] = useState(
+    wallet.current?.getPreferredBalanceUnit() || DoichainUnit.BTC
+  );
   const [amount, setAmount] = useState();
   const [renderWalletSelectionButtonHidden, setRenderWalletSelectionButtonHidden] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [description, setDescription] = useState('');
   const [lnurlParams, setLNURLParams] = useState();
+
   const styleHooks = StyleSheet.create({
     scanRoot: {
       backgroundColor: colors.scanLabel,
@@ -82,8 +84,8 @@ const LNDCreateInvoice = () => {
     Keyboard.addListener('keyboardDidShow', _keyboardDidShow);
     Keyboard.addListener('keyboardDidHide', _keyboardDidHide);
     return () => {
-      Keyboard.removeListener('keyboardDidShow', _keyboardDidShow);
-      Keyboard.removeListener('keyboardDidHide', _keyboardDidHide);
+      Keyboard.removeAllListeners('keyboardDidShow');
+      Keyboard.removeAllListeners('keyboardDidHide');
     };
   }, []);
 
@@ -105,7 +107,7 @@ const LNDCreateInvoice = () => {
       const newWallet = wallets.find(w => w.getID() === walletID);
       if (newWallet) {
         wallet.current = newWallet;
-        setSelectedWallet(newWallet.getID());
+        setSelectedWalletID(newWallet.getID());
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,26 +116,27 @@ const LNDCreateInvoice = () => {
   useFocusEffect(
     useCallback(() => {
       if (wallet.current) {
-        setSelectedWallet(walletID);
+        setSelectedWalletID(walletID);
         if (wallet.current.getUserHasSavedExport()) {
           renderReceiveDetails();
         } else {
-          BlueAlertWalletExportReminder({
-            onSuccess: () => renderReceiveDetails(),
-            onFailure: () => {
-              dangerouslyGetParent().pop();
+          presentWalletExportReminder()
+            .then(() => {
+              renderReceiveDetails();
+            })
+            .catch(() => {
+              getParent().pop();
               NavigationService.navigate('WalletExportRoot', {
                 screen: 'WalletExport',
                 params: {
                   walletID,
                 },
               });
-            },
-          });
+            });
         }
       } else {
-        ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-        alert(loc.wallets.add_ln_wallet_first);
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+        presentAlert({ message: loc.wallets.add_ln_wallet_first });
         goBack();
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -154,25 +157,54 @@ const LNDCreateInvoice = () => {
       let invoiceAmount = amount;
       switch (unit) {
         case DoichainUnit.SWARTZ:
-          invoiceAmount = parseInt(invoiceAmount); // basically nop
+          invoiceAmount = parseInt(invoiceAmount, 10); // basically nop
           break;
         case DoichainUnit.DOI:
-          invoiceAmount = currency.btcToSatoshi(invoiceAmount);
+          invoiceAmount = btcToSatoshi(invoiceAmount);
           break;
-
         case DoichainUnit.LOCAL_CURRENCY:
-
-          invoiceAmount = AmountInput.getCachedSatoshis(invoiceAmount) || currency.btcToSatoshi(currency.fiatToBTC(invoiceAmount));
+          // trying to fetch cached sat equivalent for this fiat amount
+          invoiceAmount =
+            AmountInput.getCachedSatoshis(invoiceAmount) ||
+            btcToSatoshi(fiatToBTC(invoiceAmount));
           break;
       }
 
+      if (lnurlParams) {
+        const { min, max } = lnurlParams;
+        if (invoiceAmount < min || invoiceAmount > max) {
+          let text;
+          if (invoiceAmount < min) {
+            text =
+              unit === DoichainUnit.SWARTZ
+                ? loc.formatString(loc.receive.minSats, { min })
+                : loc.formatString(loc.receive.minSatsFull, {
+                    min,
+                    currency: formatBalance(min, unit),
+                  });
+          } else {
+            text =
+              unit === DoichainUnit.SWARTZ
+                ? loc.formatString(loc.receive.maxSats, { max })
+                : loc.formatString(loc.receive.maxSatsFull, {
+                    max,
+                    currency: formatBalance(max, unit),
+                  });
+          }
+          triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+          presentAlert({ message: text });
+          setIsLoading(false);
+          return;
+        }
+      }
+
       const invoiceRequest = await wallet.current.addInvoice(invoiceAmount, description);
-      ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
 
       // lets decode payreq and subscribe groundcontrol so we can receive push notification when our invoice is paid
       /** @type LightningCustodianWallet */
       const decoded = await wallet.current.decodeInvoice(invoiceRequest);
-      await Notifications.tryToObtainPermissions();
+      await Notifications.tryToObtainPermissions(createInvoiceRef);
       Notifications.majorTomToGroundControl([], [decoded.payment_hash], []);
 
       // send to lnurl-withdraw callback url if that exists
@@ -180,20 +212,12 @@ const LNDCreateInvoice = () => {
         const { callback, k1 } = lnurlParams;
         const callbackUrl = callback + (callback.indexOf('?') !== -1 ? '&' : '?') + 'k1=' + k1 + '&pr=' + invoiceRequest;
 
-        let reply;
-        //if (isTorCapable && callbackUrl.includes('.onion')) {
-        //  const api = new torrific.Torsbee();
-        //  const torResponse = await api.get(callbackUrl);
-        //  reply = torResponse.body;
-        //  if (reply && typeof reply === 'string') reply = JSON.parse(reply);
-       // } else {
-          const resp = await fetch(callbackUrl, { method: 'GET' });
-          if (resp.status >= 300) {
-            const text = await resp.text();
-            throw new Error(text);
-          }
-          reply = await resp.json();
-       // }
+        const resp = await fetch(callbackUrl, { method: 'GET' });
+        if (resp.status >= 300) {
+          const text = await resp.text();
+          throw new Error(text);
+        }
+        const reply = await resp.json();
 
         if (reply.status === 'ERROR') {
           throw new Error('Reply from server: ' + reply.reason);
@@ -209,44 +233,44 @@ const LNDCreateInvoice = () => {
       navigate('LNDViewInvoice', {
         invoice: invoiceRequest,
         walletID: wallet.current.getID(),
-        isModal: true,
       });
     } catch (Err) {
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
       setIsLoading(false);
-      alert(Err.message);
+      presentAlert({ message: Err.message });
     }
   };
 
   const processLnurl = async data => {
     setIsLoading(true);
     if (!wallet.current) {
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      alert(loc.wallets.no_ln_wallet_error);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      presentAlert({ message: loc.wallets.no_ln_wallet_error });
       return goBack();
     }
 
     // decoding the lnurl
     const url = Lnurl.getUrlFromLnurl(data);
+    const { query } = parse(url, true);
+
+    if (query.tag === Lnurl.TAG_LOGIN_REQUEST) {
+      navigate('LnurlAuth', {
+        lnurl: data,
+        walletID: walletID ?? wallet.current.getID(),
+      });
+      return;
+    }
 
     // calling the url
-    let reply;
     try {
-     // if (isTorCapable && url.includes('.onion')) {
-      //  const api = new torrific.Torsbee();
-      //  const torResponse = await api.get(url);
-     //   reply = torResponse.body;
-     //   if (reply && typeof reply === 'string') reply = JSON.parse(reply);
-     // } else {
-        const resp = await fetch(url, { method: 'GET' });
-        if (resp.status >= 300) {
-          throw new Error('Bad response from server');
-        }
-        reply = await resp.json();
-        if (reply.status === 'ERROR') {
-          throw new Error('Reply from server: ' + reply.reason);
-        }
-     // }
+      const resp = await fetch(url, { method: 'GET' });
+      if (resp.status >= 300) {
+        throw new Error('Bad response from server');
+      }
+      const reply = await resp.json();
+      if (reply.status === 'ERROR') {
+        throw new Error('Reply from server: ' + reply.reason);
+      }
 
       if (reply.tag === Lnurl.TAG_PAY_REQUEST) {
         // we are here by mistake. user wants to SEND to lnurl-pay, but he is on a screen that creates
@@ -255,7 +279,7 @@ const LNDCreateInvoice = () => {
           screen: 'LnurlPay',
           params: {
             lnurl: data,
-            fromWalletID: wallet.current.getID(),
+            walletID: walletID ?? wallet.current.getID(),
           },
         });
         return;
@@ -266,18 +290,18 @@ const LNDCreateInvoice = () => {
       }
 
       // amount that comes from lnurl is always in sats
-      let amount = (reply.maxWithdrawable / 1000).toString();
-      const sats = amount;
+      let newAmount = (reply.maxWithdrawable / 1000).toString();
+      const sats = newAmount;
       switch (unit) {
         case DoichainUnit.SWARTZ:
           // nop
           break;
         case DoichainUnit.DOI:
-          amount = currency.satoshiToBTC(amount);
+          newAmount = satoshiToBTC(newAmount);
           break;
         case DoichainUnit.LOCAL_CURRENCY:
-          amount = formatBalancePlain(amount, DoichainUnit.LOCAL_CURRENCY);
-          AmountInput.setCachedSatoshis(amount, sats);
+          newAmount = formatBalancePlain(newAmount, DoichainUnit.LOCAL_CURRENCY);
+          AmountInput.setCachedSatoshis(newAmount, sats);
           break;
       }
 
@@ -289,14 +313,14 @@ const LNDCreateInvoice = () => {
         min: (reply.minWithdrawable || 0) / 1000,
         max: reply.maxWithdrawable / 1000,
       });
-      setAmount(amount);
+      setAmount(newAmount);
       setDescription(reply.defaultDescription);
       setIsLoading(false);
     } catch (Err) {
       Keyboard.dismiss();
       setIsLoading(false);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      alert(Err.message);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      presentAlert({ message: Err.message });
     }
   };
 
@@ -306,21 +330,23 @@ const LNDCreateInvoice = () => {
         {isLoading ? (
           <ActivityIndicator />
         ) : (
-          <BlueButton disabled={!(amount > 0)} onPress={createInvoice} title={loc.send.details_create} />
+          <Button disabled={!(amount > 0)} ref={createInvoiceRef} onPress={createInvoice} title={loc.send.details_create} />
         )}
       </View>
     );
   };
 
   const navigateToScanQRCode = () => {
-    NavigationService.navigate('ScanQRCodeRoot', {
-      screen: 'ScanQRCode',
-      params: {
-        onBarScanned: processLnurl,
-        launchedBy: name,
-      },
+    requestCameraAuthorization().then(() => {
+      NavigationService.navigate('ScanQRCodeRoot', {
+        screen: 'ScanQRCode',
+        params: {
+          onBarScanned: processLnurl,
+          launchedBy: name,
+        },
+      });
+      Keyboard.dismiss();
     });
-    Keyboard.dismiss();
   };
 
   const renderScanClickable = () => {
@@ -340,7 +366,7 @@ const LNDCreateInvoice = () => {
   };
 
   const navigateToSelectWallet = () => {
-    navigate('SelectWallet', { onWalletSelect: onWalletSelect, chainType: Chain.OFFCHAIN });
+    navigate('SelectWallet', { onWalletSelect, chainType: Chain.OFFCHAIN });
   };
 
   const renderWalletSelectionButton = () => {
@@ -357,7 +383,7 @@ const LNDCreateInvoice = () => {
           <TouchableOpacity accessibilityRole="button" style={styles.walletNameTouch} onPress={navigateToSelectWallet}>
             <Text style={[styles.walletNameText, styleHooks.walletNameText]}>{wallet.current.getLabel()}</Text>
             <Text style={[styles.walletNameBalance, styleHooks.walletNameBalance]}>
-              {formatBalanceWithoutSuffix(wallet.current.getBalance(), DoichainUnit.SWARTZ, false)}
+              {formatBalanceWithoutSuffix(wallet.current.getBalance(), DoichainUnit.SATS, false)}
             </Text>
             <Text style={[styles.walletNameSats, styleHooks.walletNameSats]}>{DoichainUnit.SWARTZ}</Text>
           </TouchableOpacity>
@@ -374,7 +400,6 @@ const LNDCreateInvoice = () => {
   if (!wallet.current) {
     return (
       <View style={[styles.root, styleHooks.root]}>
-        <StatusBar barStyle="light-content" />
         <BlueLoading />
       </View>
     );
@@ -383,27 +408,13 @@ const LNDCreateInvoice = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[styles.root, styleHooks.root]}>
-        <StatusBar barStyle="light-content" />
         <View style={[styles.amount, styleHooks.amount]}>
           <KeyboardAvoidingView enabled={!Platform.isPad} behavior="position">
             <AmountInput
               isLoading={isLoading}
               amount={amount}
               onAmountUnitChange={setUnit}
-              onChangeText={text => {
-                if (lnurlParams) {
-                  // in this case we prevent the user from changing the amount to < min or > max
-                  const { min, max } = lnurlParams;
-                  const nextAmount = parseInt(text);
-                  if (nextAmount < min) {
-                    text = min.toString();
-                  } else if (nextAmount > max) {
-                    text = max.toString();
-                  }
-                }
-
-                setAmount(text);
-              }}
+              onChangeText={setAmount}
               disabled={isLoading || (lnurlParams && lnurlParams.fixed)}
               unit={unit}
               inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
@@ -489,10 +500,6 @@ const styles = StyleSheet.create({
     textAlignVertical: 'bottom',
     marginTop: 2,
   },
-  error: {
-    flex: 1,
-    paddingTop: 20,
-  },
   root: {
     flex: 1,
     justifyContent: 'space-between',
@@ -520,11 +527,4 @@ const styles = StyleSheet.create({
 });
 
 export default LNDCreateInvoice;
-
-LNDCreateInvoice.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerLeft: null,
-  },
-  opts => ({ ...opts, title: loc.receive.header }),
-);
+LNDCreateInvoice.routeName = 'LNDCreateInvoice';

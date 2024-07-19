@@ -1,66 +1,66 @@
-/* global alert */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import {
-  TextInput,
-  FlatList,
-  ScrollView,
-  Linking,
-  TouchableOpacity,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Text,
-  View,
-  Platform,
-  PermissionsAndroid,
-  Alert,
-} from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Icon } from 'react-native-elements';
-import Share from 'react-native-share';
-import RNFS from 'react-native-fs';
+
+import { DoichainUnit} from "../../models/doichainUnits";
+import { useNavigation, useRoute } from '@react-navigation/native';
 import BigNumber from 'bignumber.js';
-import { SafeBlueArea, BlueCard, BlueText } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import Privacy from '../../blue_modules/Privacy';
-import { DoichainUnit } from '../../models/doichainUnits';
-import loc from '../../loc';
-import { BlueCurrentTheme } from '../../components/themes';
-import { DynamicQRCode } from '../../components/DynamicQRCode';
+import * as bitcoin from 'bitcoinjs-lib';
+import PropTypes from 'prop-types';
+import React, { useCallback, useEffect } from 'react';
+import { Alert, FlatList, Linking, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
+import RNFS from 'react-native-fs';
+import { PERMISSIONS, request, RESULTS } from 'react-native-permissions';
+import Share from 'react-native-share';
+
+import { satoshiToBTC } from '../../blue_modules/currency';
 import { isDesktop } from '../../blue_modules/environment';
-const currency = require('../../blue_modules/currency');
+import { BlueText } from '../../BlueComponents';
+import presentAlert from '../../components/Alert';
+import { DynamicQRCode } from '../../components/DynamicQRCode';
+import { useTheme } from '../../components/themes';
+import usePrivacy from '../../hooks/usePrivacy';
+import loc from '../../loc';
 
-export default class SendCreate extends Component {
-  constructor(props) {
-    super(props);
-    console.log('send/create constructor');
-    props.navigation.setParams({ exportTXN: this.exportTXN });
-    this.state = {
-      isLoading: false,
-      fee: props.route.params.fee,
-      recipients: props.route.params.recipients,
-      memo: props.route.params.memo || '',
-      size: Math.round(props.route.params.tx.length / 2),
-      tx: props.route.params.tx,
-      satoshiPerByte: props.route.params.satoshiPerByte,
-      wallet: props.route.params.wallet,
-      feeSatoshi: props.route.params.feeSatoshi,
-      showAnimatedQr: props.route.params.showAnimatedQr ?? false,
-      psbt: props.route.params.psbt,
+
+const SendCreate = () => {
+  const { fee, recipients, memo = '', satoshiPerByte, psbt, showAnimatedQr, tx } = useRoute().params;
+  const transaction = bitcoin.Transaction.fromHex(tx);
+  const size = transaction.virtualSize();
+  const { colors } = useTheme();
+  const { setOptions } = useNavigation();
+  const { enableBlur, disableBlur } = usePrivacy();
+
+  const styleHooks = StyleSheet.create({
+    transactionDetailsTitle: {
+      color: colors.feeText,
+    },
+    transactionDetailsSubtitle: {
+      color: colors.foregroundColor,
+    },
+    separator: {
+      backgroundColor: colors.inputBorderColor,
+    },
+    root: {
+      backgroundColor: colors.elevated,
+    },
+    cardText: {
+      color: colors.foregroundColor,
+    },
+  });
+
+  useEffect(() => {
+    console.log('send/create - useEffect');
+    enableBlur();
+    return () => {
+      disableBlur();
     };
-  }
+  }, [disableBlur, enableBlur]);
 
-  componentDidMount() {
-    Privacy.enableBlur();
-    console.log('send/create - componentDidMount');
-  }
-
-  exportTXN = async () => {
+  const exportTXN = useCallback(async () => {
     const fileName = `${Date.now()}.txn`;
     if (Platform.OS === 'ios') {
       const filePath = RNFS.TemporaryDirectoryPath + `/${fileName}`;
-      await RNFS.writeFile(filePath, this.state.tx);
+      await RNFS.writeFile(filePath, tx);
       Share.open({
         url: 'file://' + filePath,
         saveToFiles: isDesktop,
@@ -72,23 +72,16 @@ export default class SendCreate extends Component {
           RNFS.unlink(filePath);
         });
     } else if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE, {
-        title: loc.send.permission_storage_title,
-        message: loc.send.permission_storage_message,
-        buttonNeutral: loc.send.permission_storage_later,
-        buttonNegative: loc._.cancel,
-        buttonPositive: loc._.ok,
-      });
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      const granted = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+      if (granted === RESULTS.GRANTED) {
         console.log('Storage Permission: Granted');
         const filePath = RNFS.DownloadDirectoryPath + `/${fileName}`;
         try {
-          await RNFS.writeFile(filePath, this.state.tx);
-          alert(loc.formatString(loc.send.txSaved, { filePath }));
+          await RNFS.writeFile(filePath, tx);
+          presentAlert({ message: loc.formatString(loc.send.txSaved, { filePath }) });
         } catch (e) {
           console.log(e);
-          alert(e.message);
+          presentAlert({ message: e.message });
         }
       } else {
         console.log('Storage Permission: Denied');
@@ -104,123 +97,211 @@ export default class SendCreate extends Component {
         ]);
       }
     }
-  };
+  }, [tx]);
 
-  componentWillUnmount() {
-    Privacy.disableBlur();
-  }
+  useEffect(() => {
+    setOptions({
+      // eslint-disable-next-line react/no-unstable-nested-components
+      headerRight: () => (
+        <TouchableOpacity accessibilityRole="button" onPress={exportTXN}>
+          <Icon size={22} name="share-alternative" type="entypo" color={colors.foregroundColor} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [colors, exportTXN, setOptions]);
 
-  _renderItem = ({ index, item }) => {
+  const _renderItem = ({ index, item }) => {
     return (
       <>
         <View>
-          <Text style={styles.transactionDetailsTitle}>{loc.send.create_to}</Text>
-          <Text style={styles.transactionDetailsSubtitle}>{item.address}</Text>
-          <Text style={styles.transactionDetailsTitle}>{loc.send.create_amount}</Text>
-          <Text style={styles.transactionDetailsSubtitle}>
-            {currency.satoshiToBTC(item.value)} {DoichainUnit.DOI}
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_to}
           </Text>
-          {this.state.recipients.length > 1 && (
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {item.address}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_amount}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {satoshiToBTC(item.value)} {DoichainUnit.DOI}
+          </Text>
+          {recipients.length > 1 && (
             <BlueText style={styles.itemOf}>
-              {loc.formatString(loc._.of, { number: index + 1, total: this.state.recipients.length })}
+              {loc.formatString(loc._.of, {
+                number: index + 1,
+                total: recipients.length,
+              })}
             </BlueText>
           )}
         </View>
       </>
     );
   };
-
-  renderSeparator = () => {
-    return <View style={styles.separator} />;
+  _renderItem.propTypes = {
+    index: PropTypes.number,
+    item: PropTypes.shape({
+      address: PropTypes.string,
+      value: PropTypes.number,
+    }),
   };
 
-  render() {
-    return (
-      <SafeBlueArea style={styles.root}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <ScrollView>
-            <BlueCard style={styles.card}>
-              {this.state.showAnimatedQr && this.state.psbt ? <DynamicQRCode value={this.state.psbt.toHex()} /> : null}
-              <BlueText style={styles.cardText}>{loc.send.create_this_is_hex}</BlueText>
-              <TextInput testID="TxhexInput" style={styles.cardTx} height={72} multiline editable value={this.state.tx} />
+  const renderSeparator = () => {
+    return <View style={[styles.separator, styleHooks.separator]} />;
+  };
 
-              <TouchableOpacity accessibilityRole="button" style={styles.actionTouch} onPress={() => Clipboard.setString(this.state.tx)}>
-                <Text style={styles.actionText}>{loc.send.create_copy}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                accessibilityRole="button"
-                style={styles.actionTouch}
-                onPress={() => Linking.openURL('https://coinb.in/?verify=' + this.state.tx)}
-              >
-                <Text style={styles.actionText}>{loc.send.create_verify}</Text>
-              </TouchableOpacity>
-            </BlueCard>
-            <BlueCard>
-              <FlatList
-                scrollEnabled={this.state.recipients.length > 1}
-                extraData={this.state.recipients}
-                data={this.state.recipients}
-                renderItem={this._renderItem}
-                keyExtractor={(_item, index) => `${index}`}
-                ItemSeparatorComponent={this.renderSeparator}
-              />
-              <Text style={styles.transactionDetailsTitle}>{loc.send.create_fee}</Text>
-              <Text style={styles.transactionDetailsSubtitle}>
-                {new BigNumber(this.state.fee).toFixed()} {DoichainUnit.DOI}
-              </Text>
+  const ListHeaderComponent = (
+    <View>
+      {showAnimatedQr && psbt ? <DynamicQRCode value={psbt.toHex()} /> : null}
+      <BlueText style={[styles.cardText, styleHooks.cardText]}>{loc.send.create_this_is_hex}</BlueText>
+      <TextInput testID="TxhexInput" style={styles.cardTx} height={72} multiline editable={false} value={tx} />
 
-              <Text style={styles.transactionDetailsTitle}>{loc.send.create_tx_size}</Text>
-              <Text style={styles.transactionDetailsSubtitle}>{this.state.size} bytes</Text>
+      <TouchableOpacity accessibilityRole="button" style={styles.actionTouch} onPress={() => Clipboard.setString(tx)}>
+        <Text style={styles.actionText}>{loc.send.create_copy}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        accessibilityRole="button"
+        style={styles.actionTouch}
+        onPress={() => Linking.openURL('https://coinb.in/?verify=' + tx)}
+      >
+        <Text style={styles.actionText}>{loc.send.create_verify}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
-              <Text style={styles.transactionDetailsTitle}>{loc.send.create_satoshi_per_byte}</Text>
-              <Text style={styles.transactionDetailsSubtitle}>{this.state.satoshiPerByte} Sat/B</Text>
-              {this.state.memo.length > 0 && (
-                <>
-                  <Text style={styles.transactionDetailsTitle}>{loc.send.create_memo}</Text>
-                  <Text style={styles.transactionDetailsSubtitle}>{this.state.memo}</Text>
-                </>
-              )}
-            </BlueCard>
-          </ScrollView>
-        </TouchableWithoutFeedback>
-      </SafeBlueArea>
-    );
-  }
-}
+  const ListFooterComponent = (
+    <View>
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_fee}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {new BigNumber(fee).toFixed()} {DoichainUnit.DOI}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_tx_size}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {size} vbytes
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsTitle,
+          styleHooks.transactionDetailsTitle,
+        ]}
+      >
+        {loc.send.create_satoshi_per_vbyte}
+      </Text>
+      <Text
+        style={[
+          styles.transactionDetailsSubtitle,
+          styleHooks.transactionDetailsSubtitle,
+        ]}
+      >
+        {satoshiPerByte} Sat/vB
+      </Text>
+      {memo?.length > 0 && (
+        <>
+          <Text
+            style={[
+              styles.transactionDetailsTitle,
+              styleHooks.transactionDetailsTitle,
+            ]}
+          >
+            {loc.send.create_memo}
+          </Text>
+          <Text
+            style={[
+              styles.transactionDetailsSubtitle,
+              styleHooks.transactionDetailsSubtitle,
+            ]}
+          >
+            {memo}
+          </Text>
+        </>
+      )}
+    </View>
+  );
+
+  return (
+    <FlatList
+      contentContainerStyle={[styles.root, styleHooks.root]}
+      extraData={recipients}
+      data={recipients}
+      renderItem={_renderItem}
+      keyExtractor={(_item, index) => `${index}`}
+      ItemSeparatorComponent={renderSeparator}
+      ListHeaderComponent={ListHeaderComponent}
+      ListFooterComponent={ListFooterComponent}
+      contentInsetAdjustmentBehavior="automatic"
+      automaticallyAdjustContentInsets
+    />
+  );
+};
+
+export default SendCreate;
 
 const styles = StyleSheet.create({
   transactionDetailsTitle: {
-    color: BlueCurrentTheme.colors.feeText,
     fontWeight: '500',
     fontSize: 17,
     marginBottom: 2,
   },
+  root: {
+    paddingHorizontal: 20,
+  },
   transactionDetailsSubtitle: {
-    color: BlueCurrentTheme.colors.foregroundColor,
     fontWeight: '500',
     fontSize: 15,
     marginBottom: 20,
-  },
-  export: {
-    marginRight: 16,
   },
   itemOf: {
     alignSelf: 'flex-end',
   },
   separator: {
-    backgroundColor: BlueCurrentTheme.colors.inputBorderColor,
     height: 0.5,
     marginVertical: 16,
   },
-  root: {
-    backgroundColor: BlueCurrentTheme.colors.elevated,
-  },
-  card: {
-    alignItems: 'center',
-    flex: 1,
-  },
   cardText: {
-    color: BlueCurrentTheme.colors.foregroundColor,
     fontWeight: '500',
   },
   cardTx: {
@@ -244,35 +325,4 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     alignSelf: 'center',
   },
-});
-
-SendCreate.propTypes = {
-  navigation: PropTypes.shape({
-    goBack: PropTypes.func,
-    setParams: PropTypes.func,
-    navigate: PropTypes.func,
-    dismiss: PropTypes.func,
-  }),
-  route: PropTypes.shape({
-    params: PropTypes.object,
-  }),
-};
-
-SendCreate.navigationOptions = navigationStyle({}, (options, { theme, navigation, route }) => {
-  let headerRight;
-  if (route.params.exportTXN) {
-    headerRight = () => (
-      <TouchableOpacity accessibilityRole="button" style={styles.export} onPress={route.params.exportTXN}>
-        <Icon size={22} name="share-alternative" type="entypo" color={BlueCurrentTheme.colors.foregroundColor} />
-      </TouchableOpacity>
-    );
-  } else {
-    headerRight = null;
-  }
-
-  return {
-    ...options,
-    headerRight,
-    title: loc.send.create_details,
-  };
 });

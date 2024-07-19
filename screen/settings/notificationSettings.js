@@ -1,14 +1,15 @@
-/* global alert */
 import React, { useCallback, useEffect, useState } from 'react';
-import { ScrollView, TouchableWithoutFeedback, I18nManager, StyleSheet, Linking, View, TextInput } from 'react-native';
-import { useTheme } from '@react-navigation/native';
-import { Button } from 'react-native-elements';
+import { I18nManager, Linking, ScrollView, StyleSheet, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Button as ButtonRNElements } from '@rneui/themed';
 
-import navigationStyle from '../../components/navigationStyle';
-import { BlueButton, BlueCard, BlueCopyToClipboardButton, BlueListItem, BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
-import loc from '../../loc';
-import { BlueCurrentTheme } from '../../components/themes';
 import Notifications from '../../blue_modules/notifications';
+import { BlueCard, BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
+import presentAlert from '../../components/Alert';
+import { Button } from '../../components/Button';
+import CopyToClipboardButton from '../../components/CopyToClipboardButton';
+import ListItem from '../../components/ListItem';
+import { BlueCurrentTheme, useTheme } from '../../components/themes';
+import loc from '../../loc';
 
 const NotificationSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -77,13 +78,13 @@ const NotificationSettings = () => {
         // validating only if its not empty. empty means use default
         if (await Notifications.isGroundControlUriValid(URI)) {
           await Notifications.saveUri(URI);
-          alert(loc.settings.saved);
+          presentAlert({ message: loc.settings.saved });
         } else {
-          alert(loc.settings.not_a_valid_uri);
+          presentAlert({ message: loc.settings.not_a_valid_uri });
         }
       } else {
         await Notifications.saveUri('');
-        alert(loc.settings.saved);
+        presentAlert({ message: loc.settings.saved });
       }
     } catch (error) {
       console.warn(error);
@@ -94,8 +95,8 @@ const NotificationSettings = () => {
   return isLoading ? (
     <BlueLoading />
   ) : (
-    <ScrollView style={stylesWithThemeHook.scroll}>
-      <BlueListItem
+    <ScrollView style={stylesWithThemeHook.scroll} automaticallyAdjustContentInsets contentInsetAdjustmentBehavior="automatic">
+      <ListItem
         Component={TouchableWithoutFeedback}
         title={loc.settings.push_notifications}
         switch={{ onValueChange: onNotificationsSwitch, value: isNotificationsEnabled, testID: 'NotificationsSwitch' }}
@@ -106,7 +107,7 @@ const NotificationSettings = () => {
         <BlueText>{loc.settings.groundcontrol_explanation}</BlueText>
       </BlueCard>
 
-      <Button
+      <ButtonRNElements
         icon={{
           name: 'github',
           type: 'font-awesome',
@@ -145,18 +146,16 @@ const NotificationSettings = () => {
 
         {isShowTokenInfo >= 9 && (
           <View>
-            <BlueCopyToClipboardButton stringToCopy={tokenInfo} displayText={tokenInfo} />
+            <CopyToClipboardButton stringToCopy={tokenInfo} displayText={tokenInfo} />
           </View>
         )}
 
         <BlueSpacing20 />
-        <BlueButton onPress={save} title={loc.settings.save} />
+        <Button onPress={save} title={loc.settings.save} />
       </BlueCard>
     </ScrollView>
   );
 };
-
-NotificationSettings.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.settings.notifications }));
 
 const styles = StyleSheet.create({
   root: {

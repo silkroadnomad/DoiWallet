@@ -1,31 +1,36 @@
-/* global alert */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
+import BigNumber from 'bignumber.js';
+import * as bitcoin from 'bitcoinjs-lib';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
-import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
+import { Icon } from '@rneui/themed';
 
-import { BlueButton, BlueCard, BlueText, SafeBlueArea } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
+import { satoshiToBTC, satoshiToLocalCurrency } from '../../blue_modules/currency';
+import { BlueCard, BlueText } from '../../BlueComponents';
+
+import { DoichainUnit } from "../../models/doichainUnits";
+import presentAlert from '../../components/Alert';
+import Button from '../../components/Button';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
 import loc from '../../loc';
-import { DoichainUnit } from '../../models/doichainUnits';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-const bitcoin = require('bitcoinjs-lib');
-const BigNumber = require('bignumber.js');
-const currency = require('../../blue_modules/currency');
+
+import { useStorage } from '../../hooks/context/useStorage';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 
 const shortenAddress = addr => {
   return addr.substr(0, Math.floor(addr.length / 2) - 1) + '\n' + addr.substr(Math.floor(addr.length / 2) - 1, addr.length);
 };
 
 const PsbtMultisig = () => {
-  const { wallets } = useContext(BlueStorageContext);
-  const { navigate, setParams } = useNavigation();
+  const { wallets } = useStorage();
+  const { navigate, setParams } = useExtendedNavigation();
   const { colors } = useTheme();
   const [flatListHeight, setFlatListHeight] = useState(0);
-  const { walletID, psbtBase64, memo, receivedPSBTBase64 } = useRoute().params;
+  const { walletID, psbtBase64, memo, receivedPSBTBase64, launchedBy } = useRoute().params;
   /** @type MultisigHDWallet */
   const wallet = wallets.find(w => w.getID() === walletID);
-  const [psbt, setPsbt] = useState(bitcoin.Psbt.fromBase64(psbtBase64));
+  const [psbt, setPsbt] = useState(bitcoin.Psbt.fromBase64(psbtBase64, { network: DOICHAIN }));
   const data = new Array(wallet.getM());
   const stylesHook = StyleSheet.create({
     root: {
@@ -37,14 +42,8 @@ const PsbtMultisig = () => {
     textBtc: {
       color: colors.buttonAlternativeTextColor,
     },
-    textDestinationFirstFour: {
-      color: colors.buttonAlternativeTextColor,
-    },
     textBtcUnitValue: {
       color: colors.buttonAlternativeTextColor,
-    },
-    textDestination: {
-      color: colors.foregroundColor,
     },
     textFiat: {
       color: colors.alternativeTextColor,
@@ -84,7 +83,7 @@ const PsbtMultisig = () => {
   }
   destination = shortenAddress(destination.join(', '));
   const totalBtc = new BigNumber(totalSat).dividedBy(100000000).toNumber();
-  const totalFiat = currency.satoshiToLocalCurrency(totalSat);
+  const totalFiat = satoshiToLocalCurrency(totalSat);
 
   const getFee = () => {
     return wallet.calculateFeeFromPsbt(psbt);
@@ -96,7 +95,7 @@ const PsbtMultisig = () => {
   };
 
   const navigateToPSBTMultisigQRCode = () => {
-    navigate('PsbtMultisigQRCode', { walletID, psbtBase64, isShowOpenScanner: isConfirmEnabled() });
+    navigate('PsbtMultisigQRCode', { walletID, psbtBase64: psbt.toBase64(), isShowOpenScanner: isConfirmEnabled() });
   };
 
   const _renderItemUnsigned = el => {
@@ -147,7 +146,6 @@ const PsbtMultisig = () => {
     );
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (receivedPSBTBase64) {
       _combinePSBT();
@@ -157,12 +155,12 @@ const PsbtMultisig = () => {
   }, [receivedPSBTBase64]);
 
   const _combinePSBT = () => {
-    const receivedPSBT = bitcoin.Psbt.fromBase64(receivedPSBTBase64);
     try {
+      const receivedPSBT = bitcoin.Psbt.fromBase64(receivedPSBTBase64, { network: DOICHAIN });
       const newPsbt = psbt.combine(receivedPSBT);
       setPsbt(newPsbt);
     } catch (error) {
-      alert(error);
+      presentAlert({ message: error });
     }
   };
 
@@ -171,19 +169,26 @@ const PsbtMultisig = () => {
       psbt.finalizeAllInputs();
     } catch (_) {} // ignore if it is already finalized
 
+    if (launchedBy) {
+      // we must navigate back to the screen who requested psbt (instead of broadcasting it ourselves)
+      // most likely for LN channel opening
+      navigate(launchedBy, { psbt });
+      return;
+    }
+
     try {
       const tx = psbt.extractTransaction().toHex();
-      const satoshiPerByte = Math.round(getFee() / (tx.length / 2));
+      const satoshiPerByte = Math.round(getFee() / psbt.extractTransaction().virtualSize());
       navigate('Confirm', {
         fee: new BigNumber(getFee()).dividedBy(100000000).toNumber(),
-        memo: memo,
-        fromWallet: wallet,
+        memo,
+        walletID,
         tx,
         recipients: targets,
         satoshiPerByte,
       });
     } catch (error) {
-      alert(error);
+      presentAlert({ message: error });
     }
   };
 
@@ -249,13 +254,13 @@ const PsbtMultisig = () => {
       <View style={styles.bottomWrapper}>
         <View style={styles.bottomFeesWrapper}>
           <BlueText style={[styles.feeFiatText, stylesHook.feeFiatText]}>
-            {loc.formatString(loc.multisig.fee, { number: currency.satoshiToLocalCurrency(getFee()) })} -{' '}
+            {loc.formatString(loc.multisig.fee, { number: satoshiToLocalCurrency(getFee()) })} -{' '}
           </BlueText>
-          <BlueText>{loc.formatString(loc.multisig.fee_btc, { number: currency.satoshiToBTC(getFee()) })}</BlueText>
+          <BlueText>{loc.formatString(loc.multisig.fee_btc, { number: satoshiToBTC(getFee()) })}</BlueText>
         </View>
       </View>
       <View style={styles.marginConfirmButton}>
-        <BlueButton disabled={!isConfirmEnabled()} title={loc.multisig.confirm} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
+        <Button disabled={!isConfirmEnabled()} title={loc.multisig.confirm} onPress={onConfirm} testID="PsbtMultisigConfirmButton" />
       </View>
     </>
   );
@@ -265,11 +270,11 @@ const PsbtMultisig = () => {
   };
 
   return (
-    <SafeBlueArea style={stylesHook.root}>
+    <SafeArea style={stylesHook.root}>
       <View style={styles.container}>
         <View style={styles.mstopcontainer}>
           <View style={styles.mscontainer}>
-            <View style={[styles.msleft, { height: flatListHeight - 130 }]} />
+            <View style={[styles.msleft, { height: flatListHeight - 260 }]} />
           </View>
           <View style={styles.msright}>
             <BlueCard>
@@ -279,7 +284,7 @@ const PsbtMultisig = () => {
                 renderItem={_renderItem}
                 keyExtractor={(_item, index) => `${index}`}
                 ListHeaderComponent={header}
-                scrollEnabled={false}
+                ListFooterComponent={footer}
               />
               {isConfirmEnabled() && (
                 <View style={styles.height80}>
@@ -298,9 +303,8 @@ const PsbtMultisig = () => {
             </BlueCard>
           </View>
         </View>
-        {footer}
       </View>
-    </SafeBlueArea>
+    </SafeArea>
   );
 };
 
@@ -323,10 +327,6 @@ const styles = StyleSheet.create({
   msright: {
     flex: 90,
     marginLeft: '-11%',
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'space-between',
   },
   container: {
     flexDirection: 'column',
@@ -393,8 +393,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   itemUnsignedWrapper: { flexDirection: 'row', paddingTop: 16 },
-  textDestinationSpacingRight: { marginRight: 4 },
-  textDestinationSpacingLeft: { marginLeft: 4 },
   vaultKeyTextSigned: { fontSize: 18, fontWeight: 'bold' },
   vaultKeyTextSignedWrapper: { justifyContent: 'center', alignItems: 'center', paddingLeft: 16 },
   flexDirectionRow: { flexDirection: 'row', paddingVertical: 12 },
@@ -406,7 +404,5 @@ const styles = StyleSheet.create({
     height: 80,
   },
 });
-
-PsbtMultisig.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.multisig.header }));
 
 export default PsbtMultisig;

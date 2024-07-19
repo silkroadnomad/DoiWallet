@@ -1,7 +1,11 @@
-/* global alert */
 import * as bitcoin from 'bitcoinjs-lib';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { DOICHAIN } from '../blue_modules/network.js';
+import { ECPairFactory } from 'ecpair';
+
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../blue_modules/hapticFeedback';
+import ecc from '../blue_modules/noble_ecc';
+import presentAlert from '../components/Alert';
+const ECPair = ECPairFactory(ecc);
+import { DOICHAIN } from "../blue_modules/network.js";
 
 const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
@@ -18,18 +22,15 @@ export default class PayjoinTransaction {
   async getPsbt() {
     // Nasty hack to get this working for now
     const unfinalized = this._psbt.clone();
-    unfinalized.data.inputs.forEach((input, index) => {
+    for (const [index, input] of unfinalized.data.inputs.entries()) {
       delete input.finalScriptWitness;
 
-      const address = bitcoin.address.fromOutputScript(
-        input.witnessUtxo.script,
-        DOICHAIN
-      );
+      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN);
       const wif = this._wallet._getWifForAddress(address);
-      const keyPair = bitcoin.ECPair.fromWIF(wif, DOICHAIN);
+      const keyPair = ECPair.fromWIF(wif, DOICHAIN);
 
       unfinalized.signInput(index, keyPair);
-    });
+    }
 
     return unfinalized;
   }
@@ -45,18 +46,15 @@ export default class PayjoinTransaction {
 
   async signPsbt(payjoinPsbt) {
     // Do this without relying on private methods
-    payjoinPsbt.data.inputs.forEach((input, index) => {
-      const address = bitcoin.address.fromOutputScript(
-        input.witnessUtxo.script,
-        DOICHAIN
-      );
+
+    for (const [index, input] of payjoinPsbt.data.inputs.entries()) {
+      const address = bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN);
       try {
         const wif = this._wallet._getWifForAddress(address);
-        const keyPair = bitcoin.ECPair.fromWIF(wif, DOICHAIN);
+        const keyPair = ECPair.fromWIF(wif, DOICHAIN);
         payjoinPsbt.signInput(index, keyPair).finalizeInput(index);
       } catch (e) {}
-    });
-
+    }
     this._payjoinPsbt = payjoinPsbt;
     return this._payjoinPsbt;
   }
@@ -78,8 +76,8 @@ export default class PayjoinTransaction {
       const result = await this.broadcastTx(txHex);
       if (result === '') {
         // TODO: Improve the wording of this error message
-        ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-        alert('Something was wrong with the payjoin transaction, the original transaction sucessfully broadcast.');
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+        presentAlert({ message: 'Something was wrong with the payjoin transaction, the original transaction successfully broadcast.' });
       }
     });
   }

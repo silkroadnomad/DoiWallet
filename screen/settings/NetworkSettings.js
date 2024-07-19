@@ -1,73 +1,28 @@
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
-import navigationStyle from '../../components/navigationStyle';
-import { SafeBlueArea, BlueListItem } from '../../BlueComponents';
+import Notifications from '../../blue_modules/notifications';
+import ListItem from '../../components/ListItem';
 import loc from '../../loc';
-
 
 const NetworkSettings = () => {
   const { navigate } = useNavigation();
 
   const navigateToElectrumSettings = () => {
-    navigate("ElectrumSettings");
-  };
-  /*
-  import Notifications from '../../blue_modules/notifications';
-  import { isTorCapable } from '../../blue_modules/environment';
-
-  const navigateToTorSettings = () => {
-    navigate('TorSettings');
+    navigate('ElectrumSettings');
   };
 
   const navigateToLightningSettings = () => {
     navigate('LightningSettings');
   };
 
-   <BlueListItem
-     title={loc.settings.lightning_settings}
-     onPress={navigateToLightningSettings}
-     testID="LightningSettings"
-     chevron
-   />;
-   {
-     Notifications.isNotificationsCapable && (
-       <BlueListItem
-         title={loc.settings.notifications}
-         onPress={() => navigate("NotificationSettings")}
-         testID="NotificationSettings"
-         chevron
-       />
-     );
-   }
-   {
-     isTorCapable && (
-       <BlueListItem
-         title={loc.settings.tor_settings}
-         onPress={navigateToTorSettings}
-         testID="TorSettings"
-         chevron
-       />
-     );
-   }
-
-   */
-
   return (
-    <SafeBlueArea>
-      <ScrollView>
-        <BlueListItem
-          title={loc.settings.network_electrum}
-          onPress={navigateToElectrumSettings}
-          testID="ElectrumSettings"
-          chevron
-        />
-      </ScrollView>
-    </SafeBlueArea>
+    <ScrollView contentInsetAdjustmentBehavior="automatic" automaticallyAdjustContentInsets>
+      <ListItem title={loc.settings.network_electrum} onPress={navigateToElectrumSettings} testID="ElectrumSettings" chevron />
+     
+    </ScrollView>
   );
 };
-
-NetworkSettings.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.settings.network }));
 
 export default NetworkSettings;

@@ -3,18 +3,22 @@
     "bad_password": "Hatalı şifre, lütfen tekrar deneyiniz.",
     "cancel": "Vazgeç",
     "continue": "Devam et",
+    "clipboard": "Pano",
+    "discard_changes": "Değişiklikleri iptal et?",
     "enter_password": "Şifre gir",
     "never": "Asla",
     "of": "{number} / {total}",
     "ok": "Tamam",
     "storage_is_encrypted": "Depolama alanınız şifrelidir, kilidi kaldırmak için şifrenizi girin.",
-    "allow": "İzin ver",
-    "dont_allow": "İzin verme",
     "yes": "Evet",
     "no": "Hayır",
     "save": "Kaydet",
     "seed": "Seed",
+    "success": "Başarılı",
     "wallet_key": "Cüzdan anahtarı"
+  },
+  "alert": {
+    "default": "Uyarı"
   },
   "azteco": {
     "codeIs": "Bilet kodunuz ",
@@ -35,27 +39,40 @@
     "error": "Hata",
     "network": "Ağ Hatası"
   },
-  "hodl": {
-    "are_you_sure_you_want_to_logout": "Hodl Hodl'dan çıkış yapmak istediğinize emin misiniz?",
-    "cont_address_escrow": "Escrow",
-    "cont_buying": "Satın al",
-    "cont_cancel": "Anlaşmayı iptal et",
-    "cont_cancel_q": "Anlaşmadan vazgeçmek istediğinize emin misiniz ?",
-    "cont_cancel_y": "Evet, anlaşmayı boz.",
-    "filter_currency": "Para birimi",
-    "filter_detail": "Ayrıntılar",
-    "filter_filters": "Filtreler"
-  },
   "lnd": {
+    "active": "Aktif",
+    "inactive": "Inaktif",
+    "channels": "Kanallar",
+    "no_channels": "Kanal yok",
+    "claim_balance": "Talep balansı (balans)",
+    "close_channel": "Kanalı kapa",
+    "new_channel": "Yeni kanal",
+    "force_close_channel": "Kanalı kapamaya zorla",
     "expired": "Süresi doldu",
-    "placeholder": "Fatura",
+    "node_alias": "Node mahlası",
+    "expiresIn": "{time} dakika içerisinde sona erer",
+    "payButton": "Öde",
+    "open_channel": "Kanal aç",
+    "opening_channnel_for_from": "{fromWalletLabel} tarafından fonlanan kanal {forWalletLabel} için aılıyor",
+    "are_you_sure_open_channel": "Bu kanalı açmak istediğinizden emin misiniz?",
     "refill": "Yükle",
+    "reconnect_peer": "Eş'e tekrar bağlan",
     "refill_lnd_balance": "Lightning cüzdana bakiye yükle",
     "sameWalletAsInvoiceError": "Bir faturayı, oluştururken kullandığınız cüzdan ile ödeyemezsiniz.",
-    "title": "Bakiyeleri Yönet"
+    "title": "Bakiyeleri Yönet",
+    "can_send": "Gönderebilir",
+    "can_receive": "Alabilir",
+    "view_logs": "Logları gör"
   },
   "lndViewInvoice": {
-    "additional_info": "Ek Bilgi"
+    "additional_info": "Ek Bilgi",
+    "for": "İçin: ",
+    "lightning_invoice": "Lightning faturası",
+    "open_direct_channel": "Bu noda direkt kanal aç: ",
+    "please_pay_between_and": "{min} ve {max} arasında bir ödeme yapın",
+    "please_pay": "Lütfen ödeyin",
+    "sats": "sats.",
+    "wasnt_paid_and_expired": "Bu fatura ödenmeden zaman aşımına uğradı."
   },
   "plausibledeniability": {
     "create_fake_storage": "Sahte şifreli depolama oluşturun",
@@ -69,20 +86,14 @@
     "title": "Makul Ret"
   },
   "pleasebackup": {
-    "ask_no": "Hayır, kaydetmedim.",
-    "ask_yes": "Evet, kaydettim.",
-    "ok": "Tamam, bir yere not aldım.",
     "ok_lnd": "Tamam, kaydettim.",
-    "text": "Bir dakikanızı ayırıp nimonik cümlenizi bir parça kağıda not almayı ihmal etmeyin. Nimonik cümleniz, cüzdanınızı herhangi bir cihazda tekrar oluşturabilmenizi sağlar.",
     "text_lnd": "Lütfen kurtarma kodunuzu kaydedin. Cüzdanınızı kayıp etmeniz durumunda onu geri oluşturabilmenizi sağlar.",
-    "text_lnd2": "Bu cüzdan DoiWallet tarafından sağlanmaktadır.",
     "title": "Cüzdanınız oluşturuldu."
   },
   "receive": {
     "details_create": "Oluştur",
     "details_label": "Açıklama",
     "details_setAmount": "Miktar ile al",
-    "details_share": "Paylaş",
     "header": "Al"
   },
   "send": {
@@ -99,7 +110,6 @@
     "create_details": "Detaylar",
     "create_fee": "Ücret",
     "create_memo": "Not",
-    "create_satoshi_per_byte": "Bayt başına Satoshi",
     "create_this_is_hex": "Bu, işleminizin hex kodu. İmzalandı ve ağa yayınlanmaya hazır.",
     "create_to": "Kime",
     "create_tx_size": "TX boyutu",
@@ -113,7 +123,7 @@
     "details_adv_full_sure": "Cüzdanınızın tam bakiyesini bu işlem için kullanmak istediğinize emin misiniz ?",
     "details_adv_import": "İşlemi dışarı aktar",
     "details_amount_field_is_not_valid": "Miktar alanı geçerli değil",
-    "details_amount_field_is_less_than_minimum_amount_sat": "Belirlediğiniz tutar çok az. Lütfen 500 swartz'tan daha büyük bir tutar giriniz.",
+    "details_amount_field_is_less_than_minimum_amount_sat": "Belirlediğiniz tutar çok az. Lütfen 500 sat'tan daha büyük bir tutar giriniz.",
     "details_create": "Oluştur",
     "details_error_decode": "Doi adresi tanımlanamadı",
     "details_fee_field_is_not_valid": "Ücret miktarı geçerli değil.",
@@ -143,7 +153,6 @@
     "permission_camera_message": "Kamerayı kullanmak için izin vermelisiniz.",
     "psbt_sign": "Bir işlemi imzalayın",
     "open_settings": "Ayarları aç",
-    "permission_storage_later": "Daha sonra hatırlat",
     "psbt_clipboard": "Panoya kopyala",
     "success_done": "Tamam"
   },
@@ -155,11 +164,12 @@
     "advanced_options": "Gelişmiş Seçenekler",
     "biometrics": "Biyometrikler",
     "currency": "Para Birimi",
+    "electrum_clear_alert_cancel": "Vazgeç",
+    "electrum_clear": "Temizle",
     "general_adv_mode": "Enable advanced mode",
     "header": "ayarlar",
     "language": "Dil",
     "lightning_settings": "Lightning Ayarları",
-    "lightning_settings_explain": "Kendi LND düğümünüze bağlanmak için lütfen LndHubı yükleyin. ve URL’sini buraya, ayarlara yazın. DoiWallet'in LNDHub (lndhub.io) programını kullanmak için boş bırakın. Değişiklikleri kaydettikten sonra oluşturulan cüzdanlar belirtilen LNDHub'a bağlanacaktır.",
     "password": "Şifre",
     "password_explain": "Depolamanın şifresini çözmek için kullanacağınız şifreyi oluşturun",
     "passwords_do_not_match": "Şifreler eşleşmedi",
@@ -173,23 +183,21 @@
     "saved": "Kaydedildi",
     "total_balance": "Bakiye"
   },
-  "notifications": {
-    "no_and_dont_ask": "Hayır, bir daha sorma",
-    "ask_me_later": "Daha sonra hatırlat"
-  },
   "transactions": {
+    "cpfp_create": "Oluştur",
     "details_copy": "Kopya",
     "details_from": "Girdi",
+    "transaction_saved": "Kaydedildi",
     "details_show_in_block_explorer": "Blok gezgininde göster",
     "details_title": "İşlem",
     "details_to": "Çıktı",
-    "details_transaction_details": "İşlem detayları",
+    "pending": "Beklemede",
     "list_title": "işlemler"
   },
   "wallets": {
     "add_create": "Oluştur",
+    "add_entropy": "Entropi",
     "add_import_wallet": "Cüzdan İçeri Yükle",
-    "add_or": "veya",
     "add_title": "Cüzdan ekle",
     "add_wallet_name": "İsim",
     "add_wallet_type": "Tip",
@@ -201,6 +209,7 @@
     "details_save": "Kaydet",
     "details_show_xpub": "Cüzdan XPUB göster",
     "details_title": "Cüzdan",
+    "wallets": "cüzdanlar",
     "details_type": "Tip",
     "details_yes_delete": "Evet, sil",
     "export_title": "cüzdan yedekle",
@@ -214,7 +223,6 @@
     "list_create_a_wallet": "Cüzdan oluştur",
     "list_empty_txs1": "İşlemleriniz burada görünür,",
     "list_latest_transaction": "en son işlem",
-    "list_tap_here_to_buy": "Doi almak için buraya dokunun",
     "list_title": "cüzdanlar",
     "reorder_title": "Cüzdanları Sırala",
     "select_wallet": "Cüzdan Seç",
@@ -222,6 +230,10 @@
     "xpub_title": "cüzdan XPUB"
   },
   "multisig": {
+    "confirm": "Onayla",
+    "header": "Gönder",
+    "create": "Oluştur",
+    "co_sign_transaction": "Bir işlemi imzalayın",
     "ms_help": "Yardım",
     "ms_help_title5": "Gelişmiş Mod"
   },
@@ -231,9 +243,15 @@
     "check_address": "Adresi kontrol et"
   },
   "units": {
-    "BTC": "DOI",
-    "MAX": "Maks",
+    "DOI": "DOI",
+    "MAX": "MAX",
     "sat_byte": "swartz/byte",
-    "sats": "swartz"
+    "sats": "swartz",
+    "swartz":"swartz"
+  },
+  "addresses": {
+    "sign_placeholder_address": "Adres",
+    "type_receive": "Al",
+    "transactions": "işlemler"
   }
 }

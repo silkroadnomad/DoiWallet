@@ -1,223 +1,252 @@
-/* global alert */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import { I18nManager, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Icon } from 'react-native-elements';
 
-import {
-  BlueButton,
-  BlueCard,
-  BlueDismissKeyboardInputAccessory,
-  BlueLoading,
-  BlueSpacing20,
-  BlueText,
-  SafeBlueArea,
-} from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import AmountInput from '../../components/AmountInput';
-import { BlueCurrentTheme } from '../../components/themes';
+import { Icon } from '@rneui/themed';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+
+import { btcToSatoshi, fiatToBTC, satoshiToBTC, satoshiToLocalCurrency } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { BlueCard, BlueDismissKeyboardInputAccessory, BlueLoading, BlueSpacing20, BlueText } from '../../BlueComponents';
 import Lnurl from '../../class/lnurl';
-import { DoichainUnit, Chain } from '../../models/doichainUnits';
-import loc, { formatBalanceWithoutSuffix } from '../../loc';
-import Biometric from '../../class/biometrics';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-const currency = require('../../blue_modules/currency');
+import presentAlert from '../../components/Alert';
+import AmountInput from '../../components/AmountInput';
+import Button from '../../components/Button';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import prompt from '../../helpers/prompt';
+import { useBiometrics, unlockWithBiometrics } from '../../hooks/useBiometrics';
+import loc, { formatBalance, formatBalanceWithoutSuffix } from '../../loc';
 
-export default class LnurlPay extends Component {
-  static contextType = BlueStorageContext;
+import { useStorage } from '../../hooks/context/useStorage';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 
-  constructor(props, context) {
-    super(props);
-    const fromWalletID = props.route.params.fromWalletID;
-    const lnurl = props.route.params.lnurl;
+/**
+ * if user has default currency - fiat, attempting to pay will trigger conversion from entered in input field fiat value
+ * to satoshi, and attempt to pay this satoshi value, which might be a little bit off from `min` & `max` values
+ * provided by LnUrl. thats why we cache initial precise conversion rate so the reverse conversion wont be off.
+ */
+const _cacheFiatToSat = {};
 
-    const fromWallet = context.wallets.find(w => w.getID() === fromWalletID);
+const LnurlPay = () => {
+  const { wallets } = useStorage();
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
+  const { walletID, lnurl } = useRoute().params;
+  /** @type {LightningCustodianWallet} */
+  const wallet = wallets.find(w => w.getID() === walletID);
+  const [unit, setUnit] = useState(wallet.getPreferredBalanceUnit());
+  const [isLoading, setIsLoading] = useState(true);
+  const [_LN, setLN] = useState();
+  const [payButtonDisabled, setPayButtonDisabled] = useState(true);
+  const [payload, setPayload] = useState();
+  const { setParams, pop, navigate } = useExtendedNavigation();
+  const [amount, setAmount] = useState();
+  const { colors } = useTheme();
+  const stylesHook = StyleSheet.create({
+    root: {
+      backgroundColor: colors.background,
+    },
 
-    this.state = {
-      isLoading: true,
-      fromWalletID,
-      fromWallet,
-      lnurl,
-      payButtonDisabled: false,
-      unit: fromWallet.getPreferredBalanceUnit(),
-    };
-  }
+    walletWrapLabel: {
+      color: colors.buttonAlternativeTextColor,
+    },
+    walletWrapBalance: {
+      color: colors.buttonAlternativeTextColor,
+    },
+    walletWrapSats: {
+      color: colors.buttonAlternativeTextColor,
+    },
+  });
 
-  async componentDidMount() {
-    const LN = new Lnurl(this.state.lnurl, AsyncStorage);
-    const payload = await LN.callLnurlPayService();
+  useEffect(() => {
+    if (lnurl) {
+      const ln = new Lnurl(lnurl, AsyncStorage);
+      ln.callLnurlPayService()
+        .then(setPayload)
+        .catch(error => {
+          presentAlert({ message: error.message });
+          pop();
+        });
+      setLN(ln);
+      setIsLoading(false);
+    }
+  }, [lnurl, pop]);
 
-    this.setState({
-      payload,
-      amount: payload.min,
-      isLoading: false,
-      LN,
-    });
-  }
+  useEffect(() => {
+    setPayButtonDisabled(isLoading);
+  }, [isLoading]);
 
-  onWalletSelect = wallet => {
-    this.setState({ fromWallet: wallet, fromWalletID: wallet.getID() }, () => {
-      this.props.navigation.pop();
-    });
+  useEffect(() => {
+    if (payload) {
+      /** @type {Lnurl} */
+      const LN = _LN;
+      let originalSatAmount;
+      let newAmount = (originalSatAmount = LN.getMin());
+      if (!newAmount) {
+        presentAlert({ message: 'Internal error: incorrect LNURL amount' });
+        return;
+      }
+      switch (unit) {
+        case DoichainUnit.DOI:
+          newAmount = satoshiToBTC(newAmount);
+          break;
+        case DoichainUnit.LOCAL_CURRENCY:
+          newAmount = satoshiToLocalCurrency(newAmount, false);
+          _cacheFiatToSat[newAmount] = originalSatAmount;
+          break;
+      }
+      setAmount(newAmount);
+    }
+  }, [payload]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onWalletSelect = w => {
+    setParams({ walletID: w.getID() });
+    pop();
   };
 
-  pay = async () => {
-    this.setState({
-      payButtonDisabled: true,
-    });
+  const pay = async () => {
+    setPayButtonDisabled(true);
     /** @type {Lnurl} */
-    const LN = this.state.LN;
+    const LN = _LN;
 
-    const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+    const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();
     if (isBiometricsEnabled) {
-      if (!(await Biometric.unlockWithBiometrics())) {
+      if (!(await unlockWithBiometrics())) {
         return;
       }
     }
 
-    let amountSats = this.state.amount;
-    switch (this.state.unit) {
+    let amountSats = amount;
+    switch (unit) {
       case DoichainUnit.SWARTZ:
-        amountSats = parseInt(amountSats); // nop
+        amountSats = parseInt(amountSats, 10); // nop
         break;
       case DoichainUnit.DOI:
-        amountSats = currency.btcToSatoshi(amountSats);
+        amountSats = btcToSatoshi(amountSats);
         break;
       case DoichainUnit.LOCAL_CURRENCY:
-        amountSats = currency.btcToSatoshi(currency.fiatToBTC(amountSats));
+        if (_cacheFiatToSat[amount]) {
+          amountSats = _cacheFiatToSat[amount];
+        } else {
+          amountSats = btcToSatoshi(fiatToBTC(amountSats));
+        }
         break;
     }
 
-    /** @type {LightningCustodianWallet} */
-    const fromWallet = this.state.fromWallet;
-
     let bolt11payload;
     try {
-      bolt11payload = await LN.requestBolt11FromLnurlPayService(amountSats);
-      await fromWallet.payInvoice(bolt11payload.pr);
-      const decoded = fromWallet.decodeInvoice(bolt11payload.pr);
-      this.setState({ payButtonDisabled: false });
-
-      // success, probably
-      ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
-      if (fromWallet.last_paid_invoice_result && fromWallet.last_paid_invoice_result.payment_preimage) {
-        await LN.storeSuccess(decoded.payment_hash, fromWallet.last_paid_invoice_result.payment_preimage);
+      let comment;
+      if (LN.getCommentAllowed()) {
+        comment = await prompt('Comment', '', false, 'plain-text');
       }
 
-      this.props.navigation.navigate('ScanLndInvoiceRoot', {
+      bolt11payload = await LN.requestBolt11FromLnurlPayService(amountSats, comment);
+      await wallet.payInvoice(bolt11payload.pr);
+      const decoded = wallet.decodeInvoice(bolt11payload.pr);
+      setPayButtonDisabled(false);
+
+      // success, probably
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+      if (wallet.last_paid_invoice_result && wallet.last_paid_invoice_result.payment_preimage) {
+        await LN.storeSuccess(decoded.payment_hash, wallet.last_paid_invoice_result.payment_preimage);
+      }
+
+      navigate('ScanLndInvoiceRoot', {
         screen: 'LnurlPaySuccess',
         params: {
           paymentHash: decoded.payment_hash,
           justPaid: true,
-          fromWalletID: this.state.fromWalletID,
+          fromWalletID: walletID,
         },
       });
+      setIsLoading(false);
     } catch (Err) {
       console.log(Err.message);
-      this.setState({ isLoading: false, payButtonDisabled: false });
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      return alert(Err.message);
+      setIsLoading(false);
+      setPayButtonDisabled(false);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      return presentAlert({ message: Err.message });
     }
   };
 
-  renderWalletSelectionButton = () => {
-    if (this.state.renderWalletSelectionButtonHidden) return;
-    return (
-      <View style={styles.walletSelectRoot}>
-        {!this.state.isLoading && (
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={styles.walletSelectTouch}
-            onPress={() =>
-              this.props.navigation.navigate('SelectWallet', { onWalletSelect: this.onWalletSelect, chainType: Chain.OFFCHAIN })
-            }
-          >
-            <Text style={styles.walletSelectText}>{loc.wallets.select_wallet.toLowerCase()}</Text>
-            <Icon name={I18nManager.isRTL ? 'angle-left' : 'angle-right'} size={18} type="font-awesome" color="#9aa0aa" />
-          </TouchableOpacity>
-        )}
-        <View style={styles.walletWrap}>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={styles.walletWrapTouch}
-            onPress={() =>
-              this.props.navigation.navigate('SelectWallet', { onWalletSelect: this.onWalletSelect, chainType: Chain.OFFCHAIN })
-            }
-          >
-            <Text style={styles.walletWrapLabel}>{this.state.fromWallet.getLabel()}</Text>
-            <Text style={styles.walletWrapBalance}>
-              {formatBalanceWithoutSuffix(this.state.fromWallet.getBalance(), DoichainUnit.SWARTZ, false)}
-            </Text>
-            <Text style={styles.walletWrapSats}>{DoichainUnit.SWARTZ}</Text>
-          </TouchableOpacity>
-        </View>
+  const renderWalletSelectionButton = (
+    <View style={styles.walletSelectRoot}>
+      {!isLoading && (
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.walletSelectTouch}
+          onPress={() => navigate('SelectWallet', { onWalletSelect, chainType: Chain.OFFCHAIN })}
+        >
+          <Text style={styles.walletSelectText}>{loc.wallets.select_wallet.toLowerCase()}</Text>
+          <Icon name={I18nManager.isRTL ? 'angle-left' : 'angle-right'} size={18} type="font-awesome" color="#9aa0aa" />
+        </TouchableOpacity>
+      )}
+      <View style={styles.walletWrap}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.walletWrapTouch}
+          onPress={() => navigate('SelectWallet', { onWalletSelect, chainType: Chain.OFFCHAIN })}
+        >
+          <Text style={[styles.walletWrapLabel, stylesHook.walletWrapLabel]}>{wallet.getLabel()}</Text>
+          <Text style={[styles.walletWrapBalance, stylesHook.walletWrapBalance]}>
+            {formatBalanceWithoutSuffix(wallet.getBalance(), DoichainUnit.SWARTZ, false)}
+          </Text>
+          <Text style={[styles.walletWrapSats, stylesHook.walletWrapSats]}>{DoichainUnit.SWARTZ}</Text>
+        </TouchableOpacity>
       </View>
-    );
-  };
+    </View>
+  );
 
-  renderGotPayload() {
+  const renderGotPayload = () => {
     return (
-      <SafeBlueArea>
-        <ScrollView>
+      <SafeArea>
+        <ScrollView contentContainertyle={{ justifyContent: 'space-around' }}>
           <BlueCard>
             <AmountInput
-              isLoading={this.state.isLoading}
-              amount={this.state.amount.toString()}
-              onAmountUnitChange={unit => {
-                this.setState({ unit });
-              }}
-              onChangeText={text => {
-                this.setState({ amount: text });
-              }}
-              disabled={this.state.payload && this.state.payload.fixed}
-              unit={this.state.unit}
+              isLoading={isLoading}
+              amount={amount && amount.toString()}
+              onAmountUnitChange={setUnit}
+              onChangeText={setAmount}
+              disabled={payload && payload.fixed}
+              unit={unit}
               inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
             />
             <BlueText style={styles.alignSelfCenter}>
-              please pay between {this.state.payload.min} and {this.state.payload.max} swartz
+              {loc.formatString(loc.lndViewInvoice.please_pay_between_and, {
+                min: formatBalance(payload?.min, unit),
+                max: formatBalance(payload?.max, unit),
+              })}
             </BlueText>
             <BlueSpacing20 />
-            {this.state.payload.image && <Image style={styles.img} source={{ uri: this.state.payload.image }} />}
-            <BlueText style={styles.alignSelfCenter}>{this.state.payload.description}</BlueText>
-            <BlueText style={styles.alignSelfCenter}>{this.state.payload.domain}</BlueText>
+            {payload?.image && (
+              <>
+                <Image style={styles.img} source={{ uri: payload?.image }} />
+                <BlueSpacing20 />
+              </>
+            )}
+            <BlueText style={styles.alignSelfCenter}>{payload?.description}</BlueText>
+            <BlueText style={styles.alignSelfCenter}>{payload?.domain}</BlueText>
             <BlueSpacing20 />
-            <BlueButton title={loc.lnd.payButton} onPress={this.pay} disabled={this.state.payButtonDisabled} />
+            {payButtonDisabled ? <BlueLoading /> : <Button title={loc.lnd.payButton} onPress={pay} />}
             <BlueSpacing20 />
-            {this.renderWalletSelectionButton()}
           </BlueCard>
         </ScrollView>
-      </SafeBlueArea>
+        {renderWalletSelectionButton}
+      </SafeArea>
     );
-  }
+  };
 
-  render() {
-    if (this.state.isLoading) {
-      return (
-        <View style={styles.root}>
-          <BlueLoading />
-        </View>
-      );
-    }
-
-    return this.renderGotPayload();
-  }
-}
-
-LnurlPay.propTypes = {
-  route: PropTypes.shape({
-    params: PropTypes.shape({
-      fromWalletID: PropTypes.string.isRequired,
-      lnurl: PropTypes.string.isRequired,
-    }),
-  }),
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func,
-    pop: PropTypes.func,
-    dangerouslyGetParent: PropTypes.func,
-  }),
+  return isLoading || wallet === undefined || amount === undefined ? (
+    <View style={[styles.root, stylesHook.root]}>
+      <BlueLoading />
+    </View>
+  ) : (
+    renderGotPayload()
+  );
 };
+
+export default LnurlPay;
 
 const styles = StyleSheet.create({
   img: { width: 200, height: 200, alignSelf: 'center' },
@@ -226,10 +255,9 @@ const styles = StyleSheet.create({
   },
   root: {
     flex: 1,
-    backgroundColor: BlueCurrentTheme.colors.background,
+    justifyContent: 'center',
   },
   walletSelectRoot: {
-    marginBottom: 16,
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
@@ -252,28 +280,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   walletWrapLabel: {
-    color: BlueCurrentTheme.colors.buttonAlternativeTextColor,
     fontSize: 14,
   },
   walletWrapBalance: {
-    color: BlueCurrentTheme.colors.buttonAlternativeTextColor,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4,
     marginRight: 4,
   },
   walletWrapSats: {
-    color: BlueCurrentTheme.colors.buttonAlternativeTextColor,
     fontSize: 11,
     fontWeight: '600',
     textAlignVertical: 'bottom',
     marginTop: 2,
   },
-});
-
-LnurlPay.navigationOptions = navigationStyle({
-  title: '',
-  closeButton: true,
-  closeButtonFunc: ({ navigation }) => navigation.dangerouslyGetParent().popToTop(),
-  headerLeft: null,
 });

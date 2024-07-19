@@ -1,8 +1,9 @@
+import assert from 'assert';
+
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import { WatchOnlyWallet } from '../../class';
-const assert = require('assert');
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-global.tls = require('tls'); // needed by Electrum client. For RN it is proviced in shim.js
-const BlueElectrum = require('../../blue_modules/BlueElectrum'); // so it connects ASAP
+
+jest.setTimeout(500 * 1000);
 
 afterAll(async () => {
   // after all tests we close socket so the test suite can actually terminate
@@ -12,10 +13,8 @@ afterAll(async () => {
 beforeAll(async () => {
   // awaiting for Electrum to be connected. For RN Electrum would naturally connect
   // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
+  await BlueElectrum.connectMain();
 });
-
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 500 * 1000;
 
 describe('Watch only wallet', () => {
   it('can fetch balance', async () => {
@@ -42,6 +41,7 @@ describe('Watch only wallet', () => {
     assert.strictEqual(w.getTransactions().length, 2);
   });
 
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can fetch tx from huge wallet', async () => {
     const w = new WatchOnlyWallet();
     w.setSecret('1NDyJtNTjmwk5xPNhjgAMu4HDHigtobu1s'); // binance wallet
@@ -96,6 +96,23 @@ describe('Watch only wallet', () => {
     assert.strictEqual(w.getBalance(), 200000);
     await w.fetchTransactions();
     assert.strictEqual(w.getTransactions().length, 4);
-    assert.ok((await w.getAddressAsync()).startsWith('bc1'));
+    const nextAddress = await w.getAddressAsync();
+
+    assert.strictEqual(w.getNextFreeAddressIndex(), 2);
+    assert.strictEqual(nextAddress, 'bc1q6442dedpwvqldldnsyux3cuz27paqks0pf2kvf');
+    assert.strictEqual(nextAddress, w._getExternalAddressByIndex(w.getNextFreeAddressIndex()));
+
+    const nextChangeAddress = await w.getChangeAddressAsync();
+    assert.strictEqual(nextChangeAddress, 'bc1qgltdyjnertcyvdn9hlkfpgr6hc260rjrss49uy');
+  });
+
+  // skipped because its generally rare case
+  // eslint-disable-next-line jest/no-disabled-tests
+  it.skip('can fetch txs for address funded by genesis txs', async () => {
+    const w = new WatchOnlyWallet();
+    w.setSecret('37jKPSmbEGwgfacCr2nayn1wTaqMAbA94Z');
+    await w.fetchBalance();
+    await w.fetchTransactions();
+    assert.ok(w.getTransactions().length >= 138);
   });
 });
