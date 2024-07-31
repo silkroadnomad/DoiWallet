@@ -123,7 +123,7 @@
     "create_details": "Detalles",
     "create_fee": "Comisión",
     "create_memo": "Comentario",
-    "create_satoshi_per_vbyte": "Satoshis por vByte",
+    "create_satoshi_per_vbyte": "Swartzs por vByte",
     "create_this_is_hex": "Esta es tu transacción en formato hexadecimal—firmada y lista para ser emitido a través de la red.",
     "create_to": "Dirección de destino",
     "create_tx_size": "Tamaño de la transacción",

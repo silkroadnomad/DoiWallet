@@ -21,6 +21,7 @@ function scanQrHelper(currentScreenName: string, showFileImportButton = true, on
       };
 
       params.onBarScanned = function (data: any) {
+        console.log('scanQrHelper.onBarScanned', data); 
         setTimeout(() => resolve(data.data || data), 1);
         navigationRef.navigate({ name: currentScreenName, params: {}, merge: true });
       };

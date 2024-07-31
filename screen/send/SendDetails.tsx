@@ -2,6 +2,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteProp, StackActions, useFocusEffect, useRoute } from '@react-navigation/native';
 import BigNumber from 'bignumber.js';
 import * as bitcoin from 'bitcoinjs-lib';
+import { TextDecoder } from 'text-decoding';
+import bs58check from 'bs58check';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -464,6 +466,8 @@ const SendDetails = () => {
       return;
     }
 
+    console.log("________ddd",data )
+
     let address = '';
     let options: TOptions;
     try {
@@ -714,9 +718,12 @@ const SendDetails = () => {
     navigation.getParent()?.getParent()?.dispatch(popAction);
     if (!wallet) return;
     if (!ret.data) ret = { data: ret };
+console.log("_____aaaa")
     if (ret.data.toUpperCase().startsWith('UR')) {
       presentAlert({ title: loc.errors.error, message: 'BC-UR not decoded. This should never happen' });
     } else if (ret.data.indexOf('+') === -1 && ret.data.indexOf('=') === -1 && ret.data.indexOf('=') === -1) {
+
+      
       // this looks like NOT base64, so maybe its transaction's hex
       // we dont support it in this flow
     } else {
@@ -866,6 +873,8 @@ const SendDetails = () => {
 
   const importTransactionMultisigScanQr = () => {
     setOptionsVisible(false);
+
+    
     requestCameraAuthorization().then(() => {
       navigation.navigate('ScanQRCodeRoot', {
         screen: 'ScanQRCode',
@@ -917,17 +926,19 @@ const SendDetails = () => {
   };
 
   const handlePsbtSign = async () => {
+    console.log("______aaaa") 
     setIsLoading(true);
     setOptionsVisible(false);
     await new Promise(resolve => setTimeout(resolve, 100)); // sleep for animations
     const scannedData = await scanQrHelper(name);
-    if (!scannedData) return setIsLoading(false);
+
+    console.log('_____scannedData__', scannedData);
 
     let tx;
     let psbt;
     try {
-      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
-      tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
+        psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN }); 
+        tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
     } catch (e: any) {
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
@@ -944,7 +955,47 @@ const SendDetails = () => {
       // @ts-ignore hacky
       changeAddresses.push(wallet._getInternalAddressByIndex(c));
     }
-    const recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
+
+    // nameOp addresses are undefined we need to fix that before filtering them out
+    const updatedTxOutputs = psbt.txOutputs.map(output => {
+      if (!output.address) {
+        const chunks = bitcoin.script.decompile(output.script);
+        try {
+          const decodedAddress = bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
+          console.log('decodedAddress', decodedAddress);
+          return { ...output, address: decodedAddress };
+        } catch (e) {
+          console.log('error during decode', e);
+          return output; // Return the original output if decoding fails
+        }
+      }
+      return output; // Return the original output if address is already set
+    });
+
+    console.log('Updated txOutputs:', updatedTxOutputs);
+
+
+    //if a nameOp is stored to a changeAddress our recipient is not shown!
+    // let recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
+    let recipients = updatedTxOutputs.filter(({ address }) => true);
+
+    console.log('_    22__recipients', recipients);
+
+    // const nameOPRecipients = psbt.txOutputs.map(o => {
+    //   const chunks = bitcoin.script.decompile(o.script);
+    // const utf16Decoder = new TextDecoder('ascii');
+    //   try {
+
+    //     const nameId = utf16Decoder.decode(Buffer.from(chunks[1], 'hex'));
+    //     const nameValue = utf16Decoder.decode(Buffer.from(chunks[2], 'hex'));
+
+    //     console.log('__________nameId', nameId);
+    //     console.log('__________nameValue', nameValue);
+    //     console.log('__________decodedChunk70', bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash));
+    //     return bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
+    //   } catch (e) { console.log('error during decode', e) }
+    // });
+
 
     navigation.navigate('CreateTransaction', {
       fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),

@@ -2,6 +2,7 @@ import BIP47Factory from '@spsina/bip47';
 import assert from 'assert';
 import * as bitcoin from 'bitcoinjs-lib';
 import { ECPairFactory } from 'ecpair';
+import { DOICHAIN } from '../../blue_modules/network.js';
 
 import ecc from '../../blue_modules/noble_ecc';
 import { HDSegwitBech32Wallet, WatchOnlyWallet } from '../../class';
@@ -13,13 +14,14 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
   it('should work', async () => {
     const bobWallet = new HDSegwitBech32Wallet();
     // @see https://gist.github.com/SamouraiDev/6aad669604c5930864bd
-    bobWallet.setSecret('reward upper indicate eight swift arch injury crystal super wrestle already dentist');
-
+    //bobWallet.setSecret('reward upper indicate eight swift arch injury crystal super wrestle already dentist');
+    bobWallet.setSecret('coil earn raccoon party result public shrug corn scrap field security devote');
+    
     expect(bobWallet.getBIP47PaymentCode()).toEqual(
-      'PM8TJS2JxQ5ztXUpBBRnpTbcUXbUHy2T1abfrb3KkAAtMEGNbey4oumH7Hc578WgQJhPjBxteQ5GHHToTYHE3A1w6p7tU6KSoFmWBVbFGjKPisZDbP97',
+      'PM8TJS7d8ryvmPTk57d7NYJug8eLQpHHdmfcHidoBqqXgqMdjW56SBaK5R9wSSj5bRjhrVafyUBpgpdGqT7Si2XWQSu8zPxnWsjCyKwo5Mog1mGUo3as',
     );
-    assert.strictEqual(bobWallet.getBIP47NotificationAddress(), '1ChvUUvht2hUQufHBXF8NgLhW8SwE2ecGV'); // our notif address
-    assert.ok(!bobWallet.weOwnAddress('1JDdmqFLhpzcUwPeinhJbUPw4Co3aWLyzW')); // alice notif address, we dont own it
+    assert.strictEqual(bobWallet.getBIP47NotificationAddress(), '184USph7XbuWsJ3XZrbve53YdpdjYjUXoG'); // our notif address
+    assert.ok(!bobWallet.weOwnAddress('184USph7XbuWsJ3XZrbve53YdpdjYjUXoG')); // alice notif address, we dont own it
   });
 
   it('getters, setters, flags work', async () => {
@@ -51,16 +53,16 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
     w.setPassphrase('1');
 
     expect(w.getBIP47PaymentCode()).toEqual(
-      'PM8TJXuZNUtSibuXKFM6bhCxpNaSye6r4px2GXRV5v86uRdH9Raa8ZtXEkG7S4zLREf4ierjMsxLXSFTbRVUnRmvjw9qnc7zZbyXyBstSmjcb7uVcDYF',
+      'PM8TJXQ57krakYxKFR3KeUY47kAAE3u6TN7yqDZFw2Mef2EkvYnqbN31BqUN3NaGKvhyaHjtqF1tZpPR4XJbz6ykHL7nZK8oVKzUtofNF1gwAgSpM3u1',
     );
 
-    expect(w._getExternalAddressByIndex(0)).toEqual('bc1q07l355j4yd5kyut36vjxn2u60d3dknnpt39t6y');
+    expect(w._getExternalAddressByIndex(0)).toEqual('dc1q8tu9qtyfps2pcu442alu547qqsu9wx8allav6a');
 
     const ourNotificationAddress = w.getBIP47NotificationAddress();
 
     const publicBip47 = BIP47Factory(ecc).fromPaymentCode(w.getBIP47PaymentCode());
     expect(ourNotificationAddress).toEqual(publicBip47.getNotificationAddress()); // same address we derived internally for ourselves and from public Payment Code
-    expect(ourNotificationAddress).toEqual('1EiP2kSqxNqRhn8MPMkrtSEqaWiCWLYyTS'); // our notif address
+    expect(ourNotificationAddress).toEqual('13VrzVGGdYErtQRggFWvccFtyeELRMbzG1'); // our notif address
 
     // since we dont do network calls in unit test we cant get counterparties payment codes from our notif address,
     // and thus, dont know collaborative addresses with our payers. lets hardcode our counterparty payment code to test
@@ -76,18 +78,18 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
       'PM8TJi1RuCrgSHTzGMoayUf8xUW6zYBGXBPSWwTiMhMMwqto7G6NA4z9pN5Kn8Pbhryo2eaHMFRRcidCGdB3VCDXJD4DdPD2ZyG3ScLMEvtStAetvPMo',
     ]);
 
-    assert.ok(w.weOwnAddress('bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe'));
-    const pubkey = w._getPubkeyByAddress('bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe');
-    const path = w._getDerivationPathByAddress('bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe');
+    assert.ok(w.weOwnAddress('dc1q8tu9qtyfps2pcu442alu547qqsu9wx8allav6a'));
+    const pubkey = w._getPubkeyByAddress('dc1q8tu9qtyfps2pcu442alu547qqsu9wx8allav6a');
+    const path = w._getDerivationPathByAddress('dc1q8tu9qtyfps2pcu442alu547qqsu9wx8allav6a');
     assert.ok(pubkey);
     assert.ok(path);
 
-    const keyPair2 = ECPair.fromWIF(w._getWIFbyAddress('bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe') || '');
+    const keyPair2 = ECPair.fromWIF(w._getWIFbyAddress('dc1q8tu9qtyfps2pcu442alu547qqsu9wx8allav6a') || '', DOICHAIN);
     const address = bitcoin.payments.p2wpkh({
       pubkey: keyPair2.publicKey,
     }).address;
 
-    assert.strictEqual(address, 'bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe');
+    assert.strictEqual(address, 'bc1q8tu9qtyfps2pcu442alu547qqsu9wx8agexm6g');
   });
 
   it('should work (sparrow)', async () => {
@@ -98,7 +100,7 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
 
     const w = new HDSegwitBech32Wallet();
     w.setSecret(process.env.BIP47_HD_MNEMONIC.split(':')[1]);
-
+console.log("_______w.getXpub()",w.getXpub())
     assert.strictEqual(
       w.getXpub(),
       'zpub6r4KaQRsLuhHSGx8b9wGHh18UnawBs49jtiDzZYh9DSgKGwD72jWR3v54fkyy1UKVxt9HvCkYHmMAUe2YjKefofWzYp9YD62sUp6nNsEDMs',
@@ -332,14 +334,14 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
       'PM8TJi1RuCrgSHTzGMoayUf8xUW6zYBGXBPSWwTiMhMMwqto7G6NA4z9pN5Kn8Pbhryo2eaHMFRRcidCGdB3VCDXJD4DdPD2ZyG3ScLMEvtStAetvPMo',
       0,
     );
-    assert.strictEqual(addr, 'bc1q57nwf9vfq2qsl80q37wq5h0tjytsk95vgjq4fe');
+    assert.strictEqual(addr, 'dc1qvg6ajy4w2vauye8t5lh8uksw9u3pkslj9fjyqk');
 
     const addr2 = w._getBIP47AddressSend(
       'PM8TJi1RuCrgSHTzGMoayUf8xUW6zYBGXBPSWwTiMhMMwqto7G6NA4z9pN5Kn8Pbhryo2eaHMFRRcidCGdB3VCDXJD4DdPD2ZyG3ScLMEvtStAetvPMo',
       0,
     );
 
-    assert.strictEqual(addr2, 'bc1qaxxc4gwx6rd6rymq08qwpxhesd4jqu93lvjsyt');
+    assert.strictEqual(addr2, 'dc1qrt38q6vvnfqp8v5j3uhsz59q9mz9rth2whzekk');
 
     assert.strictEqual(w.getAllExternalAddresses().length, 20); // exactly gap limit for external addresses
     assert.ok(!w.getAllExternalAddresses().includes(addr)); // joint address to _receive_ is not included

@@ -145,7 +145,7 @@
     "create_details": "Podrobnosti",
     "create_fee": "Poplatek",
     "create_memo": "Poznámka",
-    "create_satoshi_per_vbyte": "Satoshi na vByte",
+    "create_satoshi_per_vbyte": "Swartz na vByte",
     "create_this_is_hex": "Toto je vaše transakce, podepsána a připravena k odeslání do sítě.",
     "create_to": "Komu",
     "create_tx_size": "Velikost transakce",

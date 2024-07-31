@@ -145,7 +145,7 @@
     "create_details": "Szczegóły",
     "create_fee": "Opłata",
     "create_memo": "Notatka",
-    "create_satoshi_per_vbyte": "Satoshi za vBajt",
+    "create_satoshi_per_vbyte": "Swartz za vBajt",
     "create_this_is_hex": "To jest twoja transakcja w postaci szestnastkowej, podpisana i gotowa żeby rozgłosić ją w sieci",
     "create_to": "Do",
     "create_tx_size": "Rozmiar transakcji",

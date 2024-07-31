@@ -126,7 +126,7 @@
     "create_details": "Részletek",
     "create_fee": "Díj",
     "create_memo": "megjegyzés",
-    "create_satoshi_per_vbyte": "Satoshi vbájtonként",
+    "create_satoshi_per_vbyte": "Swartz vbájtonként",
     "create_this_is_hex": "Tranzakció hexadecimális formátumban, aláírva és küldésre készen.",
     "create_to": "Címzett",
     "create_tx_size": "Tranzakció mérete",

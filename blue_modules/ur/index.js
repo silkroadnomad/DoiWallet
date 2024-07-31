@@ -13,7 +13,6 @@ import {
 import { decodeUR as origDecodeUr, encodeUR as origEncodeUR, extractSingleWorkload as origExtractSingleWorkload } from '../bc-ur/dist';
 import { MultisigCosigner, MultisigHDWallet } from '../../class';
 import { Psbt } from 'bitcoinjs-lib';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const USE_UR_V1 = 'USE_UR_V1';
 
@@ -147,6 +146,13 @@ function decodeUR(arg) {
     return origDecodeUr(arg);
   } catch (_) {}
 
+  try {    
+    const reassembled = joinQRs(arg);    
+    const decoder = new TextDecoder('utf-8');
+    const decodedString = decoder.decode(new Uint8Array(reassembled.raw));    
+    return decodedString;
+  } catch (_) {}
+
   const decoder = new URDecoder();
 
   for (const part of arg) {
@@ -214,7 +220,7 @@ function decodeUR(arg) {
 class BlueURDecoder extends URDecoder {
   toString() {
     const decoded = this.resultUR();
-
+    console.log("___decoded", decoded);
     if (decoded.type === 'crypto-psbt') {
       const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor);
       return cryptoPsbt.getPSBT().toString('base64');

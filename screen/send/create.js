@@ -30,6 +30,10 @@ const SendCreate = () => {
   const { setOptions } = useNavigation();
   const { enableBlur, disableBlur } = usePrivacy();
 
+  console.log("____11_____recipients", recipients);
+  console.log("____11_____transaction", transaction); 
+  
+
   const styleHooks = StyleSheet.create({
     transactionDetailsTitle: {
       color: colors.feeText,
@@ -128,7 +132,7 @@ const SendCreate = () => {
               styleHooks.transactionDetailsSubtitle,
             ]}
           >
-            {item.address}
+            {item.address}             
           </Text>
           <Text
             style={[
@@ -237,7 +241,7 @@ const SendCreate = () => {
           styleHooks.transactionDetailsSubtitle,
         ]}
       >
-        {satoshiPerByte} Sat/vB
+        {satoshiPerByte} Swartz/vB
       </Text>
       {memo?.length > 0 && (
         <>

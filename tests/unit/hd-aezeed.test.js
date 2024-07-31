@@ -61,21 +61,21 @@ describe('HDAezeedWallet', () => {
     );
 
     let address = aezeed._getExternalAddressByIndex(0);
-    assert.strictEqual(address, 'bc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xy78txn');
-    assert.ok(aezeed.getAllExternalAddresses().includes('bc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xy78txn'));
+    assert.strictEqual(address, "dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx");
+    assert.ok(aezeed.getAllExternalAddresses().includes('dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx'));
 
     address = aezeed._getExternalAddressByIndex(1);
-    assert.strictEqual(address, 'bc1qswr3s4fylskqn9vemef8l28qukshuagsjz3wpe');
-    assert.ok(aezeed.getAllExternalAddresses().includes('bc1qswr3s4fylskqn9vemef8l28qukshuagsjz3wpe'));
+    assert.strictEqual(address, "dc1qswr3s4fylskqn9vemef8l28qukshuags9y2epv");
+    assert.ok(aezeed.getAllExternalAddresses().includes('dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx'));
 
     address = aezeed._getInternalAddressByIndex(0);
-    assert.strictEqual(address, 'bc1qzyjq8sjj56n8v9fgw5klsc8sq8yuy0jx03hzzp');
+    assert.strictEqual(address, "dc1qzyjq8sjj56n8v9fgw5klsc8sq8yuy0jxchv4z5");
 
     let wif = aezeed._getExternalWIFByIndex(0);
-    assert.strictEqual(wif, 'KxtkgprHVXCcgzRetDt3JnNuRApgzQyRrvAuwiE1yFPjmYnWh6rH');
+    assert.strictEqual(wif, 'Tf3YRDb4bWqmMu7beAQUhqJEMmGcQB5EKtZh3LEwW8akQm6yk2FW');
 
     wif = aezeed._getInternalWIFByIndex(0);
-    assert.strictEqual(wif, 'L1dewhNXkVMB3JdoXYRikbz6g4CbaMGfSqSXSrmTkk5PvzmEgpdT');
+    assert.strictEqual(wif, 'ThnSg67JrUzKiDKkHUxA9euRceeWz7NTuoqJYUnPHdGQaD7DLmHw');
 
     assert.strictEqual(aezeed.getIdentityPubkey(), '0384b9a7158320e828280075224af324931ca9d6de4334f724dbb553ffee447164');
 
@@ -112,14 +112,14 @@ describe('HDAezeedWallet', () => {
     );
 
     const address = aezeed._getExternalAddressByIndex(0);
-    assert.strictEqual(address, 'bc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xy78txn');
-    assert.ok(aezeed.getAllExternalAddresses().includes('bc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xy78txn'));
+    assert.strictEqual(address, "dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx");
+    assert.ok(aezeed.getAllExternalAddresses().includes('dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx'));
 
     const watchOnly = new WatchOnlyWallet();
     watchOnly.setSecret(aezeed.getXpub());
     watchOnly.init();
     assert.strictEqual(watchOnly._getExternalAddressByIndex(0), aezeed._getExternalAddressByIndex(0));
-    assert.ok(watchOnly.weOwnAddress('bc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xy78txn'));
+    assert.ok(watchOnly.weOwnAddress('dc1qdjj7lhj9lnjye7xq3dzv3r4z0cta294xncuuxx'));
     assert.ok(!watchOnly.weOwnAddress('garbage'));
     assert.ok(!watchOnly.weOwnAddress(false));
   });

@@ -145,7 +145,7 @@
     "create_details": "Detalles",
     "create_fee": "Tasa",
     "create_memo": "Nota",
-    "create_satoshi_per_vbyte": "Satoshi por vByte",
+    "create_satoshi_per_vbyte": "Swartz por vByte",
     "create_this_is_hex": "Este es el hex de tu transacción, firmado y listo para ser transmitido a la red.",
     "create_to": "A",
     "create_tx_size": "Tamaño de transacción",

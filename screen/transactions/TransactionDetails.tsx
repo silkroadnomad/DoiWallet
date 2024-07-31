@@ -168,7 +168,8 @@ const TransactionDetails = () => {
 
   const handleOnOpenTransactionOnBlockExplorerTapped = () => {
 
-    const url = `https://explorer.doichain.org/tx/?txid=${tx.hash}`;
+    let url = `https://explorer.doichain.org`;
+    if (tx) url += `/tx/?txid=${tx.hash}`;
 
     Linking.canOpenURL(url)
       .then(supported => {

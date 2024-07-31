@@ -120,7 +120,7 @@
     "create_details": "Detaljer",
     "create_fee": "Avgift",
     "create_memo": "Memo",
-    "create_satoshi_per_vbyte": "Satoshi per vByte",
+    "create_satoshi_per_vbyte": "Swartz per vByte",
     "create_this_is_hex": "Dette er din transaksjonsheks - signert og klar til å kringkastes til nettverket.",
     "create_to": "Til",
     "create_tx_size": "Transaksjonsstørrelse",

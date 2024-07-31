@@ -138,7 +138,7 @@
     "create_details": "Детали",
     "create_fee": "Комиссия",
     "create_memo": "Примечание",
-    "create_satoshi_per_vbyte": "Satoshi за vByte",
+    "create_satoshi_per_vbyte": "Swartz за vByte",
     "create_this_is_hex": "Это данные транзакции. Транзакция подписана и готова к трансляции в сеть. Продолжить?",
     "create_to": "Куда",
     "create_tx_size": "Размер",

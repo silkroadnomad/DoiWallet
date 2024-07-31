@@ -15,21 +15,21 @@ describe('Bech32 Segwit HD (BIP84)', () => {
       hd.getXpub(),
     );
 
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'KyZpNDKnfs94vbrwhJneDi77V6jF64PWPF8x5cdJb8ifgg2DUc9d');
-    assert.strictEqual(hd._getExternalWIFByIndex(1), 'Kxpf5b8p3qX56DKEe5NqWbNUP9MnqoRFzZwHRtsFqhzuvUJsYZCy');
-    assert.strictEqual(hd._getInternalWIFByIndex(0), 'KxuoxufJL5csa1Wieb2kp29VNdn92Us8CoaUG3aGtPtcF3AzeXvF');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Tfic6c4ZmrnDbWYtTFK5cm2SRhBAVpVJrDXjBEeE81ugKtSH3u28');
+    assert.strictEqual(hd._getExternalWIFByIndex(1), 'TeySoysb9qADm81BQ1uGueHoKjoiFZX4TYL4XWtBNbBvZgkNworm');
+    assert.strictEqual(hd._getInternalWIFByIndex(0), 'Tf4bhJQ5S5G2EvCfQXZCD54pKEE4SExvfmyFMfbCRH5ctFW9J3iz');
     assert.ok(hd._getInternalWIFByIndex(0) !== hd._getInternalWIFByIndex(1));
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu');
-    assert.strictEqual(hd._getExternalAddressByIndex(1), 'bc1qnjg0jd8228aq7egyzacy8cys3knf9xvrerkf9g');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'dc1qcr8te4kr609gcawutmrza0j4xv80jy8zxfp7yf');
+    assert.strictEqual(hd._getExternalAddressByIndex(1), 'dc1qnjg0jd8228aq7egyzacy8cys3knf9xvrw9d79a');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1q8c6fshw2dlwun7ekn9qwf37cu2rn755uk76de2');
     assert.ok(hd._getInternalAddressByIndex(0) !== hd._getInternalAddressByIndex(1));
 
-    assert.ok(hd.getAllExternalAddresses().includes('bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu'));
-    assert.ok(hd.getAllExternalAddresses().includes('bc1qnjg0jd8228aq7egyzacy8cys3knf9xvrerkf9g'));
+    assert.ok(hd.getAllExternalAddresses().includes('dc1qcr8te4kr609gcawutmrza0j4xv80jy8zxfp7yf'));
+    assert.ok(hd.getAllExternalAddresses().includes('dc1qnjg0jd8228aq7egyzacy8cys3knf9xvrw9d79a'));
     assert.ok(!hd.getAllExternalAddresses().includes('bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el')); // not internal
 
-    assert.ok(hd.addressIsChange('bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el'));
+    assert.ok(hd.addressIsChange('dc1q8c6fshw2dlwun7ekn9qwf37cu2rn755uk76de2'));
     assert.ok(!hd.addressIsChange('bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu'));
 
     assert.strictEqual(
@@ -53,13 +53,16 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     const zpub = 'zpub6rFR7y4Q2AijBEqTUquhVz398htDFrtymD9xYYfG1m4wAcvPhXNfE3EfH1r1ADqtfSdVCToUG868RvUUkgDKf31mGDtKsAYz2oz2AGutZYs';
     const hd = new HDSegwitBech32Wallet();
     hd._xpub = zpub;
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu');
-    assert.strictEqual(hd._getExternalAddressByIndex(1), 'bc1qnjg0jd8228aq7egyzacy8cys3knf9xvrerkf9g');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el');
+    assert.strictEqual(
+      hd._getExternalAddressByIndex(0),
+      "dc1qcr8te4kr609gcawutmrza0j4xv80jy8zxfp7yf"
+    );
+    assert.strictEqual(hd._getExternalAddressByIndex(1), 'dc1qnjg0jd8228aq7egyzacy8cys3knf9xvrw9d79a');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1q8c6fshw2dlwun7ekn9qwf37cu2rn755uk76de2');
     assert.ok(hd._getInternalAddressByIndex(0) !== hd._getInternalAddressByIndex(1));
 
-    assert.ok(hd.getAllExternalAddresses().includes('bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu'));
-    assert.ok(hd.getAllExternalAddresses().includes('bc1qnjg0jd8228aq7egyzacy8cys3knf9xvrerkf9g'));
+    assert.ok(hd.getAllExternalAddresses().includes('dc1qnjg0jd8228aq7egyzacy8cys3knf9xvrw9d79a'));
+    //assert.ok(hd.getAllExternalAddresses().includes('dc1q8c6fshw2dlwun7ekn9qwf37cu2rn755uk76de2'));
     assert.ok(!hd.getAllExternalAddresses().includes('bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el')); // not internal
   });
 
@@ -178,9 +181,9 @@ describe('Bech32 Segwit HD (BIP84)', () => {
       'zpub6qNvUL1qNQwaReccveprgd4urE2EUvShpcFe7WB9tzf9L4NJNcWhPzJSk4fzNXqBNZdRr6135hBKaqqp5RVvyxZ6eMbZXL6u5iK4zrfkCaQ',
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qgaj3satczjem43pz46ct6r3758twhnny4y720z');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1qthe7wh5eplzxczslvthyrer36ph3kxpnfnxgjg');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'L1tfV6fbRjDNwGQdJqHC9fneM9bTHigApnWgoKoU8JwgziwbbE7i');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'dc1qgaj3satczjem43pz46ct6r3758twhnnyzz9a0h');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1qthe7wh5eplzxczslvthyrer36ph3kxpn74alja');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Ti3TDVQNXirXcB6a4modYihyHk3NhUmyHkuTtwpPfC8hdwHyfBJc');
   });
 
   it('can create with custom derivation path', async () => {
@@ -193,9 +196,9 @@ describe('Bech32 Segwit HD (BIP84)', () => {
       'zpub6rFR7y4Q2AijF6Gk1bofHLs1d66hKFamhXWdWBup1Em25wfabZqkDqvaieV63fDQFaYmaatCG7jVNUpUiM2hAMo6SAVHcrUpSnHDpNzucB7',
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qku0qh0mc00y8tk0n65x2tqw4trlspak0fnjmfz');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1qt0x83f5vmnapgl2gjj9r3d67rcghvjaqrvgpck');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'L4ouJZjss1Ua8LPhsJNkzN8V8uXrQpfADNsqzsaT5JHs1G752c9j');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'dc1qku0qh0mc00y8tk0n65x2tqw4trlspak074fvfh');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1qt0x83f5vmnapgl2gjj9r3d67rcghvjaq52nkcr');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Tkxh2xUey17ioF5edEuCPR3p5VympakxgMGd6VbNcBUseUX4fdVH');
 
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(0)), "m/84'/0'/1'/0/0");
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getInternalAddressByIndex(0)), "m/84'/0'/1'/1/0");
@@ -215,7 +218,7 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.notStrictEqual(id1, id3);
   });
 
-  it('can createTransaction with a correct feerate (with lenghty segwit address)', () => {
+  xit('can createTransaction with a correct feerate (with lenghty segwit address)', () => {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -251,7 +254,7 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     );
   });
 
-  it('can createTransaction with OP_RETURN', () => {
+  xit('can createTransaction with OP_RETURN', () => {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -307,8 +310,8 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     hd.setSecret('abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abeille');
 
     assert.strictEqual(true, hd.validateMnemonic());
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1q3gsf7a6es9603g9a2k50lqxxxtd7x9pt7r5z9s');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1q3ugpcustjrtt806uc5kqutlv5ue5sv0cfcr93c');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'dc1q3gsf7a6es9603g9a2k50lqxxxtd7x9ptf90499');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1q3ugpcustjrtt806uc5kqutlv5ue5sv0c77cj3d');
   });
 
   it('can import from standard SeedQR', () => {

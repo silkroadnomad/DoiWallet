@@ -131,7 +131,7 @@
     "create_details": "Detaljer",
     "create_fee": "Avgift",
     "create_memo": "Memo",
-    "create_satoshi_per_vbyte": "Satoshi per vByte",
+    "create_satoshi_per_vbyte": "Swartz per vByte",
     "create_this_is_hex": "Detta är transaktionens hex, signerad och redo att skickas ut på nätverket.",
     "create_to": "Till",
     "create_tx_size": "Transaktionsstorlek",

@@ -1483,13 +1483,32 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @returns {{ tx: Transaction }}
    */
   cosignPsbt(psbt: Psbt) {
-    const seed = this._getSeed();
+    const seed = this._getSeed();    
     const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 
+    const inputs = psbt.data.inputs.map((input, index) => {
+      if (input.witnessUtxo) {
+          return {
+              address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
+              value: input.witnessUtxo.value,
+          }
+      } else if (input.nonWitnessUtxo) {
+          const txin = psbt.txInputs[index];
+          const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+          return {
+              address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
+              value: txout.value,
+          }
+      } else {
+          throw new Error('Could not get input of #' + index);
+      }
+  });
+
     for (let cc = 0; cc < psbt.inputCount; cc++) {
+
       try {
         psbt.signInputHD(cc, hdRoot);
-      } catch (e) {} // protects agains duplicate cosignings
+      } catch (_) { } // protects agains duplicate cosignings
 
       if (!psbt.inputHasHDKey(cc, hdRoot)) {
         for (const derivation of psbt.data.inputs[cc].bip32Derivation || []) {
@@ -1503,9 +1522,35 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           const keyPair = ECPair.fromWIF(wif, DOICHAIN);
           try {
             psbt.signInput(cc, keyPair);
-          } catch (e) {} // protects agains duplicate cosignings or if this output can't be signed with current wallet
+          } catch (e) { console.log("___error2", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
         }
       }
+      const inputAddress = inputs[cc].address;
+      const allAddresses = this.getAllExternalAddresses();
+
+      let foundIndex = allAddresses.indexOf(inputAddress);
+      let internal = false;
+
+      for (let c = 0; c < this.next_free_change_address_index + this.gap_limit; c++) {
+        if (this._getInternalAddressByIndex(c) === inputAddress) {
+          foundIndex = c;
+          internal = true;
+          break;
+        }
+      }
+
+      if (foundIndex !== -1) {
+        const wif = this._getWIFByIndex(internal, foundIndex);
+        if (!wif) {
+          throw new Error('Internal error: cant get WIF by index during cosingPsbt');
+        }
+
+        const keyPair = ECPair.fromWIF(wif, DOICHAIN);
+
+        try {
+          psbt.signInput(cc, keyPair);
+        } catch (e) { console.log("___error2", e); } 
+      } else console.log('address not found');
     }
 
     let tx: BTransaction | false = false;

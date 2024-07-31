@@ -112,6 +112,7 @@ const ScanQRCode = () => {
   });
 
   useEffect(() => {
+    console.log('ScanQRCode!')
     isCameraAuthorizationStatusGranted().then(setCameraStatusGranted);
   }, []);
 
@@ -203,6 +204,7 @@ const ScanQRCode = () => {
   };
 
   const onBarCodeRead = ret => {
+    console.log('onBarCodeRead', ret);
     const h = HashIt(ret.data);
     if (scannedCache[h]) {
       // this QR was already scanned by this ScanQRCode, lets prevent firing duplicate callbacks
@@ -233,6 +235,7 @@ const ScanQRCode = () => {
       return _onReadUniformResource(ret.data);
     }
 
+    console.log('ScanQRCode', ret.data);
     // is it base43? stupid electrum desktop
     try {
       const hex = Base43.decode(ret.data);
