@@ -5,6 +5,7 @@ import * as bitcoin from 'bitcoinjs-lib';
 import { TextDecoder } from 'text-decoding';
 import bs58check from 'bs58check';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import * as Progress from 'react-native-progress';
 import {
   ActivityIndicator,
   Alert,
@@ -117,6 +118,7 @@ const SendDetails = () => {
   // if utxo is limited we use it to calculate available balance
   const balance: number = utxo ? utxo.reduce((prev, curr) => prev + curr.value, 0) : wallet?.getBalance() ?? 0;
   const allBalance = formatBalanceWithoutSuffix(balance, DoichainUnit.DOI, true);
+  const [isProgress, setProgress] = useState(false);
 
   // if cutomFee is not set, we need to choose highest possible fee for wallet balance
   // if there are no funds for even Slow option, use 1 sat/vbyte fee
@@ -718,7 +720,6 @@ const SendDetails = () => {
     navigation.getParent()?.getParent()?.dispatch(popAction);
     if (!wallet) return;
     if (!ret.data) ret = { data: ret };
-console.log("_____aaaa")
     if (ret.data.toUpperCase().startsWith('UR')) {
       presentAlert({ title: loc.errors.error, message: 'BC-UR not decoded. This should never happen' });
     } else if (ret.data.indexOf('+') === -1 && ret.data.indexOf('=') === -1 && ret.data.indexOf('=') === -1) {
@@ -926,10 +927,10 @@ console.log("_____aaaa")
   };
 
   const handlePsbtSign = async () => {
-    console.log("______aaaa") 
     setIsLoading(true);
     setOptionsVisible(false);
     await new Promise(resolve => setTimeout(resolve, 100)); // sleep for animations
+    setProgress(true);
     const scannedData = await scanQrHelper(name);
 
     console.log('_____scannedData__', scannedData);
@@ -996,7 +997,8 @@ console.log("_____aaaa")
     //   } catch (e) { console.log('error during decode', e) }
     // });
 
-
+    //setProgress(false);
+    /*
     navigation.navigate('CreateTransaction', {
       fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),
       feeSatoshi: psbt.getFee(),
@@ -1007,6 +1009,7 @@ console.log("_____aaaa")
       showAnimatedQr: true,
       psbt,
     });
+    */
   };
 
   const hideOptions = () => {
@@ -1444,7 +1447,13 @@ console.log("_____aaaa")
           <ActivityIndicator />
         ) : (
           <Button style={styles.button} onPress={handlePsbtSign} disabled={isDisabled} title={loc.send.psbt_sign} testID="PSBT" />
+          
         )}
+        {isProgress? (
+          //<Progress.Pie progress={1}  size={50} style={styles.progress} />
+          <Progress.Circle size={60} indeterminate={true} style={styles.progress}  />
+        ) : null
+        }        
       </View>
     );
   };
@@ -1839,5 +1848,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 8,
+  },
+  progress: {
+    alignItems: 'center',
   },
 });

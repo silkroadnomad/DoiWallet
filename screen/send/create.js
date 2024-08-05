@@ -55,7 +55,7 @@ const SendCreate = () => {
     }
     try {
       await BlueElectrum.ping();
-      await BlueElectrum.waitTillConnected();      
+      await BlueElectrum.waitTillConnected();
       const result = await wallet.broadcastTx(tx);
       if (result) {
       //  setIsLoading(false);
