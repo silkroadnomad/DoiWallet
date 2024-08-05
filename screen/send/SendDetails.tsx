@@ -1438,6 +1438,12 @@ console.log("_____aaaa")
           <ActivityIndicator />
         ) : (
           <Button onPress={createTransaction} disabled={isDisabled} title={loc.send.details_next} testID="CreateTransactionButton" />
+          
+        )}     
+        {isLoading ? (
+          <ActivityIndicator />
+        ) : (
+          <Button style={styles.button} onPress={handlePsbtSign} disabled={isDisabled} title={loc.send.psbt_sign} testID="PSBT" />
         )}
       </View>
     );
@@ -1757,6 +1763,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     alignContent: 'center',
     minHeight: 44,
+  },
+  button:{
+    marginVertical: 56,
   },
   select: {
     marginBottom: 24,
