@@ -161,7 +161,8 @@
     "psbt_clipboard": "Αντιγραφή στο πρόχειρο",
     "psbt_tx_export": "Εξαγωγή σε αρχείο",
     "success_done": "Ολοκληρώθηκε",
-    "problem_with_psbt": "Πρόβλημα με  PSBT"
+    "problem_with_psbt": "Πρόβλημα με  PSBT",
+    "name": "Name"
   },
   "settings": {
     "about": "Σχετικά",

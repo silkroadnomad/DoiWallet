@@ -197,7 +197,8 @@
     "reset_amount_confirm": "هل تريد إعادة تعيين المبلغ؟",
     "success_done": "تم",
     "txSaved": "تم حفظ ملف المعاملة ({filePath}) في مجلد \"التنزيلات\" الخاص بك.",
-    "problem_with_psbt": "مشكلة مع PSBT"
+    "problem_with_psbt": "مشكلة مع PSBT",
+    "name": "Name"
   },
   "settings": {
     "about": "نبذة",

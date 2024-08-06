@@ -53,7 +53,8 @@
   "send": {
     "broadcastError": "Памылка",
     "broadcastSuccess": "Посьпех",
-    "create_to": "Да"
+    "create_to": "Да",
+    "name": "Name"
   },
   "settings": {
     "electrum_clear_alert_cancel": "Адмяніць",

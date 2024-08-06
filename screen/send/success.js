@@ -47,12 +47,12 @@ const Success = () => {
       />
       <View style={styles.buttonContainer}>
         <Button onPress={onDonePressed} title={loc.send.success_done} />
-      </View>
+      </View> 
       {txid && (
         <HandOffComponent
           title={loc.transactions.details_title}
           type={HandOffActivityType.ViewInBlockExplorer}
-          url={`https://mempool.space/tx/${txid}`}
+          url={`https://explorer.doichain.org/tx/?txid=${txid}`}
         />
       )}
     </SafeArea>
@@ -157,37 +157,37 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   amount: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   view: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   amountValue: {
     fontSize: 36,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   amountUnit: {
     fontSize: 16,
     marginHorizontal: 4,
     paddingBottom: 6,
-    fontWeight: '600',
-    alignSelf: 'flex-end',
+    fontWeight: "600",
+    alignSelf: "flex-end",
   },
   feeText: {
-    color: '#37c0a1',
+    color: "#37c0a1",
     fontSize: 14,
     marginHorizontal: 4,
     paddingVertical: 6,
-    fontWeight: '500',
-    alignSelf: 'center',
+    fontWeight: "500",
+    alignSelf: "center",
   },
   ready: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    alignSelf: 'center',
-    alignItems: 'center',
+    alignSelf: "center",
+    alignItems: "center",
     marginBottom: 53,
   },
   lottie: {

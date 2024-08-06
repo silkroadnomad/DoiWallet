@@ -468,8 +468,6 @@ const SendDetails = () => {
       return;
     }
 
-    console.log("________ddd",data )
-
     let address = '';
     let options: TOptions;
     try {
@@ -936,9 +934,9 @@ const SendDetails = () => {
     console.log('_____scannedData__', scannedData);
 
     let tx;
-    let psbt;
+    let psbt;    
     try {
-        psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN }); 
+        psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
         tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
     } catch (e: any) {
       presentAlert({ title: loc.errors.error, message: e.message });
@@ -956,15 +954,17 @@ const SendDetails = () => {
       // @ts-ignore hacky
       changeAddresses.push(wallet._getInternalAddressByIndex(c));
     }
-
     // nameOp addresses are undefined we need to fix that before filtering them out
-    const updatedTxOutputs = psbt.txOutputs.map(output => {
+    const updatedTxOutputs = psbt.txOutputs.map(output => {     
+
       if (!output.address) {
         const chunks = bitcoin.script.decompile(output.script);
         try {
           const decodedAddress = bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
-          console.log('decodedAddress', decodedAddress);
-          return { ...output, address: decodedAddress };
+          const utf16Decoder = new TextDecoder('ascii');          
+          const nameId = utf16Decoder.decode(Buffer.from(chunks[1], 'hex'));
+          const nameValue = utf16Decoder.decode(Buffer.from(chunks[2], 'hex'));
+          return { ...output, address: decodedAddress, nameId, nameValue};
         } catch (e) {
           console.log('error during decode', e);
           return output; // Return the original output if decoding fails
@@ -979,9 +979,7 @@ const SendDetails = () => {
     //if a nameOp is stored to a changeAddress our recipient is not shown!
     // let recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
     let recipients = updatedTxOutputs.filter(({ address }) => true);
-
-    console.log('_    22__recipients', recipients);
-
+   
     // const nameOPRecipients = psbt.txOutputs.map(o => {
     //   const chunks = bitcoin.script.decompile(o.script);
     // const utf16Decoder = new TextDecoder('ascii');
@@ -997,8 +995,8 @@ const SendDetails = () => {
     //   } catch (e) { console.log('error during decode', e) }
     // });
 
-    //setProgress(false);
-    /*
+    setProgress(false);
+    
     navigation.navigate('CreateTransaction', {
       fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),
       feeSatoshi: psbt.getFee(),
@@ -1009,7 +1007,7 @@ const SendDetails = () => {
       showAnimatedQr: true,
       psbt,
     });
-    */
+    
   };
 
   const hideOptions = () => {

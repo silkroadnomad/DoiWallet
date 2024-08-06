@@ -27,7 +27,7 @@ import { useBiometrics, unlockWithBiometrics } from '../../hooks/useBiometrics';
 import { useExtendedNavigation } from "../../hooks/useExtendedNavigation";
 
 const SendCreate = () => {
-  const { fee, recipients, wallet,  memo = "", satoshiPerByte, psbt, showAnimatedQr, tx, } = useRoute().params;
+  const { fee, recipients, wallet,  memo = "", satoshiPerByte, psbt, showAnimatedQr, tx,} = useRoute().params;
 
   const { txMetadata, fetchAndSaveWalletTransactions, isElectrumDisabled } =  useStorage();
   const route = useRoute();
@@ -39,11 +39,7 @@ const SendCreate = () => {
   const navigation = useExtendedNavigation();
   
  // const [isLoading, setIsLoading] = useState(true);
-  const { isBiometricUseCapableAndEnabled } = useBiometrics();
-  //console.log("____11_____recipients", recipients);
-  //console.log("____11_____transaction", transaction);
-  //console.log("____4__route", route);  
-
+  const { isBiometricUseCapableAndEnabled } = useBiometrics(); 
   const broadcast = async () => {
    // setIsLoading(true);
     const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();
@@ -56,20 +52,20 @@ const SendCreate = () => {
     try {
       await BlueElectrum.ping();
       await BlueElectrum.waitTillConnected();
-      const result = await wallet.broadcastTx(tx);
+      const result =1 // await wallet.broadcastTx(tx);
       if (result) {
       //  setIsLoading(false);
         const txDecoded = bitcoin.Transaction.fromHex(tx);
-       // console.log("_____txDecoded", txDecoded);
-       // console.log("_____ins", txDecoded.ins);
-       // console.log("__tx___outs", txDecoded.outs);
-        
         const txid = txDecoded.getId();
         Notifications.majorTomToGroundControl([], [], [txid]);
         if (memo) {
           txMetadata[txid] = { memo };
         }
-        navigation.navigate("Success", { amount: undefined });
+        navigation.navigate("Success", {
+          amount: undefined,
+          txid: txid,
+          fee: fee,
+        });
         await new Promise((resolve) => setTimeout(resolve, 3000)); // sleep to make sure network propagates
         fetchAndSaveWalletTransactions(wallet.getID());
       } else {
@@ -209,6 +205,46 @@ const SendCreate = () => {
           >
             {satoshiToBTC(item.value)} {DoichainUnit.DOI}
           </Text>
+          {item.nameId !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsTitle,
+                styleHooks.transactionDetailsTitle,
+              ]}
+            >
+              {loc.send.name}
+            </Text>
+          )}
+          {item.nameId !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsSubtitle,
+                styleHooks.transactionDetailsSubtitle,
+              ]}
+            >
+              {item.nameId}
+            </Text>
+          )}
+          {item.nameValue !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsTitle,
+                styleHooks.transactionDetailsTitle,
+              ]}
+            >              
+              {loc.send.broadcast_value}
+            </Text>
+          )}
+          {item.nameValue !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsSubtitle,
+                styleHooks.transactionDetailsSubtitle,
+              ]}
+            >
+              {item.nameValue}
+            </Text>
+          )}
           {recipients.length > 1 && (
             <BlueText style={styles.itemOf}>
               {loc.formatString(loc._.of, {
@@ -226,6 +262,8 @@ const SendCreate = () => {
     item: PropTypes.shape({
       address: PropTypes.string,
       value: PropTypes.number,
+      nameId: PropTypes.nameId,
+      nameValue: PropTypes.nameValue,
     }),
   };
 
@@ -255,24 +293,18 @@ const SendCreate = () => {
       >
         <Text style={styles.actionText}>{loc.send.create_copy}</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        accessibilityRole="button"
-        style={styles.actionTouch}
-        onPress={() => Linking.openURL("https://coinb.in/?verify=" + tx)}
-      >
-        <Text style={styles.actionText}>{loc.send.create_verify}</Text>
-      </TouchableOpacity>
+     
       <SecondButton
         disabled={isElectrumDisabled}
         onPress={broadcast}
-        title={loc.send.confirm_sendNow}
+        title={loc.send.broadcast}
         testID="PsbtBroadcastTransactionButton"
       />
     </View>
   );
 
   const ListFooterComponent = (
-    <View>      
+    <View>
       <Text
         style={[
           styles.transactionDetailsTitle,
