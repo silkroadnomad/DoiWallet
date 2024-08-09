@@ -222,7 +222,9 @@
     "problem_with_psbt": "Problem with PSBT",
     "name": "Name",
     "broadcast": "Broadcast now",
-    "broadcast_value": "Value"
+    "broadcast_value": "Value",
+    "input_index": "Index",
+    "foreign_address": "Foreign address"
   },
   "settings": {
     "about": "About",

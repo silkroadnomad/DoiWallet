@@ -1,6 +1,6 @@
 import Clipboard from '@react-native-clipboard/clipboard';
-
 import { DoichainUnit } from '../../models/doichainUnits';
+import { DOICHAIN } from "../../blue_modules/network.js";
 import { useNavigation, useRoute } from '@react-navigation/native';
 import BigNumber from "bignumber.js";
 import * as bitcoin from "bitcoinjs-lib";
@@ -26,6 +26,7 @@ import { useStorage } from '../../hooks/context/useStorage';
 import { useBiometrics, unlockWithBiometrics } from '../../hooks/useBiometrics';
 import { useExtendedNavigation } from "../../hooks/useExtendedNavigation";
 
+
 const SendCreate = () => {
   const { fee, recipients, wallet,  memo = "", satoshiPerByte, psbt, showAnimatedQr, tx,} = useRoute().params;
 
@@ -35,8 +36,30 @@ const SendCreate = () => {
   const size = transaction.virtualSize();
   const { colors } = useTheme();
   const { setOptions } = useNavigation();
-  const { enableBlur, disableBlur } = usePrivacy(); 
+  const { enableBlur, disableBlur } = usePrivacy();
   const navigation = useExtendedNavigation();
+
+  const inputs = psbt.data.inputs.map((input, index) => {
+    if (input.witnessUtxo) {
+      return {
+        address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
+        value: input.witnessUtxo.value,
+      };
+    } else if (input.nonWitnessUtxo) {
+      const txin = psbt.txInputs[index];
+
+      const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+      return {
+        address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
+        value: txout.value,
+        index: txin.index,
+      };
+    } else {
+      throw new Error("Could not get input of #" + index);
+    }
+  });
+
+  const inputAndOutput = inputs.concat(recipients);  
   
  // const [isLoading, setIsLoading] = useState(true);
   const { isBiometricUseCapableAndEnabled } = useBiometrics(); 
@@ -52,9 +75,9 @@ const SendCreate = () => {
     try {
       await BlueElectrum.ping();
       await BlueElectrum.waitTillConnected();
-      const result =1 // await wallet.broadcastTx(tx);
+      const result = await wallet.broadcastTx(tx);
       if (result) {
-      //  setIsLoading(false);
+      //  setIsLoading(false);      
         const txDecoded = bitcoin.Transaction.fromHex(tx);
         const txid = txDecoded.getId();
         Notifications.majorTomToGroundControl([], [], [txid]);
@@ -64,7 +87,6 @@ const SendCreate = () => {
         navigation.navigate("Success", {
           amount: undefined,
           txid: txid,
-          fee: fee,
         });
         await new Promise((resolve) => setTimeout(resolve, 3000)); // sleep to make sure network propagates
         fetchAndSaveWalletTransactions(wallet.getID());
@@ -84,10 +106,12 @@ const SendCreate = () => {
     }
   };
 
-
   const styleHooks = StyleSheet.create({
     transactionDetailsTitle: {
       color: colors.feeText,
+    },
+    transactionDetailsTitleRed: {
+      color: colors.redText,
     },
     transactionDetailsSubtitle: {
       color: colors.foregroundColor,
@@ -173,14 +197,34 @@ const SendCreate = () => {
     return (
       <>
         <View>
-          <Text
-            style={[
-              styles.transactionDetailsTitle,
-              styleHooks.transactionDetailsTitle,
-            ]}
-          >
-            {loc.send.create_to}
-          </Text>
+          {item.index !== undefined ? (
+            <Text
+              style={[
+                styles.transactionDetailsTitle,
+                styleHooks.transactionDetailsTitle,
+              ]}
+            >
+              {loc.transactions.details_from}
+            </Text>
+          ) : item.isIncluded !== true ? (
+            <Text
+              style={[
+                styles.transactionDetailsTitleRed,
+                styleHooks.transactionDetailsTitleRed,
+              ]}
+            >
+              {loc.send.foreign_address}
+            </Text>
+          ) : (
+            <Text
+              style={[
+                styles.transactionDetailsTitle,
+                styleHooks.transactionDetailsTitle,
+              ]}
+            >
+              {loc.send.create_to}
+            </Text>
+          )}
           <Text
             style={[
               styles.transactionDetailsSubtitle,
@@ -205,6 +249,17 @@ const SendCreate = () => {
           >
             {satoshiToBTC(item.value)} {DoichainUnit.DOI}
           </Text>
+          {item.index !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsTitle,
+                styleHooks.transactionDetailsTitle,
+              ]}
+            >
+              {loc.send.input_index}: {item.index}
+            </Text>
+          )}
+
           {item.nameId !== undefined && (
             <Text
               style={[
@@ -231,7 +286,7 @@ const SendCreate = () => {
                 styles.transactionDetailsTitle,
                 styleHooks.transactionDetailsTitle,
               ]}
-            >              
+            >
               {loc.send.broadcast_value}
             </Text>
           )}
@@ -245,11 +300,11 @@ const SendCreate = () => {
               {item.nameValue}
             </Text>
           )}
-          {recipients.length > 1 && (
+          {inputAndOutput.length > 1 && (
             <BlueText style={styles.itemOf}>
               {loc.formatString(loc._.of, {
                 number: index + 1,
-                total: recipients.length,
+                total: inputAndOutput.length,
               })}
             </BlueText>
           )}
@@ -379,8 +434,8 @@ const SendCreate = () => {
   return (
     <FlatList
       contentContainerStyle={[styles.root, styleHooks.root]}
-      extraData={recipients}
-      data={recipients}
+      extraData={inputAndOutput}
+      data={inputAndOutput}
       renderItem={_renderItem}
       keyExtractor={(_item, index) => `${index}`}
       ItemSeparatorComponent={renderSeparator}
@@ -396,6 +451,11 @@ export default SendCreate;
 
 const styles = StyleSheet.create({
   transactionDetailsTitle: {
+    fontWeight: "500",
+    fontSize: 17,
+    marginBottom: 2,
+  },
+  transactionDetailsTitleRed: {
     fontWeight: "500",
     fontSize: 17,
     marginBottom: 2,

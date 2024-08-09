@@ -3,7 +3,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import BigNumber from 'bignumber.js';
 import LottieView from 'lottie-react-native';
 import PropTypes from 'prop-types';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Linking } from "react-native";
 import { Text } from '@rneui/themed';
 import { BlueCard } from '../../BlueComponents';
 import Button from '../../components/Button';
@@ -13,6 +13,7 @@ import { useTheme } from '../../components/themes';
 import loc from '../../loc';
 import HandOffComponent from '../../components/HandOffComponent';
 import { HandOffActivityType } from '../../components/types';
+import ToolTipMenu from '../../components/TooltipMenu';
 
 const Success = () => {
   const pop = () => {
@@ -21,6 +22,7 @@ const Success = () => {
   const { colors } = useTheme();
   const { getParent } = useNavigation();
   const { amount, fee, amountUnit = DoichainUnit.DOI, invoiceDescription = '', onDonePressed = pop, txid } = useRoute().params;
+  
   const stylesHook = StyleSheet.create({
     root: {
       backgroundColor: colors.elevated,
@@ -31,10 +33,59 @@ const Success = () => {
     amountUnit: {
       color: colors.alternativeTextColor2,
     },
+    Link: {
+      color: colors.buttonTextColor,
+    },
+    greyButton: {
+      backgroundColor: colors.lightButton,
+    },
   });
   useEffect(() => {
     console.log('send/success - useEffect');
   }, []);
+
+  const actionKeys = {
+    CopyToClipboard: "copyToClipboard",
+    GoToWallet: "goToWallet",
+  };
+
+  const actionIcons = {
+    Clipboard: {
+      iconValue: "doc.on.doc",
+    },
+    GoToWallet: {
+      iconValue: "wallet.pass",
+    },
+  };
+
+  const toolTipMenuActions = [
+    {
+      id: actionKeys.CopyToClipboard,
+      text: loc.transactions.copy_link,
+      icon: actionIcons.Clipboard,
+    },
+  ];
+
+
+  const handleOnOpenTransactionOnBlockExplorerTapped = () => {
+    let url = `https://explorer.doichain.org`;
+    if (txid) url += `/tx/?txid=${txid}`;
+    Linking.canOpenURL(url)
+      .then((supported) => {
+        if (supported) {
+          Linking.openURL(url).catch((e) => {
+            console.log(e.message);
+          });
+        } else {
+          console.log(
+            "canOpenURL supported is false in handleOnOpenTransactionOnBlockExplorerTapped"
+          );
+        }
+      })
+      .catch((e) => {        
+        console.log(e.message);
+      });
+  };
 
   return (
     <SafeArea style={[styles.root, stylesHook.root]}>
@@ -47,12 +98,28 @@ const Success = () => {
       />
       <View style={styles.buttonContainer}>
         <Button onPress={onDonePressed} title={loc.send.success_done} />
-      </View> 
+      </View>
+
+      <ToolTipMenu
+        isButton
+        actions={toolTipMenuActions}
+        // onPressMenuItem={handleCopyPress}
+        onPress={handleOnOpenTransactionOnBlockExplorerTapped}
+        buttonStyle={StyleSheet.flatten([
+          styles.greyButton,
+          stylesHook.greyButton,
+        ])}        
+      >
+        <Text style={[styles.Link, stylesHook.Link]}>
+          {loc.transactions.details_show_in_block_explorer}
+        </Text>
+      </ToolTipMenu>
+
       {txid && (
         <HandOffComponent
           title={loc.transactions.details_title}
           type={HandOffActivityType.ViewInBlockExplorer}
-          url={`https://explorer.doichain.org/tx/?txid=${txid}`}
+          url={`https://explorer.doichain.org/tx/?txid=${txid}`}         
         />
       )}
     </SafeArea>
@@ -193,5 +260,16 @@ const styles = StyleSheet.create({
   lottie: {
     width: 200,
     height: 200,
+  },  
+  greyButton: {
+    borderRadius: 9,
+    minHeight: 49,
+    paddingHorizontal: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    alignSelf: 'auto',
+    flexGrow: 1,
+    marginHorizontal: 40,
   },
 });
