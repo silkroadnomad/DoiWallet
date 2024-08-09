@@ -961,10 +961,6 @@ const SendDetails = () => {
           if (!output.address) {
             const chunks = bitcoin.script.decompile(output.script);
             try {
-
-             // let fromOutputScriptAddress = bitcoin.address.fromOutputScript(output.script, DOICHAIN)
-
-            //  console.log("______fromOutputScriptAddress", fromOutputScriptAddress)
               let decodedAddress = bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
 
               if(bitcoin.address.fromBase58Check(decodedAddress).version !== bitcoin.networks.bitcoin.pubKeyHash && 
