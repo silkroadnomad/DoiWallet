@@ -953,43 +953,35 @@ const SendDetails = () => {
     }
 
     try {
+        console.log("_____scannedData", scannedData)
         psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
-
         console.log("____pspd", psbt)
 
-        updatedTxOutputs = psbt.txOutputs.map((output, index) => {      
-          if (!output.address) {
-            const chunks = bitcoin.script.decompile(output.script);
-            try {
-              let decodedAddress = bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
-
-              if(bitcoin.address.fromBase58Check(decodedAddress).version !== bitcoin.networks.bitcoin.pubKeyHash && 
-                bitcoin.address.fromBase58Check(decodedAddress).version !== bitcoin.networks.bitcoin.scriptHash){ 
-                
-                  decodedAddress = bitcoin.address.toBech32(Buffer.from(chunks[7], 'hex'), 0, DOICHAIN.bech32);
-                  psbt.updateOutput(index, {
-                    address: decodedAddress,
-                    //value: change_amount + 100,
-                  });
-                }
-              
-              let isIncluded =  changeAddresses.includes(String(decodedAddress)) || externalAddresses.includes(String(decodedAddress)) ? true : false;
-              const utf16Decoder = new TextDecoder('ascii');
-              const nameId = utf16Decoder.decode(Buffer.from(chunks[1], 'hex'));
-              const nameValue = utf16Decoder.decode(Buffer.from(chunks[2], 'hex'));
-              return { ...output, address: decodedAddress, nameId, nameValue, isIncluded};
+        updatedTxOutputs = psbt.txOutputs.map((output, index) => {
+          console.log('____output', output)
+          const chunks = bitcoin.script.decompile(output.script);
+          let address = output.address; //TODO check if this is segwit if so make an error message
+          
+          if(chunks[0] === 90){ //TODO make this a constant
+            
+            try { 
+                let isIncluded = changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
+                const utf16Decoder = new TextDecoder('ascii');
+                const nameId = utf16Decoder.decode(Buffer.from(chunks[1], 'hex'));
+                const nameValue = utf16Decoder.decode(Buffer.from(chunks[2], 'hex'));
+              return { ...output, nameId, nameValue, isIncluded};
             } catch (e) {
               console.log('error during decode', e);
               return output; // Return the original output if decoding fails
             }
           }
-          let isIncluded =  changeAddresses.includes(String(output.address)) || externalAddresses.includes(String(output.address)) ? true : false;
+          let isIncluded =  changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
           return { ...output, isIncluded};// Return the original output if address is already set
         });
 
         
         tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
-
+        console.log('_____tx', tx.toHex());
     } catch (e: any) {
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
@@ -997,7 +989,7 @@ const SendDetails = () => {
       setIsLoading(false);
     }
 
-    if (!tx || !wallet) return setIsLoading(false);   
+    if (!tx || !wallet) return setIsLoading(false);
 
     // nameOp addresses are undefined we need to fix that before filtering them out
     

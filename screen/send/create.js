@@ -52,7 +52,7 @@ const SendCreate = () => {
       return {
         address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
         value: txout.value,
-        index: txin.index,
+        index: index,
       };
     } else {
       throw new Error("Could not get input of #" + index);

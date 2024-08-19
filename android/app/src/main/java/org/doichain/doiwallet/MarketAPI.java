@@ -74,6 +74,8 @@ public class MarketAPI {
                 return "https://www.bnr.ro/nbrfxrates.xml";
             case "Kraken":
                 return "https://api.kraken.com/0/public/Ticker?pair=XXBTZ" + endPointKey.toUpperCase();
+            case "Coinpaprika":
+                return "https://api.coinpaprika.com/v1/coins/doi-doicoin/ohlcv/latest";               
             default:
                 return "https://api.coindesk.com/v1/bpi/currentprice/" + endPointKey + ".json";
         }
