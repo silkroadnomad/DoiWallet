@@ -210,6 +210,16 @@ class DeeplinkSchemaMatch {
           },
         },
       ]);
+    } else if (DeeplinkSchemaMatch.isPsbtNameOpTransactions(event.url)) {
+      completionHandler([
+        'SendDetailsRoot',
+        {
+          screen: 'SendDetails',
+          params: {
+            uri: event.url,
+          },
+        },
+      ]);
     } else {
       const urlObject = URL.parse(event.url, true); // eslint-disable-line n/no-deprecated-api
       (async () => {
@@ -329,6 +339,15 @@ class DeeplinkSchemaMatch {
       isValidBitcoinAddress = false;
     }
     return isValidBitcoinAddress;
+  }
+  
+  static isPsbtNameOpTransactions(psbt: string): boolean {
+    let isPsbtNameOpTransactions = false;
+    try {
+      const aa = bitcoin.Psbt.fromBase64(psbt, { network: DOICHAIN });
+      isPsbtNameOpTransactions = true;
+    } catch (err) {}
+    return isPsbtNameOpTransactions;
   }
 
   static isLightningInvoice(invoice: string): boolean {

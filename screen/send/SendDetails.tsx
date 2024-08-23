@@ -167,7 +167,31 @@ const SendDetails = () => {
   useEffect(() => {
     // decode route params
     const currentAddress = addresses[scrollIndex.current];
-    if (routeParams.uri) {
+
+    if (routeParams.uri && DeeplinkSchemaMatch.isPsbtNameOpTransactions(routeParams.uri)) {
+      const psbt = bitcoin.Psbt.fromBase64(routeParams.uri, { network: DOICHAIN });
+      const inputs = psbt.data.inputs.map((input, index) => {
+        if (input.witnessUtxo) {
+          return {
+            address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
+            value: input.witnessUtxo.value,
+          };
+        } else if (input.nonWitnessUtxo) {
+          const txin = psbt.txInputs[index];
+          const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+          return {
+            address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
+            value: txout.value,
+            index: index,
+          };
+        } else {
+          throw new Error("Could not get input of #" + index);
+        }
+      });
+      let inputAddress = inputs[0].address;
+      const weOwnWallet = wallets.find(w => w.weOwnAddress(inputAddress));
+      handlePsbtSign(weOwnWallet)
+    } else if (routeParams.uri) {
       try {
         const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
 
@@ -926,44 +950,39 @@ const SendDetails = () => {
     navigation.navigate('PaymentCodeList', { walletID: wallet.getID() });
   };
 
-  const handlePsbtSign = async () => {
+  const handlePsbtSign = async (weOwnWallet: string | undefined) => {
+    
+    const actWallet =  wallet?.type !== undefined  ? wallet : weOwnWallet
     setIsLoading(true);
     setOptionsVisible(false);
     await new Promise(resolve => setTimeout(resolve, 100)); // sleep for animations
     setProgress(true);
-    const scannedData = await scanQrHelper(name);    
+    const scannedData = routeParams.uri !== undefined ? routeParams.uri : await scanQrHelper(name);
 
-    let tx;    
+    let tx;
     let psbt;
     let updatedTxOutputs;
-
     // we need to remove change address from recipients, so that Confirm screen show more accurate info
     const changeAddresses: string[] = [];
     // @ts-ignore hacky
-    for (let c = 0; c < wallet.next_free_change_address_index + wallet.gap_limit; c++) {
-      // @ts-ignore hacky
-      changeAddresses.push(wallet._getInternalAddressByIndex(c));
+    for (let c = 0; c < actWallet.next_free_change_address_index + actWallet.gap_limit; c++) {
+        // @ts-ignore hacky
+      changeAddresses.push(actWallet._getInternalAddressByIndex(c));
     }
 
     // Liste für die externen Adressen (falls relevant)
     const externalAddresses: string[] = [];
     // Externe Adressen generieren (optional)
-    for (let c = 0; c < wallet.next_free_change_address_index + wallet.gap_limit; c++) {
-        externalAddresses.push(wallet._getExternalAddressByIndex(c));
+    for (let c = 0; c < actWallet.next_free_address_index + actWallet.gap_limit; c++) {
+      externalAddresses.push(actWallet._getExternalAddressByIndex(c));
     }
 
     try {
-        console.log("_____scannedData", scannedData)
-        psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
-        console.log("____pspd", psbt)
-
-        updatedTxOutputs = psbt.txOutputs.map((output, index) => {
-          console.log('____output', output)
-          const chunks = bitcoin.script.decompile(output.script);
-          let address = output.address; //TODO check if this is segwit if so make an error message
-          
-          if(chunks[0] === 90){ //TODO make this a constant
-            
+      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
+      updatedTxOutputs = psbt.txOutputs.map((output, index) => {
+        const chunks = bitcoin.script.decompile(output.script);
+        let address = output.address; //TODO check if this is segwit if so make an error message          
+          if(chunks[0] === 90){ //TODO make this a constant            
             try { 
                 let isIncluded = changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
                 const utf16Decoder = new TextDecoder('ascii');
@@ -978,10 +997,7 @@ const SendDetails = () => {
           let isIncluded =  changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
           return { ...output, isIncluded};// Return the original output if address is already set
         });
-
-        
-        tx = (wallet as MultisigHDWallet).cosignPsbt(psbt).tx;
-        console.log('_____tx', tx.toHex());
+        tx = (actWallet as MultisigHDWallet).cosignPsbt(psbt).tx;        
     } catch (e: any) {
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
@@ -989,42 +1005,21 @@ const SendDetails = () => {
       setIsLoading(false);
     }
 
-    if (!tx || !wallet) return setIsLoading(false);
-
-    // nameOp addresses are undefined we need to fix that before filtering them out
-    
-
-    console.log('Updated txOutputs:', updatedTxOutputs);
-
+    if (!tx || !actWallet) return setIsLoading(false);
     //if a nameOp is stored to a changeAddress our recipient is not shown!
     // let recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
-    let recipients = updatedTxOutputs.filter(({ address }) => true); 
-
-    // const nameOPRecipients = psbt.txOutputs.map(o => {
-    //   const chunks = bitcoin.script.decompile(o.script); 
-    // const utf16Decoder = new TextDecoder('ascii');
-    //   try {
-    //     const nameId = utf16Decoder.decode(Buffer.from(chunks[1], 'hex'));
-    //     const nameValue = utf16Decoder.decode(Buffer.from(chunks[2], 'hex'));
-    //     console.log('__________nameId', nameId);
-    //     console.log('__________nameValue', nameValue);
-    //     console.log('__________decodedChunk70', bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash));
-    //     return bitcoin.address.toBase58Check(Buffer.from(chunks[7], 'hex'), DOICHAIN.pubKeyHash);
-    //   } catch (e) { console.log('error during decode', e) }
-    // });
- 
+    let recipients = updatedTxOutputs.filter(({ address }) => true);
     setProgress(false);
-    
     navigation.navigate('CreateTransaction', {
       fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),
       feeSatoshi: psbt.getFee(),
-      wallet,
+      actWallet,
       tx: tx.toHex(),
       recipients,
       satoshiPerByte: psbt.getFeeRate(),
       showAnimatedQr: true,
       psbt,
-    }); 
+    });
   };
 
   const hideOptions = () => {

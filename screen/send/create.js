@@ -44,10 +44,10 @@ const SendCreate = () => {
       return {
         address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
         value: input.witnessUtxo.value,
+        index: index,
       };
     } else if (input.nonWitnessUtxo) {
       const txin = psbt.txInputs[index];
-
       const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
       return {
         address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
