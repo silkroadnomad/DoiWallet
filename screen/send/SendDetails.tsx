@@ -169,32 +169,36 @@ const SendDetails = () => {
     const currentAddress = addresses[scrollIndex.current];
 
     if (routeParams.uri && DeeplinkSchemaMatch.isPsbtNameOpTransactions(routeParams.uri)) {
-      const psbt = bitcoin.Psbt.fromBase64(routeParams.uri, { network: DOICHAIN });
-      const inputs = psbt.data.inputs.map((input, index) => {
-        if (input.witnessUtxo) {
-          return {
-            address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
-            value: input.witnessUtxo.value,
-          };
-        } else if (input.nonWitnessUtxo) {
-          const txin = psbt.txInputs[index];
-          const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
-          return {
-            address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
-            value: txout.value,
-            index: index,
-          };
-        } else {
-          throw new Error("Could not get input of #" + index);
-        }
-      });
-      let inputAddress = inputs[0].address;
-      const weOwnWallet = wallets.find(w => w.weOwnAddress(inputAddress));
+      try {
+        const psbt = bitcoin.Psbt.fromBase64(routeParams.uri, { network: DOICHAIN });
+        const inputs = psbt.data.inputs.map((input, index) => {
+          if (input.witnessUtxo) {
+            return {
+              address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
+              value: input.witnessUtxo.value,
+            };
+          } else if (input.nonWitnessUtxo) {
+            const txin = psbt.txInputs[index];
+            const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+            return {
+              address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
+              value: txout.value,
+              index: index,
+            };
+          } else {
+            throw new Error("Could not get input of #" + index);
+          }
+        });
+        let inputAddress = inputs[0].address;
+        const weOwnWallet = wallets.find(w => w.weOwnAddress(inputAddress));
 
-      if (weOwnWallet) {
-        handlePsbtSign(weOwnWallet);
-      } else {
-        throw new Error("No matching wallet found for the provided PSBT input.");
+        if (weOwnWallet) {
+          handlePsbtSign(weOwnWallet);
+        } else {
+          throw new Error("No matching wallet found for the provided PSBT input.");
+        }
+      } catch (error) {
+        console.error("Failed to process PSBT:", error);
       }
 
     } else if (routeParams.uri) {
