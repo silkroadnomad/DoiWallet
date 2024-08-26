@@ -344,7 +344,7 @@ class DeeplinkSchemaMatch {
   static isPsbtNameOpTransactions(psbt: string): boolean {
     let isPsbtNameOpTransactions = false;
     try {
-      const aa = bitcoin.Psbt.fromBase64(psbt, { network: DOICHAIN });
+      bitcoin.Psbt.fromBase64(psbt, { network: DOICHAIN });
       isPsbtNameOpTransactions = true;
     } catch (err) {}
     return isPsbtNameOpTransactions;

@@ -190,7 +190,13 @@ const SendDetails = () => {
       });
       let inputAddress = inputs[0].address;
       const weOwnWallet = wallets.find(w => w.weOwnAddress(inputAddress));
-      handlePsbtSign(weOwnWallet)
+
+      if (weOwnWallet) {
+        handlePsbtSign(weOwnWallet);
+      } else {
+        throw new Error("No matching wallet found for the provided PSBT input.");
+      }
+
     } else if (routeParams.uri) {
       try {
         const { address, amount, memo, payjoinUrl: pjUrl } = DeeplinkSchemaMatch.decodeBitcoinUri(routeParams.uri);
@@ -952,12 +958,13 @@ const SendDetails = () => {
 
   const handlePsbtSign = async (weOwnWallet: string | undefined) => {
     
-    const actWallet =  wallet?.type !== undefined  ? wallet : weOwnWallet
+    const actWallet =  wallet?.type !== undefined  ? wallet : weOwnWallet;
+    if (!actWallet) return; // Early return if no wallet is available
     setIsLoading(true);
     setOptionsVisible(false);
     await new Promise(resolve => setTimeout(resolve, 100)); // sleep for animations
     setProgress(true);
-    const scannedData = routeParams.uri !== undefined ? routeParams.uri : await scanQrHelper(name);
+    const scannedData = routeParams.uri || await scanQrHelper(name);
 
     let tx;
     let psbt;
