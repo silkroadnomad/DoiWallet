@@ -3,14 +3,14 @@ import Foundation
 class Balance {
     static func formatBalance(_ balance: Decimal, toUnit: DoichainUnit, withFormatting: Bool = false, completion: @escaping (String) -> Void) {
         switch toUnit {
-        case .BTC:
+        case .DOI:
             let value = balance / Decimal(100_000_000)
-            completion("\(value) BTC") // Localize unit names as needed.
-        case .SATS:
+            completion("\(value) DOI") // Localize unit names as needed.
+        case .SWARTZ:
             if withFormatting {
-                completion(NumberFormatter.localizedString(from: balance as NSNumber, number: .decimal) + " SATS")
+                completion(NumberFormatter.localizedString(from: balance as NSNumber, number: .decimal) + " SWARTZ") 
             } else {
-                completion("\(balance) SATS")
+                completion("\(balance) SWARTZ")
             }
         case .LOCAL_CURRENCY:
             fetchLocalCurrencyEquivalent(satoshi: balance, completion: completion)

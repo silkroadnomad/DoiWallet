@@ -34,7 +34,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       amount = context.amountStringArray
       keyPadType = context.doichainUnit
     }
-    periodButton.setEnabled(keyPadType == .SATS)
+    periodButton.setEnabled(keyPadType == .SWARTZ)
   }
   
   override func willActivate() {
@@ -63,7 +63,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       return
     }
     switch keyPadType {
-    case .SATS:
+    case .SWARTZ:
       if amount.first == "0" {
         if value == "0" {
           return

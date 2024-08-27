@@ -40,7 +40,7 @@ class SpecifyInterfaceController: WKInterfaceController {
     let wallet = WatchDataSource.shared.wallets[identifier]
     self.wallet = wallet
     self.createButton.setAlpha(0.5)
-    self.specifiedQRContent.doichainUnit = (wallet.type == WalletGradient.LightningCustodial.rawValue || wallet.type == WalletGradient.LightningLDK.rawValue) ? .SATS : .BTC
+    self.specifiedQRContent.doichainUnit = (wallet.type == WalletGradient.LightningCustodial.rawValue || wallet.type == WalletGradient.LightningLDK.rawValue) ? .SWARTZ : .DOI
     NotificationCenter.default.addObserver(forName: NumericKeypadInterfaceController.NotificationName.keypadDataChanged, object: nil, queue: nil) { [weak self] (notification) in
       guard let amountObject = notification.object as? [String], !amountObject.isEmpty else { return }
       if amountObject.count == 1 && (amountObject.first == "." || amountObject.first == "0") {
