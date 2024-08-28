@@ -21,7 +21,7 @@ class SpecifyInterfaceController: WKInterfaceController {
     var amount: Double?
     var description: String?
     var amountStringArray: [String] = ["0"]
-    var doichainUnit.: NumericKeypadInterfaceController.NumericKeypadType = .DOI
+    var doichainUnit: NumericKeypadInterfaceController.NumericKeypadType = .DOI
   }
   var specifiedQRContent: SpecificQRCodeContent = SpecificQRCodeContent(amount: nil, description: nil, amountStringArray: ["0"], doichainUnit: .DOI)
   var wallet: Wallet?
