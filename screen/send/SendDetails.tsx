@@ -1024,7 +1024,7 @@ const SendDetails = () => {
     navigation.navigate('CreateTransaction', {
       fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),
       feeSatoshi: psbt.getFee(),
-      actWallet,
+      wallet: actWallet,
       tx: tx.toHex(),
       recipients,
       satoshiPerByte: psbt.getFeeRate(),
