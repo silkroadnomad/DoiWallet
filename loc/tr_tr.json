@@ -40,29 +40,13 @@
     "network": "Ağ Hatası"
   },
   "lnd": {
-    "active": "Aktif",
-    "inactive": "Inaktif",
-    "channels": "Kanallar",
-    "no_channels": "Kanal yok",
-    "claim_balance": "Talep balansı (balans)",
-    "close_channel": "Kanalı kapa",
-    "new_channel": "Yeni kanal",
-    "force_close_channel": "Kanalı kapamaya zorla",
     "expired": "Süresi doldu",
-    "node_alias": "Node mahlası",
     "expiresIn": "{time} dakika içerisinde sona erer",
     "payButton": "Öde",
-    "open_channel": "Kanal aç",
-    "opening_channnel_for_from": "{fromWalletLabel} tarafından fonlanan kanal {forWalletLabel} için aılıyor",
-    "are_you_sure_open_channel": "Bu kanalı açmak istediğinizden emin misiniz?",
     "refill": "Yükle",
-    "reconnect_peer": "Eş'e tekrar bağlan",
     "refill_lnd_balance": "Lightning cüzdana bakiye yükle",
     "sameWalletAsInvoiceError": "Bir faturayı, oluştururken kullandığınız cüzdan ile ödeyemezsiniz.",
-    "title": "Bakiyeleri Yönet",
-    "can_send": "Gönderebilir",
-    "can_receive": "Alabilir",
-    "view_logs": "Logları gör"
+    "title": "Bakiyeleri Yönet"
   },
   "lndViewInvoice": {
     "additional_info": "Ek Bilgi",
@@ -81,7 +65,7 @@
     "help": "Bazı koşullar altında, şifrenizi açıklamanız gerekebilir. Paralarınızı güvende tutmak için, DoiWallet başka bir şifre ile şifreli depolama alanı yaratabilir. Baskı altında, Bu şifreyi 3. bir tarafa söyleyebilirsiniz. Girilirse DoiWallet, yeni 'sahte' bir depolamanın kilidini açacaktır. Bu 3. şahıslara normal görünecektir, ancak paraların olduğu ana depolama alanınızı gizlice saklamaya devam edecektir.",
     "help2": "Yeni depolama alanı tamamen işlevsel olacak ve ufak bir miktar tutarsanız daha inanılır görünecektir.",
     "password_should_not_match": "Sahte depolama şifreniz, ana depolama şifrenizle aynı olmamalıdır",
-    "retype_password": "Şifrenizi yeniden yazın",
+    "confirm_password": "Şifrenizi yeniden yazın",
     "success": "Başarılı",
     "title": "Makul Ret"
   },
@@ -178,7 +162,7 @@
     "privacy_system_settings": "Sistem Ayarları",
     "privacy_quickactions": "Cüzdan Kısayolları",
     "push_notifications": "Bildirimler",
-    "retype_password": "Şifrenizi yeniden girin",
+    "confirm_password": "Şifrenizi yeniden girin",
     "save": "Kaydet",
     "saved": "Kaydedildi",
     "total_balance": "Bakiye"
@@ -192,7 +176,8 @@
     "details_title": "İşlem",
     "details_to": "Çıktı",
     "pending": "Beklemede",
-    "list_title": "işlemler"
+    "list_title": "işlemler",
+    "transaction": "İşlem"
   },
   "wallets": {
     "add_create": "Oluştur",
@@ -224,7 +209,6 @@
     "list_empty_txs1": "İşlemleriniz burada görünür,",
     "list_latest_transaction": "en son işlem",
     "list_title": "cüzdanlar",
-    "reorder_title": "Cüzdanları Sırala",
     "select_wallet": "Cüzdan Seç",
     "xpub_copiedToClipboard": "Panoya kopyalandı",
     "xpub_title": "cüzdan XPUB"

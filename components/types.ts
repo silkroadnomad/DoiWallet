@@ -7,7 +7,7 @@ export interface Action {
     iconValue: string;
   };
   menuTitle?: string;
-  menuStateOn?: boolean;
+  menuState?: 'mixed' | boolean | undefined;
   disabled?: boolean;
   displayInline?: boolean;
 }
@@ -30,6 +30,7 @@ export interface ToolTipMenuProps {
   style?: ViewStyle | ViewStyle[];
   accessibilityLabel?: string;
   accessibilityHint?: string;
+  accessibilityState?: object;
   buttonStyle?: ViewStyle | ViewStyle[];
   onMenuWillShow?: () => void;
   onMenuWillHide?: () => void;

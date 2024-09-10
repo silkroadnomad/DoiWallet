@@ -1,13 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRoute } from '@react-navigation/native';
 import {
   ActivityIndicator,
   Alert,
   I18nManager,
   InteractionManager,
   Keyboard,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -25,7 +22,6 @@ import {
   HDAezeedWallet,
   HDSegwitBech32Wallet,
   LegacyWallet,
-  LightningLdkWallet,
   MultisigHDWallet,
   SegwitBech32Wallet,
   SegwitP2SHWallet,
@@ -49,6 +45,7 @@ import { DoichainUnit, Chain } from "../../models/doichainUnits";
 import { useSettings } from '../../hooks/context/useSettings';
 import { useStorage } from '../../hooks/context/useStorage';
 import { popToTop } from '../../NavigationService';
+import { useRoute } from '@react-navigation/native';
 
 
 const styles = StyleSheet.create({
@@ -115,12 +112,12 @@ const WalletDetails = () => {
   const { walletID } = useRoute().params;
   const [isLoading, setIsLoading] = useState(false);
   const [backdoorPressed, setBackdoorPressed] = useState(0);
-  const [backdoorBip47Pressed, setBackdoorBip47Pressed] = useState(0);
   const wallet = useRef(wallets.find(w => w.getID() === walletID)).current;
   const [walletName, setWalletName] = useState(wallet.getLabel());
   const [useWithHardwareWallet, setUseWithHardwareWallet] = useState(wallet.useWithHardwareWalletEnabled());
   const { isAdvancedModeEnabled } = useSettings();
   const [isBIP47Enabled, setIsBIP47Enabled] = useState(wallet.isBIP47Enabled());
+  const [isContactsVisible, setIsContactsVisible] = useState(wallet.allowBIP47() && wallet.isBIP47Enabled());
   const [hideTransactionsInWalletsList, setHideTransactionsInWalletsList] = useState(!wallet.getHideTransactionsInWalletsList());
   const { goBack, setOptions, navigate } = useExtendedNavigation();
   const { colors } = useTheme();
@@ -134,11 +131,14 @@ const WalletDetails = () => {
       return null;
     }
   }, [wallet]);
-  const [lightningWalletInfo, setLightningWalletInfo] = useState({});
   const [isToolTipMenuVisible, setIsToolTipMenuVisible] = useState(false);
 
   const onMenuWillShow = () => setIsToolTipMenuVisible(true);
   const onMenuWillHide = () => setIsToolTipMenuVisible(false);
+
+  useEffect(() => {
+    setIsContactsVisible(isBIP47Enabled);
+  }, [isBIP47Enabled]);
 
   useEffect(() => {
     if (isAdvancedModeEnabled && wallet.allowMasterFingerprint()) {
@@ -167,11 +167,6 @@ const WalletDetails = () => {
       color: isToolTipMenuVisible ? colors.buttonDisabledTextColor : '#d0021b',
     },
   });
-  useEffect(() => {
-    if (wallet.type === LightningLdkWallet.type) {
-      wallet.getInfo().then(setLightningWalletInfo);
-    }
-  }, [wallet]);
 
   const handleSave = useCallback(() => {
     setIsLoading(true);
@@ -254,7 +249,7 @@ const WalletDetails = () => {
     navigate('WalletExportRoot', {
       screen: 'WalletExport',
       params: {
-        walletID: wallet.getID(),
+        walletID,
       },
     });
   };
@@ -262,7 +257,7 @@ const WalletDetails = () => {
     navigate('ExportMultisigCoordinationSetupRoot', {
       screen: 'ExportMultisigCoordinationSetup',
       params: {
-        walletID: wallet.getID(),
+        walletID,
       },
     });
   };
@@ -285,19 +280,14 @@ const WalletDetails = () => {
     navigate('SignVerifyRoot', {
       screen: 'SignVerify',
       params: {
-        walletID: wallet.getID(),
+        walletID,
         address: wallet.getAllExternalAddresses()[0], // works for both single address and HD wallets
       },
     });
-  const navigateToLdkViewLogs = () => {
-    navigate('LdkViewLogs', {
-      walletID,
-    });
-  };
 
   const navigateToAddresses = () =>
     navigate('WalletAddresses', {
-      walletID: wallet.getID(),
+      walletID,
     });
 
   const navigateToContacts = () => navigate('PaymentCodeList', { walletID });
@@ -429,6 +419,7 @@ const WalletDetails = () => {
 
   return (
     <ScrollView
+      automaticallyAdjustKeyboardInsets
       contentInsetAdjustmentBehavior="automatic"
       centerContent={isLoading}
       contentContainerStyle={styles.scrollViewContent}
@@ -463,37 +454,23 @@ const WalletDetails = () => {
                 }
               })()}
               <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.add_wallet_name.toLowerCase()}</Text>
-              <KeyboardAvoidingView enabled={!Platform.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
-                <View style={[styles.input, stylesHook.input]}>
-                  <TextInput
-                    value={walletName}
-                    onChangeText={setWalletName}
-                    onBlur={walletNameTextInputOnBlur}
-                    numberOfLines={1}
-                    placeholderTextColor="#81868e"
-                    style={styles.inputText}
-                    editable={!isLoading}
-                    underlineColorAndroid="transparent"
-                    testID="WalletNameInput"
-                  />
-                </View>
-              </KeyboardAvoidingView>
+              <View style={[styles.input, stylesHook.input]}>
+                <TextInput
+                  value={walletName}
+                  onChangeText={setWalletName}
+                  onBlur={walletNameTextInputOnBlur}
+                  numberOfLines={1}
+                  placeholderTextColor="#81868e"
+                  style={styles.inputText}
+                  editable={!isLoading}
+                  underlineColorAndroid="transparent"
+                  testID="WalletNameInput"
+                />
+              </View>
               <BlueSpacing20 />
               <Text style={[styles.textLabel1, stylesHook.textLabel1]}>{loc.wallets.details_type.toLowerCase()}</Text>
               <Text style={[styles.textValue, stylesHook.textValue]}>{wallet.typeReadable}</Text>
 
-              {wallet.type === LightningLdkWallet.type && (
-                <>
-                  <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.identity_pubkey}</Text>
-                  {lightningWalletInfo?.identityPubkey ? (
-                    <>
-                      <BlueText>{lightningWalletInfo.identityPubkey}</BlueText>
-                    </>
-                  ) : (
-                    <ActivityIndicator />
-                  )}
-                </>
-              )}
               {wallet.type === MultisigHDWallet.type && (
                 <>
                   <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.wallets.details_multisig_type}</Text>
@@ -530,7 +507,7 @@ const WalletDetails = () => {
                   {loc.transactions.list_title.toLowerCase()}
                 </Text>
                 <View style={styles.hardware}>
-                  <BlueText onPress={() => setBackdoorBip47Pressed(prevState => prevState + 1)}>{loc.wallets.details_display}</BlueText>
+                  <BlueText>{loc.wallets.details_display}</BlueText>
                   <Switch
                     disabled={isToolTipMenuVisible}
                     value={hideTransactionsInWalletsList}
@@ -545,12 +522,12 @@ const WalletDetails = () => {
                 <BlueText>{wallet.getTransactions().length}</BlueText>
               </>
 
-              {backdoorBip47Pressed >= 10 && wallet.allowBIP47() ? (
+              {wallet.allowBIP47() ? (
                 <>
                   <Text style={[styles.textLabel2, stylesHook.textLabel2]}>{loc.bip47.payment_code}</Text>
                   <View style={styles.hardware}>
                     <BlueText>{loc.bip47.purpose}</BlueText>
-                    <Switch value={isBIP47Enabled} onValueChange={setIsBIP47Enabled} />
+                    <Switch value={isBIP47Enabled} onValueChange={setIsBIP47Enabled} testID="BIP47Switch" />
                   </View>
                 </>
               ) : null}
@@ -590,9 +567,9 @@ const WalletDetails = () => {
             {(wallet instanceof AbstractHDElectrumWallet || (wallet.type === WatchOnlyWallet.type && wallet.isHd())) && (
               <ListItem disabled={isToolTipMenuVisible} onPress={navigateToAddresses} title={loc.wallets.details_show_addresses} chevron />
             )}
-            {wallet.allowBIP47() && wallet.isBIP47Enabled() && (
+            {isContactsVisible ? (
               <ListItem disabled={isToolTipMenuVisible} onPress={navigateToContacts} title={loc.bip47.contacts} chevron />
-            )}
+            ) : null}
             <BlueCard style={styles.address}>
               <View>
                 <BlueSpacing20 />
@@ -658,17 +635,6 @@ const WalletDetails = () => {
                       onPress={navigateToSignVerify}
                       testID="SignVerify"
                       title={loc.addresses.sign_title}
-                    />
-                  </>
-                )}
-                {wallet.type === LightningLdkWallet.type && (
-                  <>
-                    <BlueSpacing20 />
-                    <SecondButton
-                      disabled={isToolTipMenuVisible}
-                      onPress={navigateToLdkViewLogs}
-                      testID="LdkLogs"
-                      title={loc.lnd.view_logs}
                     />
                   </>
                 )}

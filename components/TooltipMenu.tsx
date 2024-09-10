@@ -1,5 +1,5 @@
 import React, { Ref, useCallback, useMemo } from 'react';
-import { Platform, Pressable, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, TouchableOpacity } from 'react-native';
 import {
   ContextMenuView,
   RenderItem,
@@ -10,6 +10,7 @@ import {
 } from 'react-native-ios-context-menu';
 import { MenuView, MenuAction, NativeActionEvent } from '@react-native-menu/menu';
 import { ToolTipMenuProps, Action } from './types';
+import { useSettings } from '../hooks/context/useSettings';
 
 const ToolTipMenu = React.memo((props: ToolTipMenuProps, ref?: Ref<any>) => {
   const {
@@ -27,13 +28,15 @@ const ToolTipMenu = React.memo((props: ToolTipMenuProps, ref?: Ref<any>) => {
     ...restProps
   } = props;
 
+  const { language } = useSettings();
+
   const mapMenuItemForContextMenuView = useCallback((action: Action) => {
     if (!action.id) return null;
     return {
       actionKey: action.id.toString(),
       actionTitle: action.text,
       icon: action.icon?.iconValue ? ({ iconType: 'SYSTEM', iconValue: action.icon.iconValue } as IconConfig) : undefined,
-      state: action.menuStateOn ? ('on' as MenuState) : ('off' as MenuState),
+      state: action.menuState ?? undefined,
       attributes: action.disabled ? ['disabled'] : [],
     };
   }, []);
@@ -43,8 +46,8 @@ const ToolTipMenu = React.memo((props: ToolTipMenuProps, ref?: Ref<any>) => {
     return {
       id: action.id.toString(),
       title: action.text,
-      image: action.menuStateOn && Platform.OS === 'android' ? 'checkbox_on_background' : action.icon?.iconValue || undefined,
-      state: action.menuStateOn ? ('on' as MenuState) : undefined,
+      image: action.icon?.iconValue ? action.icon.iconValue : undefined,
+      state: action.menuState === undefined ? undefined : ((action.menuState ? 'on' : 'off') as MenuState),
       attributes: { disabled: action.disabled },
     };
   }, []);
@@ -99,6 +102,11 @@ const ToolTipMenu = React.memo((props: ToolTipMenuProps, ref?: Ref<any>) => {
     return (
       <ContextMenuView
         lazyPreview
+        accessibilityLabel={props.accessibilityLabel}
+        accessibilityHint={props.accessibilityHint}
+        accessibilityRole={props.accessibilityRole}
+        accessibilityState={props.accessibilityState}
+        accessibilityLanguage={language}
         shouldEnableAggressiveCleanup
         internalCleanupMode="automatic"
         onPressMenuItem={handlePressMenuItemForContextMenuView}
@@ -133,23 +141,26 @@ const ToolTipMenu = React.memo((props: ToolTipMenuProps, ref?: Ref<any>) => {
   const renderMenuView = () => {
     console.debug('ToolTipMenu.tsx rendering: renderMenuView');
     return (
-      <View>
-        <MenuView
-          title={title}
-          isAnchoredToRight
-          onPressAction={handlePressMenuItemForMenuView}
-          actions={Platform.OS === 'ios' ? menuViewItemsIOS : menuViewItemsAndroid}
-          shouldOpenOnLongPress={!isMenuPrimaryAction}
-        >
-          {isMenuPrimaryAction || isButton ? (
-            <TouchableOpacity style={buttonStyle} disabled={disabled} onPress={onPress} {...restProps}>
-              {children}
-            </TouchableOpacity>
-          ) : (
-            children
-          )}
-        </MenuView>
-      </View>
+      <MenuView
+        title={title}
+        isAnchoredToRight
+        onPressAction={handlePressMenuItemForMenuView}
+        actions={Platform.OS === 'ios' ? menuViewItemsIOS : menuViewItemsAndroid}
+        shouldOpenOnLongPress={!isMenuPrimaryAction}
+        // @ts-ignore: its not in the types but it works
+        accessibilityLabel={props.accessibilityLabel}
+        accessibilityHint={props.accessibilityHint}
+        accessibilityRole={props.accessibilityRole}
+        accessibilityLanguage={language}
+      >
+        {isMenuPrimaryAction || isButton ? (
+          <TouchableOpacity style={buttonStyle} disabled={disabled} onPress={onPress} {...restProps}>
+            {children}
+          </TouchableOpacity>
+        ) : (
+          children
+        )}
+      </MenuView>
     );
   };
 

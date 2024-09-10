@@ -52,37 +52,19 @@
     "network": "שגיאת רשת"
   },
   "lnd": {
-    "active": "פעיל",
-    "inactive": "לא פעיל",
-    "channels": "ערוצים",
-    "no_channels": "אין ערוצים",
-    "claim_balance": "מאזן דרישה {balance}",
-    "close_channel": "סגירת ערוץ",
-    "new_channel": "ערוץ חדש",
     "errorInvoiceExpired": "חשבונית פגה",
-    "force_close_channel": "כפיית סגירת ערוץ?",
     "expired": "פג",
-    "node_alias": "כינוי צומת",
     "expiresIn": "פג בעוד {time} דקות",
     "payButton": "תשלום",
     "payment": "תשלום",
     "placeholder": "חשבונית או כתובת",
-    "open_channel": "פתיחת ערוץ",
-    "funding_amount_placeholder": "סכום מימון, לדוגמה, 0.001",
-    "opening_channnel_for_from": "פתיחת ערוץ עבור ארנק {forWalletLabel}, בעמצאות מימון מארנק {fromWalletLabel}",
-    "are_you_sure_open_channel": "האם אתם בטוחים שברצונכם לפתוח ערוץ זה?",
     "potentialFee": "עמלה פוטנציאלית: {fee}",
-    "remote_host": "מארח מרוחק",
     "refill": "טעינה",
-    "reconnect_peer": "התחברות מחדש לעמית",
     "refill_create": "כדי להמשיך, אנא צרו ארנק ביטקוין כדי לטעון באמצעותו.",
     "refill_external": "טעינה בעזרת ארנק חיצוני",
     "refill_lnd_balance": "מלאו את יתרת ארנק הברק",
     "sameWalletAsInvoiceError": "לא ניתן לשלם חשבונית עם אותו הארנק שיצר אותה.",
-    "title": "ניהול כספים",
-    "can_send": "ניתן לשלוח",
-    "can_receive": "ניתן לקבל",
-    "view_logs": "צפייה ביומנים"
+    "title": "ניהול כספים"
   },
   "lndViewInvoice": {
     "additional_info": "מידע נוסף",
@@ -101,7 +83,7 @@
     "help2": "האחסון החדש יתפקד באופן מלא, ותוכלו לאחסן בו סכומים מינימליים כך שיראה יותר מהימן.",
     "password_should_not_match": "הסיסמה כבר בשימוש. אנא נסו סיסמה אחרת.",
     "passwords_do_not_match": "סיסמאות אינן תואמות, אנא נסו שוב",
-    "retype_password": "הכניסו שוב סיסמה",
+    "confirm_password": "הכניסו שוב סיסמה",
     "success": "הצלחה",
     "title": "יכולת הכחשה סבירה"
   },
@@ -319,7 +301,7 @@
     "privacy_do_not_track_explanation": "מידע ביצועים ומהימנות לא ישלח לניתוח.",
     "push_notifications": "התראות",
     "rate": "תעריף",
-    "retype_password": "הכניסו שוב סיסמה",
+    "confirm_password": "הכניסו שוב סיסמה",
     "selfTest": "בדיקה עצמית",
     "save": "שמירה",
     "saved": "נשמר",
@@ -370,6 +352,7 @@
     "eta_1d": "ETA: תוך ~1 יום",
     "view_wallet": "הצגת {walletLabel}",
     "list_title": "תנועות",
+    "transaction": "פעולה",
     "open_url_error": "לא ניתן לפתוח קישור עם דפדפן ברירת המחדל. אנא שנו את דפדפן ברירת המחדל שלכם ונסו שוב",
     "rbf_explain": "אנו נחליף את פעולה זו בפעולה עם עמלה גבוהה יותר, כך שמהירות קבלת האישור אמורה לעלות. פעולה זאת נקראת RBF—Replace by Fee.",
     "rbf_title": "העלאת עמלה (RBF)",
@@ -380,8 +363,7 @@
     "from": "מאת: {counterparty}",
     "to": "עבור: {counterparty}",
     "updating": "מעדכן...",
-    "watchOnlyWarningTitle": "אזהרת הונאה",
-    "watchOnlyWarningDescription": "שימו לב שנוכלים לרוב משתמשים בסוג ארנק 'צפייה בלבד' כדי לנסות לגנוב ממשתמשים. אינכם זה שאינכם יכולים לשלוט בו או לשלוח ממנו, מאפשר צפייה במאזן בלבד."
+    "watchOnlyWarningDescription": "היזהרו מנוכלים אשר לעיתים קרובות משתמשים בארנקי ”צפייה-בלבד“ כדי להונות משתמשים. ארנקים אלה אינם מאפשרים לכם לשלוט בכספים או לשלוח כספים; הם מאפשרים לכם אך ורק לצפות במאזן."
   },
   "wallets": {
     "add_bitcoin": "ביטקוין",
@@ -473,7 +455,6 @@
     "list_tryagain": "נסו שוב",
     "no_ln_wallet_error": "לפני תשלום חשבונית ברק, עלייך להוסיף ארנק ברק.",
     "looks_like_bip38": "זה נראה כמו מפתח פרטי מוגן בסיסמה (BIP38)",
-    "reorder_title": "ארגון ארנקים מחדש ",
     "please_continue_scanning": "אנא המשיכו בסריקה.",
     "select_no_bitcoin": "אין ארנקי ביטקוין זמינים.",
     "select_no_bitcoin_exp": "דרוש ארנק ביטקוין בכדי לטעון את ארנקי הברק. צרו או יבאו אחד.",
@@ -483,8 +464,7 @@
     "warning_do_not_disclose": "אזהרה! אין לחשוף.",
     "add_ln_wallet_first": "עלייך להוסיף ארנק ברק קודם.",
     "identity_pubkey": "מפתח זהות ציבורי",
-    "xpub_title": "מפתח צפייה של הארנק",
-    "search_wallets": "חיפוש ארנקים"
+    "xpub_title": "מפתח צפייה של הארנק"
   },
   "multisig": {
     "multisig_vault": "כספת",

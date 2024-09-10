@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Linking, StyleSheet, View } from 'react-native';
+import { Linking, View, ViewStyle } from 'react-native';
 import Lnurl from '../class/lnurl';
 import { LightningTransaction, Transaction } from '../class/wallets/types';
 import TransactionExpiredIcon from '../components/icons/TransactionExpiredIcon';
@@ -22,367 +22,324 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DetailViewStackParamList } from '../navigation/DetailViewStackParamList';
 import { useStorage } from '../hooks/context/useStorage';
 import ToolTipMenu from './TooltipMenu';
+import { CommonToolTipActions } from '../typings/CommonToolTipActions';
+import { pop } from '../NavigationService';
 
 interface TransactionListItemProps {
   itemPriceUnit: DoichainUnit;
   walletID: string;
   item: Transaction & LightningTransaction; // using type intersection to have less issues with ts
+  searchQuery?: string;
+  style?: ViewStyle;
+  renderHighlightedText?: (text: string, query: string) => JSX.Element;
 }
 
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList>;
 
-export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(({ item, itemPriceUnit = DoichainUnit.DOI, walletID }) => {
-  const [subtitleNumberOfLines, setSubtitleNumberOfLines] = useState(1);
-  const { colors } = useTheme();
-  const { navigate } = useExtendedNavigation<NavigationProps>();
-  const menuRef = useRef<ToolTipMenuProps>();
-  const { txMetadata, counterpartyMetadata, wallets } = useStorage();
-  const { preferredFiatCurrency, language } = useSettings();
-  const containerStyle = useMemo(
-    () => ({
-      backgroundColor: 'transparent',
-      borderBottomColor: colors.lightBorder,
-    }),
-    [colors.lightBorder],
-  );
+export const TransactionListItem: React.FC<TransactionListItemProps> = React.memo(
+  ({ item, itemPriceUnit = DoichainUnit.DOI, walletID, searchQuery, style, renderHighlightedText }) => {
+    const [subtitleNumberOfLines, setSubtitleNumberOfLines] = useState(1);
+    const { colors } = useTheme();
+    const { navigate } = useExtendedNavigation<NavigationProps>();
+    const menuRef = useRef<ToolTipMenuProps>();
+    const { txMetadata, counterpartyMetadata, wallets } = useStorage();
+    const { language } = useSettings();
+    const containerStyle = useMemo(
+      () => ({
+        backgroundColor: 'transparent',
+        borderBottomColor: colors.lightBorder,
+      }),
+      [colors.lightBorder],
+    );
 
-  const shortenContactName = (name: string): string => {
-    if (name.length < 16) return name;
-    return name.substr(0, 7) + '...' + name.substr(name.length - 7, 7);
-  };
+    const combinedStyle = useMemo(() => [containerStyle, style], [containerStyle, style]);
 
-  const title = useMemo(() => {
-    if (item.confirmations === 0) {
-      return loc.transactions.pending;
-    } else {
-      return transactionTimeToReadable(item.received!);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.confirmations, item.received, language]);
-
-  let counterparty;
-  if (item.counterparty) {
-    counterparty = counterpartyMetadata?.[item.counterparty]?.label ?? item.counterparty;
-  }
-  const txMemo = (counterparty ? `[${shortenContactName(counterparty)}] ` : '') + (txMetadata[item.hash]?.memo ?? '');
-  const subtitle = useMemo(() => {
-    let sub = Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
-    if (sub !== '') sub += ' ';
-    sub += txMemo;
-    if (item.memo) sub += item.memo;
-    return sub || undefined;
-  }, [txMemo, item.confirmations, item.memo]);
-
-  const rowTitle = useMemo(() => {
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      if (isNaN(Number(item.value))) {
-        item.value = 0;
-      }
-      const currentDate = new Date();
-      const now = (currentDate.getTime() / 1000) | 0; // eslint-disable-line no-bitwise
-      const invoiceExpiration = item.timestamp! + item.expire_time!;
-
-      if (invoiceExpiration > now) {
-        return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-      } else {
-        if (item.ispaid) {
-          return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-        } else {
-          return loc.lnd.expired;
-        }
-      }
-    } else {
-      return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item, itemPriceUnit, preferredFiatCurrency]);
-
-  const rowTitleStyle = useMemo(() => {
-    let color = colors.successColor;
-
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      const currentDate = new Date();
-      const now = (currentDate.getTime() / 1000) | 0; // eslint-disable-line no-bitwise
-      const invoiceExpiration = item.timestamp! + item.expire_time!;
-
-      if (invoiceExpiration > now) {
-        color = colors.successColor;
-      } else if (invoiceExpiration < now) {
-        if (item.ispaid) {
-          color = colors.successColor;
-        } else {
-          color = '#9AA0AA';
-        }
-      }
-    } else if (item.value! / 100000000 < 0) {
-      color = colors.foregroundColor;
-    }
-
-    return {
-      color,
-      fontSize: 14,
-      fontWeight: '600',
-      textAlign: 'right',
+    const shortenContactName = (name: string): string => {
+      if (name.length < 16) return name;
+      return name.substr(0, 7) + '...' + name.substr(name.length - 7, 7);
     };
-  }, [item, colors.foregroundColor, colors.successColor]);
 
-  const avatar = useMemo(() => {
-    // is it lightning refill tx?
-    if (item.category === 'receive' && item.confirmations! < 3) {
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionPendingIcon />
-        </View>
-      );
-    }
+    const title = useMemo(() => {
+      if (item.confirmations === 0) {
+        return loc.transactions.pending;
+      } else {
+        return transactionTimeToReadable(item.received!);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [item.confirmations, item.received, language]);
 
-    if (item.type && item.type === 'bitcoind_tx') {
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionOnchainIcon />
-        </View>
-      );
+    let counterparty;
+    if (item.counterparty) {
+      counterparty = counterpartyMetadata?.[item.counterparty]?.label ?? item.counterparty;
     }
-    if (item.type === 'paid_invoice') {
-      // is it lightning offchain payment?
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionOffchainIcon />
-        </View>
-      );
-    }
+    const txMemo = (counterparty ? `[${shortenContactName(counterparty)}] ` : '') + (txMetadata[item.hash]?.memo ?? '');
+    const subtitle = useMemo(() => {
+      let sub = Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
+      if (sub !== '') sub += ' ';
+      sub += txMemo;
+      if (item.memo) sub += item.memo;
+      return sub || undefined;
+    }, [txMemo, item.confirmations, item.memo]);
 
-    if (item.type === 'user_invoice' || item.type === 'payment_request') {
-      if (!item.ispaid) {
+    const rowTitle = useMemo(() => {
+      if (item.type === 'user_invoice' || item.type === 'payment_request') {
+        if (isNaN(Number(item.value))) {
+          item.value = 0;
+        }
         const currentDate = new Date();
         const now = (currentDate.getTime() / 1000) | 0; // eslint-disable-line no-bitwise
         const invoiceExpiration = item.timestamp! + item.expire_time!;
-        if (invoiceExpiration < now) {
-          return (
-            <View style={styles.iconWidth}>
-              <TransactionExpiredIcon />
-            </View>
-          );
+
+        if (invoiceExpiration > now) {
+          return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
+        } else {
+          if (item.ispaid) {
+            return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
+          } else {
+            return loc.lnd.expired;
+          }
         }
       } else {
-        return (
-          <View style={styles.iconWidth}>
-            <TransactionOffchainIncomingIcon />
-          </View>
-        );
+        return formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
       }
-    }
+    }, [item, itemPriceUnit]);
 
-    if (!item.confirmations) {
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionPendingIcon />
-        </View>
-      );
-    } else if (item.value! < 0) {
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionOutgoingIcon />
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.iconWidth}>
-          <TransactionIncomingIcon />
-        </View>
-      );
-    }
-  }, [item]);
+    const rowTitleStyle = useMemo(() => {
+      let color = colors.successColor;
 
-  useEffect(() => {
-    setSubtitleNumberOfLines(1);
-  }, [subtitle]);
+      if (item.type === 'user_invoice' || item.type === 'payment_request') {
+        const currentDate = new Date();
+        const now = (currentDate.getTime() / 1000) | 0; // eslint-disable-line no-bitwise
+        const invoiceExpiration = item.timestamp! + item.expire_time!;
 
-  const onPress = useCallback(async () => {
-    menuRef?.current?.dismissMenu?.();
-    if (item.hash) {
-      navigate('TransactionStatus', { hash: item.hash, walletID });
-    } else if (item.type === 'user_invoice' || item.type === 'payment_request' || item.type === 'paid_invoice') {
-      const lightningWallet = wallets.filter(wallet => wallet?.getID() === item.walletID);
-      if (lightningWallet.length === 1) {
-        try {
-          // is it a successful lnurl-pay?
-          const LN = new Lnurl(false, AsyncStorage);
-          let paymentHash = item.payment_hash!;
-          if (typeof paymentHash === 'object') {
-            paymentHash = Buffer.from(paymentHash.data).toString('hex');
+        if (invoiceExpiration > now) {
+          color = colors.successColor;
+        } else if (invoiceExpiration < now) {
+          if (item.ispaid) {
+            color = colors.successColor;
+          } else {
+            color = '#9AA0AA';
           }
-          const loaded = await LN.loadSuccessfulPayment(paymentHash);
-          if (loaded) {
-            navigate('ScanLndInvoiceRoot', {
-              screen: 'LnurlPaySuccess',
-              params: {
-                paymentHash,
-                justPaid: false,
-                fromWalletID: lightningWallet[0].getID(),
-              },
-            });
-            return;
-          }
-        } catch (e) {
-          console.log(e);
         }
-
-        navigate('LNDViewInvoice', {
-          invoice: item,
-          walletID: lightningWallet[0].getID(),
-        });
+      } else if (item.value! / 100000000 < 0) {
+        color = colors.foregroundColor;
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item, wallets]);
 
-  const handleOnExpandNote = useCallback(() => {
-    setSubtitleNumberOfLines(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subtitle]);
+      return {
+        color,
+        fontSize: 14,
+        fontWeight: '600',
+        textAlign: 'right',
+      };
+    }, [item, colors.foregroundColor, colors.successColor]);
 
-  const subtitleProps = useMemo(() => ({ numberOfLines: subtitleNumberOfLines }), [subtitleNumberOfLines]);
-
-  const handleOnCopyAmountTap = useCallback(() => Clipboard.setString(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
-  const handleOnCopyTransactionID = useCallback(() => Clipboard.setString(item.hash), [item.hash]);
-  const handleOnCopyNote = useCallback(() => Clipboard.setString(subtitle ?? ''), [subtitle]);
-  const handleOnViewOnBlockExplorer = useCallback(() => {
-    const url = `https://mempool.space/tx/${item.hash}`;
-    Linking.canOpenURL(url).then(supported => {
-      if (supported) {
-        Linking.openURL(url);
+    const determineTransactionTypeAndAvatar = () => {
+      if (item.category === 'receive' && item.confirmations! < 3) {
+        return {
+          label: loc.transactions.pending_transaction,
+          icon: <TransactionPendingIcon />,
+        };
       }
-    });
-  }, [item.hash]);
-  const handleCopyOpenInBlockExplorerPress = useCallback(() => {
-    Clipboard.setString(`https://mempool.space/tx/${item.hash}`);
-  }, [item.hash]);
 
-  const onToolTipPress = useCallback(
-    (id: any) => {
-      if (id === actionKeys.CopyAmount) {
-        handleOnCopyAmountTap();
-      } else if (id === actionKeys.CopyNote) {
-        handleOnCopyNote();
-      } else if (id === actionKeys.OpenInBlockExplorer) {
-        handleOnViewOnBlockExplorer();
-      } else if (id === actionKeys.ExpandNote) {
-        handleOnExpandNote();
-      } else if (id === actionKeys.CopyBlockExplorerLink) {
-        handleCopyOpenInBlockExplorerPress();
-      } else if (id === actionKeys.CopyTXID) {
-        handleOnCopyTransactionID();
+      if (item.type && item.type === 'bitcoind_tx') {
+        return {
+          label: loc.transactions.onchain,
+          icon: <TransactionOnchainIcon />,
+        };
       }
-    },
-    [
-      handleCopyOpenInBlockExplorerPress,
-      handleOnCopyAmountTap,
-      handleOnCopyNote,
-      handleOnCopyTransactionID,
-      handleOnExpandNote,
-      handleOnViewOnBlockExplorer,
-    ],
-  );
-  const toolTipActions = useMemo((): Action[] | Action[][] => {
-    const actions: (Action | Action[])[] = [];
 
-    if (rowTitle !== loc.lnd.expired) {
-      actions.push({
-        id: actionKeys.CopyAmount,
-        text: loc.transactions.details_copy_amount,
-        icon: actionIcons.Clipboard,
+      if (item.type === 'paid_invoice') {
+        return {
+          label: loc.transactions.offchain,
+          icon: <TransactionOffchainIcon />,
+        };
+      }
+
+      if (item.type === 'user_invoice' || item.type === 'payment_request') {
+        const currentDate = new Date();
+        const now = (currentDate.getTime() / 1000) | 0; // eslint-disable-line no-bitwise
+        const invoiceExpiration = item.timestamp! + item.expire_time!;
+        if (!item.ispaid && invoiceExpiration < now) {
+          return {
+            label: loc.transactions.expired_transaction,
+            icon: <TransactionExpiredIcon />,
+          };
+        } else {
+          return {
+            label: loc.transactions.incoming_transaction,
+            icon: <TransactionOffchainIncomingIcon />,
+          };
+        }
+      }
+
+      if (!item.confirmations) {
+        return {
+          label: loc.transactions.pending_transaction,
+          icon: <TransactionPendingIcon />,
+        };
+      } else if (item.value! < 0) {
+        return {
+          label: loc.transactions.outgoing_transaction,
+          icon: <TransactionOutgoingIcon />,
+        };
+      } else {
+        return {
+          label: loc.transactions.incoming_transaction,
+          icon: <TransactionIncomingIcon />,
+        };
+      }
+    };
+
+    const { label: transactionTypeLabel, icon: avatar } = determineTransactionTypeAndAvatar();
+
+    const amountWithUnit = useMemo(() => {
+      const amount = formatBalanceWithoutSuffix(item.value && item.value, itemPriceUnit, true).toString();
+      const unit = itemPriceUnit === DoichainUnit.DOI || itemPriceUnit === DoichainUnit.SWARTZ ? ` ${itemPriceUnit}` : ' ';
+      return `${amount}${unit}`;
+    }, [item.value, itemPriceUnit]);
+
+    useEffect(() => {
+      setSubtitleNumberOfLines(1);
+    }, [subtitle]);
+
+    const onPress = useCallback(async () => {
+      menuRef?.current?.dismissMenu?.();
+      if (item.hash) {
+        if (renderHighlightedText) {
+          pop();
+        }
+        navigate('TransactionStatus', { hash: item.hash, walletID });
+      } else if (item.type === 'user_invoice' || item.type === 'payment_request' || item.type === 'paid_invoice') {
+        const lightningWallet = wallets.filter(wallet => wallet?.getID() === item.walletID);
+        if (lightningWallet.length === 1) {
+          try {
+            // is it a successful lnurl-pay?
+            const LN = new Lnurl(false, AsyncStorage);
+            let paymentHash = item.payment_hash!;
+            if (typeof paymentHash === 'object') {
+              paymentHash = Buffer.from(paymentHash.data).toString('hex');
+            }
+            const loaded = await LN.loadSuccessfulPayment(paymentHash);
+            if (loaded) {
+              navigate('ScanLndInvoiceRoot', {
+                screen: 'LnurlPaySuccess',
+                params: {
+                  paymentHash,
+                  justPaid: false,
+                  fromWalletID: lightningWallet[0].getID(),
+                },
+              });
+              return;
+            }
+          } catch (e) {
+            console.debug(e);
+          }
+
+          navigate('LNDViewInvoice', {
+            invoice: item,
+            walletID: lightningWallet[0].getID(),
+          });
+        }
+      }
+    }, [item, renderHighlightedText, navigate, walletID, wallets]);
+
+    const handleOnExpandNote = useCallback(() => {
+      setSubtitleNumberOfLines(0);
+    }, []);
+
+    const subtitleProps = useMemo(() => ({ numberOfLines: subtitleNumberOfLines }), [subtitleNumberOfLines]);
+
+    const handleOnCopyAmountTap = useCallback(() => Clipboard.setString(rowTitle.replace(/[\s\\-]/g, '')), [rowTitle]);
+    const handleOnCopyTransactionID = useCallback(() => Clipboard.setString(item.hash), [item.hash]);
+    const handleOnCopyNote = useCallback(() => Clipboard.setString(subtitle ?? ''), [subtitle]);
+    const handleOnViewOnBlockExplorer = useCallback(() => {
+      const url = `https://mempool.space/tx/${item.hash}`;
+      Linking.canOpenURL(url).then(supported => {
+        if (supported) {
+          Linking.openURL(url);
+        }
       });
-    }
+    }, [item.hash]);
+    const handleCopyOpenInBlockExplorerPress = useCallback(() => {
+      Clipboard.setString(`https://mempool.space/tx/${item.hash}`);
+    }, [item.hash]);
 
-    if (subtitle) {
-      actions.push({
-        id: actionKeys.CopyNote,
-        text: loc.transactions.details_copy_note,
-        icon: actionIcons.Clipboard,
-      });
-    }
+    const onToolTipPress = useCallback(
+      (id: any) => {
+        if (id === CommonToolTipActions.CopyAmount.id) {
+          handleOnCopyAmountTap();
+        } else if (id === CommonToolTipActions.CopyNote.id) {
+          handleOnCopyNote();
+        } else if (id === CommonToolTipActions.OpenInBlockExplorer.id) {
+          handleOnViewOnBlockExplorer();
+        } else if (id === CommonToolTipActions.ExpandNote.id) {
+          handleOnExpandNote();
+        } else if (id === CommonToolTipActions.CopyBlockExplorerLink.id) {
+          handleCopyOpenInBlockExplorerPress();
+        } else if (id === CommonToolTipActions.CopyTXID.id) {
+          handleOnCopyTransactionID();
+        }
+      },
+      [
+        handleCopyOpenInBlockExplorerPress,
+        handleOnCopyAmountTap,
+        handleOnCopyNote,
+        handleOnCopyTransactionID,
+        handleOnExpandNote,
+        handleOnViewOnBlockExplorer,
+      ],
+    );
+    const toolTipActions = useMemo((): Action[] | Action[][] => {
+      const actions: (Action | Action[])[] = [];
 
-    if (item.hash) {
-      actions.push(
-        {
-          id: actionKeys.CopyTXID,
-          text: loc.transactions.details_copy_txid,
-          icon: actionIcons.Clipboard,
-        },
-        {
-          id: actionKeys.CopyBlockExplorerLink,
-          text: loc.transactions.details_copy_block_explorer_link,
-          icon: actionIcons.Clipboard,
-        },
-        [
-          {
-            id: actionKeys.OpenInBlockExplorer,
-            text: loc.transactions.details_show_in_block_explorer,
-            icon: actionIcons.Link,
-          },
-        ],
-      );
-    }
+      if (rowTitle !== loc.lnd.expired) {
+        actions.push(CommonToolTipActions.CopyAmount);
+      }
 
-    if (subtitle && subtitleNumberOfLines === 1) {
-      actions.push([
-        {
-          id: actionKeys.ExpandNote,
-          text: loc.transactions.expand_note,
-          icon: actionIcons.Note,
-        },
-      ]);
-    }
+      if (subtitle) {
+        actions.push(CommonToolTipActions.CopyNote);
+      }
 
-    return actions as Action[] | Action[][];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item.hash, subtitle, rowTitle, subtitleNumberOfLines, txMetadata]);
-  return (
-    <ToolTipMenu isButton actions={toolTipActions} onPressMenuItem={onToolTipPress} onPress={onPress}>
-      <ListItem
-        leftAvatar={avatar}
-        title={title}
-        subtitleNumberOfLines={subtitleNumberOfLines}
-        subtitle={subtitle}
-        Component={View}
-        subtitleProps={subtitleProps}
-        chevron={false}
-        rightTitle={rowTitle}
-        rightTitleStyle={rowTitleStyle}
-        containerStyle={containerStyle}
-      />
-    </ToolTipMenu>
-  );
-});
+      if (item.hash) {
+        actions.push(CommonToolTipActions.CopyTXID, CommonToolTipActions.CopyBlockExplorerLink, [CommonToolTipActions.OpenInBlockExplorer]);
+      }
 
-const actionKeys = {
-  CopyTXID: 'copyTX_ID',
-  CopyBlockExplorerLink: 'copy_blockExplorer',
-  ExpandNote: 'expandNote',
-  OpenInBlockExplorer: 'open_in_blockExplorer',
-  CopyAmount: 'copyAmount',
-  CopyNote: 'copyNote',
-};
+      if (subtitle && subtitleNumberOfLines === 1) {
+        actions.push([CommonToolTipActions.ExpandNote]);
+      }
 
-const actionIcons = {
-  Eye: {
-    iconValue: 'eye',
+      return actions as Action[] | Action[][];
+    }, [item.hash, subtitle, rowTitle, subtitleNumberOfLines]);
+
+    const accessibilityState = useMemo(() => {
+      return {
+        expanded: subtitleNumberOfLines === 0,
+      };
+    }, [subtitleNumberOfLines]);
+
+    return (
+      <ToolTipMenu
+        isButton
+        actions={toolTipActions}
+        onPressMenuItem={onToolTipPress}
+        onPress={onPress}
+        accessibilityLabel={`${transactionTypeLabel}, ${amountWithUnit}, ${subtitle ?? title}`}
+        accessibilityRole="button"
+        accessibilityState={accessibilityState}
+      >
+        <ListItem
+          leftAvatar={avatar}
+          title={title}
+          subtitleNumberOfLines={subtitleNumberOfLines}
+          subtitle={subtitle ? (renderHighlightedText ? renderHighlightedText(subtitle, searchQuery ?? '') : subtitle) : undefined}
+          Component={View}
+          subtitleProps={subtitleProps}
+          chevron={false}
+          rightTitle={rowTitle}
+          rightTitleStyle={rowTitleStyle}
+          containerStyle={combinedStyle}
+        />
+      </ToolTipMenu>
+    );
   },
-  EyeSlash: {
-    iconValue: 'eye.slash',
-  },
-  Clipboard: {
-    iconValue: 'doc.on.doc',
-  },
-  Link: {
-    iconValue: 'link',
-  },
-  Note: {
-    iconValue: 'note.text',
-  },
-};
-
-const styles = StyleSheet.create({
-  iconWidth: { width: 25 },
-});
+);

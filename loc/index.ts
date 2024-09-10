@@ -279,7 +279,7 @@ export const saveLanguage = async (lang: string) => {
   await setDateTimeLocale();
 };
 
-export const transactionTimeToReadable = (time: number) => {
+export const transactionTimeToReadable = (time: number | string) => {
   if (time === -1) {
     return 'unknown';
   }
@@ -341,17 +341,15 @@ export function formatBalanceWithoutSuffix(balance = 0, toUnit: string, withForm
   if (toUnit === undefined) {
     return balance;
   }
-  if (balance !== 0) {
-    if (toUnit === DoichainUnit.DOI) {
-      const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
-      return removeTrailingZeros(value);
-    } else if (toUnit === DoichainUnit.SWARTZ) {
-      return withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance);
-    } else {
-      return satoshiToLocalCurrency(balance);
-    }
+  if (toUnit === DoichainUnit.DOI) {
+    const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
+    return removeTrailingZeros(value);
+  } else if (toUnit === DoichainUnit.SWARTZ) {
+    return withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance);
+  } else {
+    return satoshiToLocalCurrency(balance);
+
   }
-  return balance.toString();
 }
 
 /**

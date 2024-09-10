@@ -48,30 +48,16 @@
     "network": "Error de red"
   },
   "lnd": {
-    "active": "Actiu",
-    "inactive": "Inactiu",
-    "channels": "Canals",
-    "no_channels": "No hi ha canals",
-    "claim_balance": "Reclamar el saldo {balance}",
-    "close_channel": "Tancar el canal",
-    "new_channel": "Nou canal",
-    "force_close_channel": "Forçar tancar el canal?",
     "expired": "Caducat",
-    "node_alias": "Àlies del node",
     "expiresIn": "Caduca en {time} minuts",
     "payButton": "Pagar",
     "payment": "Pagament",
     "placeholder": "Factura o adreça",
-    "open_channel": "Obra el canal",
-    "are_you_sure_open_channel": "Esteu segur que voleu obrir aquest canal?",
     "refill": "Recarregar",
     "refill_external": "Recarregar amb un moneder extern",
     "refill_lnd_balance": "Recarregar el balanç del moneder Lightning",
     "sameWalletAsInvoiceError": "No pots pagar una factura amb el mateix moneder que l'ha creat.",
-    "title": "gestionar fons",
-    "can_send": "Pots enviar",
-    "can_receive": "Pots rebre",
-    "view_logs": "Veure Registres"
+    "title": "gestionar fons"
   },
   "lndViewInvoice": {
     "additional_info": "Informació addicional",
@@ -91,7 +77,7 @@
     "help2": "El moneder \"false\" és completament funcional. Pot dipositar una quantitat mínima perquè sigui més creïble.",
     "password_should_not_match": "La contrasenya no pot ser la mateixa que la del seu moneder principal.",
     "passwords_do_not_match": "Les contrasenyes no coincideixin. Torni-ho a intentar",
-    "retype_password": "Tornar a escriure la contrasenya",
+    "confirm_password": "Tornar a escriure la contrasenya",
     "success": "Exit",
     "title": "Negació plausible"
   },
@@ -222,7 +208,7 @@
     "privacy": "Privacitat",
     "privacy_read_clipboard": "Llegir el portapapers",
     "privacy_system_settings": "Configuració del Sistema",
-    "retype_password": "Introdueix de nou la contrasenya contrasenya",
+    "confirm_password": "Introdueix de nou la contrasenya contrasenya",
     "save": "guardar",
     "saved": "Desat",
     "total_balance": "Saldo total",
@@ -250,6 +236,7 @@
     "pending": "Pendent",
     "view_wallet": "Veure {walletLabel}",
     "list_title": "transaccions",
+    "transaction": "Transacció",
     "status_cancel": "Cancel·lar la Transacció",
     "txid": "ID de la transacció",
     "updating": "Actualitzant..."
@@ -298,7 +285,6 @@
     "list_long_scan": "Escaneja el codi QR",
     "list_title": "moneders",
     "list_tryagain": "Torna-ho a provar",
-    "reorder_title": "Reorganitzar moneder",
     "select_wallet": "Seleccioni moneder",
     "xpub_copiedToClipboard": "Copiat al porta-retalls."
   },

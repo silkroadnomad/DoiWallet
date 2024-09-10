@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useFocusEffect, useIsFocused, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useIsFocused, useRoute, RouteProp } from '@react-navigation/native';
 import { findNodeHandle, Image, InteractionManager, SectionList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import A from '../../blue_modules/analytics';
 import BlueClipboard from '../../blue_modules/clipboard';
@@ -21,6 +21,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 import { useStorage } from '../../hooks/context/useStorage';
+import TotalWalletsBalance from '../../components/TotalWalletsBalance';
+import { useSettings } from '../../hooks/context/useSettings';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', TRANSACTIONS: 'TRANSACTIONS' };
 
@@ -88,6 +90,7 @@ function reducer(state: WalletListState, action: WalletListAction) {
 }
 
 type NavigationProps = NativeStackNavigationProp<DetailViewStackParamList, 'WalletsList'>;
+type RouteProps = RouteProp<DetailViewStackParamList, 'WalletsList'>;
 
 const WalletsList: React.FC = () => {
   const [state, dispatch] = useReducer<React.Reducer<WalletListState, WalletListAction>>(reducer, initialState);
@@ -104,11 +107,13 @@ const WalletsList: React.FC = () => {
     isElectrumDisabled,
     setReloadTransactionsMenuActionFunction,
   } = useStorage();
+  const { isTotalBalanceEnabled } = useSettings();
   const { width } = useWindowDimensions();
   const { colors, scanImage } = useTheme();
   const { navigate } = useExtendedNavigation<NavigationProps>();
   const isFocused = useIsFocused();
-  const routeName = useRoute().name;
+  const route = useRoute<RouteProps>();
+  const routeName = route.name;
   const dataSource = getTransactions(undefined, 10);
   const walletsCount = useRef<number>(wallets.length);
   const walletActionButtonsRef = useRef<any>();
@@ -148,6 +153,14 @@ const WalletsList: React.FC = () => {
 
     walletsCount.current = wallets.length;
   }, [wallets]);
+
+  useEffect(() => {
+    const scannedData = route.params?.scannedData;
+    if (scannedData) {
+      onBarScanned(scannedData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.scannedData]);
 
   const verifyBalance = useCallback(() => {
     if (getBalance() !== 0) {
@@ -229,7 +242,7 @@ const WalletsList: React.FC = () => {
 
   const handleLongPress = useCallback(() => {
     if (wallets.length > 1) {
-      navigate('ReorderWallets');
+      navigate('ManageWallets');
     } else {
       triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
     }
@@ -246,18 +259,20 @@ const WalletsList: React.FC = () => {
 
   const renderWalletsCarousel = useCallback(() => {
     return (
-      <WalletsCarousel
-        // @ts-ignore: Fix later
-        data={wallets.concat(false)}
-        extraData={[wallets]}
-        onPress={handleClick}
-        handleLongPress={handleLongPress}
-        onMomentumScrollEnd={onSnapToItem}
-        ref={walletsCarousel}
-        testID="WalletsList"
-        horizontal
-        scrollEnabled={isFocused}
-      />
+      <>
+        <WalletsCarousel
+          data={wallets}
+          extraData={[wallets]}
+          onPress={handleClick}
+          handleLongPress={handleLongPress}
+          onMomentumScrollEnd={onSnapToItem}
+          ref={walletsCarousel}
+          onNewWalletPress={handleClick}
+          testID="WalletsList"
+          horizontal
+          scrollEnabled={isFocused}
+        />
+      </>
     );
   }, [handleClick, handleLongPress, isFocused, onSnapToItem, wallets]);
 
@@ -280,11 +295,15 @@ const WalletsList: React.FC = () => {
       switch (section.section.key) {
         case WalletsListSections.TRANSACTIONS:
           return renderListHeaderComponent();
+        case WalletsListSections.CAROUSEL: {
+          return !isLargeScreen && isTotalBalanceEnabled ? <TotalWalletsBalance /> : null;
+        }
+
         default:
           return null;
       }
     },
-    [renderListHeaderComponent],
+    [isLargeScreen, isTotalBalanceEnabled, renderListHeaderComponent],
   );
 
   const renderSectionFooter = useCallback(
@@ -331,9 +350,8 @@ const WalletsList: React.FC = () => {
   };
 
   const onScanButtonPressed = useCallback(() => {
-    scanQrHelper(routeName).then(onBarScanned);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    scanQrHelper(routeName, true, undefined, false);
+  }, [routeName]);
 
   const onBarScanned = useCallback(
     (value: any) => {
@@ -380,7 +398,7 @@ const WalletsList: React.FC = () => {
             });
           break;
         case 2:
-          scanQrHelper(routeName, true).then(data => onBarScanned(data));
+          scanQrHelper(routeName, true, undefined, false);
           break;
         case 3:
           if (!isClipboardEmpty) {

@@ -1,9 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useRoute } from '@react-navigation/native';
-import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
 import { BlueButtonLink, BlueCard, BlueSpacing10, BlueSpacing20, BlueText } from '../../BlueComponents';
 import Button from '../../components/Button';
-import navigationStyle from '../../components/navigationStyle';
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
 import { requestCameraAuthorization } from '../../helpers/scan-qr';
@@ -87,58 +86,51 @@ const IsItMyAddress = () => {
 
   return (
     <SafeArea style={styles.blueArea}>
-      <KeyboardAvoidingView
-        enabled={!Platform.isPad}
-        behavior={Platform.OS === 'ios' ? 'position' : null}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.wrapper}>
-          <BlueCard style={styles.mainCard}>
-            <View style={[styles.input, stylesHooks.input]}>
-              <TextInput
-                style={styles.text}
-                maxHeight={100}
-                minHeight={100}
-                maxWidth="100%"
-                minWidth="100%"
-                multiline
-                editable
-                placeholder={loc.is_it_my_address.enter_address}
-                placeholderTextColor="#81868e"
-                value={address}
-                onChangeText={handleUpdateAddress}
-                testID="AddressInput"
-              />
-            </View>
-
-            <BlueSpacing10 />
-            <BlueButtonLink ref={scanButtonRef} title={loc.wallets.import_scan_qr} onPress={importScan} />
-            <BlueSpacing10 />
-            <Button title={loc.send.input_clear} onPress={clearAddressInput} />
-            <BlueSpacing20 />
-            {resultCleanAddress && (
-              <>
-                <Button title={loc.is_it_my_address.view_qrcode} onPress={viewQRCode} />
-                <BlueSpacing20 />
-              </>
-            )}
-            <Button
-              disabled={address.trim().length === 0}
-              title={loc.is_it_my_address.check_address}
-              onPress={checkAddress}
-              testID="CheckAddress"
+      <View style={styles.wrapper}>
+        <BlueCard style={styles.mainCard}>
+          <View style={[styles.input, stylesHooks.input]}>
+            <TextInput
+              style={styles.text}
+              maxHeight={100}
+              minHeight={100}
+              maxWidth="100%"
+              minWidth="100%"
+              multiline
+              editable
+              placeholder={loc.is_it_my_address.enter_address}
+              placeholderTextColor="#81868e"
+              value={address}
+              onChangeText={handleUpdateAddress}
+              testID="AddressInput"
             />
-            <BlueSpacing20 />
-            <BlueText testID="Result">{result}</BlueText>
-          </BlueCard>
-        </View>
-      </KeyboardAvoidingView>
+          </View>
+
+          <BlueSpacing10 />
+          <BlueButtonLink ref={scanButtonRef} title={loc.wallets.import_scan_qr} onPress={importScan} />
+          <BlueSpacing10 />
+          <Button title={loc.send.input_clear} onPress={clearAddressInput} />
+          <BlueSpacing20 />
+          {resultCleanAddress && (
+            <>
+              <Button title={loc.is_it_my_address.view_qrcode} onPress={viewQRCode} />
+              <BlueSpacing20 />
+            </>
+          )}
+          <Button
+            disabled={address.trim().length === 0}
+            title={loc.is_it_my_address.check_address}
+            onPress={checkAddress}
+            testID="CheckAddress"
+          />
+          <BlueSpacing20 />
+          <BlueText testID="Result">{result}</BlueText>
+        </BlueCard>
+      </View>
     </SafeArea>
   );
 };
 
 export default IsItMyAddress;
-IsItMyAddress.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.is_it_my_address.title }));
 
 const styles = StyleSheet.create({
   wrapper: {

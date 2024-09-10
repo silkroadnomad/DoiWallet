@@ -8,10 +8,57 @@ import { BlueApp } from '../../class';
 import { saveLanguage, STORAGE_KEY } from '../../loc';
 import { FiatUnit, TFiatUnit } from '../../models/fiatUnit';
 import { getEnabled as getIsDeviceQuickActionsEnabled, setEnabled as setIsDeviceQuickActionsEnabled } from '..//DeviceQuickActions';
-import presentAlert from '../Alert';
 import { getIsHandOffUseEnabled, setIsHandOffUseEnabled } from '../HandOffComponent';
 import { isBalanceDisplayAllowed, setBalanceDisplayAllowed } from '../WidgetCommunication';
 import { useStorage } from '../../hooks/context/useStorage';
+import { DoichainUnit} from '../../models/doichainUnits';
+import { TotalWalletsBalanceKey, TotalWalletsBalancePreferredUnit } from '../TotalWalletsBalance';
+import { LayoutAnimation } from 'react-native';
+
+// DefaultPreference and AsyncStorage get/set
+
+// TotalWalletsBalance
+
+export const setTotalBalanceViewEnabled = async (value: boolean) => {
+  await DefaultPreference.setName(GROUP_IO_BLUEWALLET);
+  await DefaultPreference.set(TotalWalletsBalanceKey, value ? 'true' : 'false');
+  console.debug('setTotalBalanceViewEnabled value:', value);
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+};
+
+export const getIsTotalBalanceViewEnabled = async (): Promise<boolean> => {
+  try {
+    await DefaultPreference.setName(GROUP_IO_BLUEWALLET);
+
+    const isEnabledValue = (await DefaultPreference.get(TotalWalletsBalanceKey)) ?? 'true';
+    console.debug('getIsTotalBalanceViewEnabled', isEnabledValue);
+    return isEnabledValue === 'true';
+  } catch (e) {
+    console.debug('getIsTotalBalanceViewEnabled error', e);
+    await setTotalBalanceViewEnabled(true);
+  }
+  await setTotalBalanceViewEnabled(true);
+  return true;
+};
+
+export const setTotalBalancePreferredUnit = async (unit: DoichainUnit) => {
+  await DefaultPreference.setName(GROUP_IO_BLUEWALLET);
+  await DefaultPreference.set(TotalWalletsBalancePreferredUnit, unit);
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // Add animation when changing unit
+};
+
+//
+
+export const getTotalBalancePreferredUnit = async (): Promise<DoichainUnit> => {
+  try {
+    await DefaultPreference.setName(GROUP_IO_BLUEWALLET);
+    const unit = ((await DefaultPreference.get(TotalWalletsBalancePreferredUnit)) as DoichainUnit) ?? DoichainUnit.DOI;
+    return unit;
+  } catch (e) {
+    console.debug('getPreferredUnit error', e);
+  }
+  return DoichainUnit.DOI;
+};
 
 interface SettingsContextType {
   preferredFiatCurrency: TFiatUnit;
@@ -34,6 +81,10 @@ interface SettingsContextType {
   setIsClipboardGetContentEnabledStorage: (value: boolean) => Promise<void>;
   isQuickActionsEnabled: boolean;
   setIsQuickActionsEnabledStorage: (value: boolean) => Promise<void>;
+  isTotalBalanceEnabled: boolean;
+  setIsTotalBalanceEnabledStorage: (value: boolean) => Promise<void>;
+  totalBalancePreferredUnit: DoichainUnit;
+  setTotalBalancePreferredUnitStorage: (unit: DoichainUnit) => Promise<void>;
 }
 
 const defaultSettingsContext: SettingsContextType = {
@@ -57,6 +108,10 @@ const defaultSettingsContext: SettingsContextType = {
   setIsClipboardGetContentEnabledStorage: async () => {},
   isQuickActionsEnabled: true,
   setIsQuickActionsEnabledStorage: async () => {},
+  isTotalBalanceEnabled: true,
+  setIsTotalBalanceEnabledStorage: async () => {},
+  totalBalancePreferredUnit: DoichainUnit.DOI,
+  setTotalBalancePreferredUnitStorage: async (unit: DoichainUnit) => {},
 };
 
 export const SettingsContext = createContext<SettingsContextType>(defaultSettingsContext);
@@ -82,6 +137,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isClipboardGetContentEnabled, setIsClipboardGetContentEnabled] = useState<boolean>(false);
   // Quick Actions
   const [isQuickActionsEnabled, setIsQuickActionsEnabled] = useState<boolean>(true);
+  // Total Balance
+  const [isTotalBalanceEnabled, setIsTotalBalanceEnabled] = useState<boolean>(true);
+  const [totalBalancePreferredUnit, setTotalBalancePreferredUnitState] = useState<DoichainUnit>(DoichainUnit.DOI);
 
   const advancedModeStorage = useAsyncStorage(BlueApp.ADVANCED_MODE_ENABLED);
   const languageStorage = useAsyncStorage(STORAGE_KEY);
@@ -147,6 +205,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setDoNotTrackStorage(value ?? false);
       })
       .catch(error => console.error('Error fetching do not track settings:', error));
+
+    getIsTotalBalanceViewEnabled()
+      .then(value => {
+        console.debug('SettingsContext totalBalance:', value);
+        setIsTotalBalanceEnabledStorage(value);
+      })
+      .catch(error => console.error('Error fetching total balance settings:', error));
+
+    getTotalBalancePreferredUnit()
+      .then(unit => {
+        console.debug('SettingsContext totalBalancePreferredUnit:', unit);
+        setTotalBalancePreferredUnit(unit);
+      })
+      .catch(error => console.error('Error fetching total balance preferred unit:', error));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -225,12 +297,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     (value: boolean) => {
       setIsPrivacyBlurEnabled(value);
       console.debug(`Privacy blur: ${isPrivacyBlurEnabled}`);
-      if (!value) {
-        presentAlert({ message: 'Privacy blur has been disabled.' });
-      }
     },
     [isPrivacyBlurEnabled],
   );
+
+  const setIsTotalBalanceEnabledStorage = useCallback(async (value: boolean) => {
+    setTotalBalanceViewEnabled(value);
+    setIsTotalBalanceEnabled(value);
+  }, []);
+
+  const setTotalBalancePreferredUnitStorage = useCallback(async (unit: DoichainUnit) => {
+    await setTotalBalancePreferredUnit(unit);
+    setTotalBalancePreferredUnitState(unit);
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -254,6 +333,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsClipboardGetContentEnabledStorage,
       isQuickActionsEnabled,
       setIsQuickActionsEnabledStorage,
+      isTotalBalanceEnabled,
+      setIsTotalBalanceEnabledStorage,
+      totalBalancePreferredUnit,
+      setTotalBalancePreferredUnitStorage,
     }),
     [
       preferredFiatCurrency,
@@ -276,6 +359,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setIsClipboardGetContentEnabledStorage,
       isQuickActionsEnabled,
       setIsQuickActionsEnabledStorage,
+      isTotalBalanceEnabled,
+      setIsTotalBalanceEnabledStorage,
+      totalBalancePreferredUnit,
+      setTotalBalancePreferredUnitStorage,
     ],
   );
 

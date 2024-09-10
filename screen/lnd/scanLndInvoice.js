@@ -1,16 +1,6 @@
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  I18nManager,
-  Keyboard,
-  KeyboardAvoidingView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, I18nManager, Keyboard, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@rneui/themed';
 
 
@@ -65,12 +55,11 @@ const ScanLndInvoice = () => {
   });
 
   useEffect(() => {
-    console.log('scanLndInvoice useEffect');
-    Keyboard.addListener('keyboardDidShow', _keyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', _keyboardDidHide);
+    const showSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', _keyboardDidShow);
+    const hideSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', _keyboardDidHide);
     return () => {
-      Keyboard.removeAllListeners('keyboardDidShow');
-      Keyboard.removeAllListeners('keyboardDidHide');
+      showSubscription.remove();
+      hideSubscription.remove();
     };
   }, []);
 
@@ -225,7 +214,7 @@ const ScanLndInvoice = () => {
 
   const processTextForInvoice = text => {
     if (
-      text.toLowerCase().startsWith('lnb') ||
+      (text && text.toLowerCase().startsWith('lnb')) ||
       text.toLowerCase().startsWith('lightning:lnb') ||
       Lnurl.isLnurl(text) ||
       Lnurl.isLightningAddress(text)
@@ -304,62 +293,67 @@ const ScanLndInvoice = () => {
   return (
     <SafeArea style={stylesHook.root}>
       <View style={[styles.root, stylesHook.root]}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <KeyboardAvoidingView enabled behavior="position" keyboardVerticalOffset={20}>
-            <View style={styles.scrollMargin}>
-              <AmountInput
-                pointerEvents={isAmountInitiallyEmpty ? 'auto' : 'none'}
-                isLoading={isLoading}
-                amount={amount}
-                onAmountUnitChange={setUnit}
-                onChangeText={setAmount}
-                disabled={!decoded || isLoading || decoded.num_satoshis > 0}
-                unit={unit}
-                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              />
-            </View>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustContentInsets
+          automaticallyAdjustKeyboardInsets
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          <View style={styles.scrollMargin}>
+            <AmountInput
+              pointerEvents={isAmountInitiallyEmpty ? 'auto' : 'none'}
+              isLoading={isLoading}
+              amount={amount}
+              onAmountUnitChange={setUnit}
+              onChangeText={setAmount}
+              disabled={!decoded || isLoading || decoded.num_satoshis > 0}
+              unit={unit}
+              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+            />
+          </View>
 
-            <BlueCard>
-              <AddressInput
-                onChangeText={text => {
-                  text = text.trim();
-                  setDestination(text);
-                }}
-                onBarScanned={processInvoice}
-                address={destination}
-                isLoading={isLoading}
-                placeholder={loc.lnd.placeholder}
-                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-                launchedBy={name}
-                onBlur={onBlur}
-                keyboardType="email-address"
-              />
-              <View style={styles.description}>
-                <Text numberOfLines={0} style={styles.descriptionText}>
-                  {decoded !== undefined ? decoded.description : ''}
-                </Text>
+          <BlueCard>
+            <AddressInput
+              onChangeText={text => {
+                text = text.trim();
+                setDestination(text);
+              }}
+              onBarScanned={data => processTextForInvoice(data.data)}
+              address={destination}
+              isLoading={isLoading}
+              placeholder={loc.lnd.placeholder}
+              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+              launchedBy={name}
+              onBlur={onBlur}
+              keyboardType="email-address"
+            />
+            <View style={styles.description}>
+              <Text numberOfLines={0} style={styles.descriptionText}>
+                {decoded !== undefined ? decoded.description : ''}
+              </Text>
+            </View>
+            {expiresIn !== undefined && (
+              <View>
+                <Text style={styles.expiresIn}>{expiresIn}</Text>
+                {decoded && decoded.num_satoshis > 0 && (
+                  <Text style={styles.expiresIn}>{loc.formatString(loc.lnd.potentialFee, { fee: getFees() })}</Text>
+                )}
               </View>
-              {expiresIn !== undefined && (
+            )}
+            <BlueCard>
+              {isLoading ? (
                 <View>
-                  <Text style={styles.expiresIn}>{expiresIn}</Text>
-                  {decoded && decoded.num_satoshis > 0 && (
-                    <Text style={styles.expiresIn}>{loc.formatString(loc.lnd.potentialFee, { fee: getFees() })}</Text>
-                  )}
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <View>
+                  <Button title={loc.lnd.payButton} onPress={pay} disabled={shouldDisablePayButton()} />
                 </View>
               )}
-              <BlueCard>
-                {isLoading ? (
-                  <View>
-                    <ActivityIndicator />
-                  </View>
-                ) : (
-                  <View>
-                    <Button title={loc.lnd.payButton} onPress={pay} disabled={shouldDisablePayButton()} />
-                  </View>
-                )}
-              </BlueCard>
             </BlueCard>
-          </KeyboardAvoidingView>
+          </BlueCard>
+
           {renderWalletSelectionButton()}
         </ScrollView>
       </View>

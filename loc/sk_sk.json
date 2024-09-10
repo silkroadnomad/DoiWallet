@@ -33,22 +33,15 @@
     "network": "Sieťová chyba"
   },
   "lnd": {
-    "active": "Aktívne",
-    "inactive": "Neaktívne",
-    "channels": "Kanály",
-    "close_channel": "Zatvoriť kanál",
-    "new_channel": "Nový kanál",
     "expired": "Expirovaná",
     "expiresIn": "Vyprší za {time} minút",
     "payButton": "Zaplatiť",
-    "open_channel": "Otvoriť kanál",
     "refill": "Doplniť",
     "refill_create": "Pre pokračovanie, prosím, vytvorte si Bitcoinovú peňaženku",
     "refill_external": "Doplniť z externej peňaženky",
     "refill_lnd_balance": "Doplniť zostatok na Lightning peňaženke",
     "sameWalletAsInvoiceError": "Faktúra sa nedá uhradiť s rovnakou peňaženkou ako tá, ktorá ju vytvorila.",
-    "title": "spravovať zostatok",
-    "can_send": "Môže poslať"
+    "title": "spravovať zostatok"
   },
   "lndViewInvoice": {
     "additional_info": "Doplňujúce informácie",
@@ -64,7 +57,7 @@
     "help": "Za určitých okolností môžete byť donútení k prezradeniu hesla. K zaisteniu bezpečnosti vaších prostriedkov, DoiWallet môže vytvořiť ďalšie zašifrované úložiská s rozdielným heslom. V prípade potreby môžete toto heslo dať tretej strane. Pokiaľ bude zadané do DoiWallet, odomkne nové \"falošné\" úložisko. Toto bude vyzerať hodnoverne, ale udrží vaše pravé hlavné úložisko v bezpečí.",
     "help2": "Nové úložisko bude plne funkčné, môžete naň uložiť minimálnu čiastku, aby vyzeralo uveriteľnejšie.",
     "password_should_not_match": "Heslo k falošnému úložisku nesmie byť rovnaké ako heslo k hlavnému úložisku",
-    "retype_password": "Heslo znovu",
+    "confirm_password": "Heslo znovu",
     "success": "Úspech",
     "title": "Plausible deniability..."
   },
@@ -160,7 +153,7 @@
     "plausible_deniability": "Plausible deniability...",
     "privacy_system_settings": "Systémové nastavenia",
     "push_notifications": "Push notifikácie",
-    "retype_password": "Heslo znovu",
+    "confirm_password": "Heslo znovu",
     "save": "Uložiť",
     "saved": "Uložené"
   },
@@ -182,6 +175,7 @@
     "details_to": "Výstup",
     "pending": "Čaká...",
     "list_title": "transakcie",
+    "transaction": "Transakcia",
     "rbf_title": "Navýšiť poplatok za transakciu (RBF)",
     "status_bump": "Navýšiť poplatok",
     "status_cancel": "Zrušiť transakciu",
@@ -235,7 +229,6 @@
     "list_long_scan": "Skenovať QR kód",
     "list_title": "peňaženky",
     "list_tryagain": "Skúste znovu",
-    "reorder_title": "Zoradiť peňaženky",
     "select_no_bitcoin": "Žiadne Bitcoinové peňaženky nie sú k dispozícii.",
     "select_wallet": "Vyberte peňaženku",
     "xpub_copiedToClipboard": "Skopírované do schránky.",
