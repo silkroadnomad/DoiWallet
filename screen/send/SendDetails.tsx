@@ -999,8 +999,8 @@ const SendDetails = () => {
       psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
       updatedTxOutputs = psbt.txOutputs.map((output, index) => {
         const chunks = bitcoin.script.decompile(output.script);
-        let address = output.address; //TODO check if this is segwit if so make an error message          
-          if(chunks[0] === 90){ //TODO make this a constant            
+        let address = output.address; //TODO check if this is segwit if so make an error message
+          if(chunks[0] === 90){ //make this const and support also name_new, name_update, name_firstupdate
             try { 
                 let isIncluded = changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
                 const utf16Decoder = new TextDecoder('ascii');
@@ -1015,29 +1015,43 @@ const SendDetails = () => {
           let isIncluded =  changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
           return { ...output, isIncluded};// Return the original output if address is already set
         });
-        tx = (actWallet as MultisigHDWallet).cosignPsbt(psbt).tx;        
+        const retval = (actWallet as MultisigHDWallet).cosignPsbt(psbt) 
+        tx = retval.tx
+        psbt = retval.psbt
     } catch (e: any) {
+
+      console.log("___message",e.message )
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
 
-    if (!tx || !actWallet) return setIsLoading(false);
+   // if ((!tx && !psbt )|| !actWallet) return setIsLoading(false);
     //if a nameOp is stored to a changeAddress our recipient is not shown!
     // let recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
     let recipients = updatedTxOutputs.filter(({ address }) => true);
+    
+    
     setProgress(false);
+     try { 
+    //console.log("____psbt__", psbt.getFee())
     navigation.navigate('CreateTransaction', {
-      fee: new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber(),
-      feeSatoshi: psbt.getFee(),
+      fee: tx?new BigNumber(psbt.getFee()).dividedBy(100000000).toNumber():0,
+      feeSatoshi: tx?psbt.getFee():0,
       wallet: actWallet,
-      tx: tx.toHex(),
+      tx: tx?tx.toHex():0,
       recipients,
-      satoshiPerByte: psbt.getFeeRate(),
+      satoshiPerByte: tx?psbt.getFeeRate():0,
       showAnimatedQr: true,
       psbt,
     });
+
+    } catch (e: any) {
+
+      console.log("___message",e.message )
+      
+    }
   };
 
   // Header Right Button

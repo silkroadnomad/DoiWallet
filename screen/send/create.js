@@ -3,7 +3,7 @@ import { DoichainUnit } from '../../models/doichainUnits';
 import { DOICHAIN } from "../../blue_modules/network.js";
 import { useNavigation, useRoute } from '@react-navigation/native';
 import BigNumber from "bignumber.js";
-import * as bitcoin from "bitcoinjs-lib";
+import * as bitcoin from "@doichain/doichainjs-lib";
 import PropTypes from "prop-types";
 import React, { useCallback, useEffect, useState } from 'react';
 import {  Alert,  FlatList,  Linking,  Platform,  StyleSheet,  Text,  TextInput,  TouchableOpacity,  View,} from "react-native";
@@ -30,10 +30,10 @@ import { useExtendedNavigation } from "../../hooks/useExtendedNavigation";
 const SendCreate = () => {
   const { fee, recipients, wallet,  memo = "", satoshiPerByte, psbt, showAnimatedQr, tx,} = useRoute().params;
 
-  const { txMetadata, fetchAndSaveWalletTransactions, isElectrumDisabled } =  useStorage();
+  const { txMetadata, fetchAndSaveWalletTransactions, isElectrumDisabled } = useStorage();
   const route = useRoute();
-  const transaction = bitcoin.Transaction.fromHex(tx);
-  const size = transaction.virtualSize();
+  const transaction = tx?bitcoin.Transaction.fromHex(tx):0;
+  const size = tx?transaction.virtualSize():1;
   const { colors } = useTheme();
   const { setOptions } = useNavigation();
   const { enableBlur, disableBlur } = usePrivacy();
@@ -59,10 +59,10 @@ const SendCreate = () => {
     }
   });
 
-  const inputAndOutput = inputs.concat(recipients);  
+  const inputAndOutput = inputs.concat(recipients);
   
  // const [isLoading, setIsLoading] = useState(true);
-  const { isBiometricUseCapableAndEnabled } = useBiometrics(); 
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const broadcast = async () => {
    // setIsLoading(true);
     const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();

@@ -4,7 +4,7 @@ import assert from 'assert';
 import BigNumber from 'bignumber.js';
 import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as bip39 from 'bip39';
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoin from '@doichain/doichainjs-lib';
 import { Psbt, Transaction as BTransaction } from 'bitcoinjs-lib';
 import b58 from 'bs58check';
 import { CoinSelectOutput, CoinSelectReturnInput } from 'coinselect';
@@ -1483,32 +1483,42 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @returns {{ tx: Transaction }}
    */
   cosignPsbt(psbt: Psbt) {
+    console.log("___psbt_2", psbt)
+
     const seed = this._getSeed();    
     const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 
     const inputs = psbt.data.inputs.map((input, index) => {
-      if (input.witnessUtxo) {
-          return {
-              address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
-              value: input.witnessUtxo.value,
-          }
-      } else if (input.nonWitnessUtxo) {
-          const txin = psbt.txInputs[index];
-          const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
-          return {
-              address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
-              value: txout.value,
-          }
-      } else {
-          throw new Error('Could not get input of #' + index);
-      }
+      console.log("____input", input)
+      try {
+
+        if (input.witnessUtxo) {
+            return {
+                address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
+                value: input.witnessUtxo.value,
+            }
+        } else if (input.nonWitnessUtxo) {
+            const txin = psbt.txInputs[index];
+            console.log("_______txin", txin)
+            const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+            console.log("_______txout", txout)
+            return {
+                address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
+                value: txout.value,
+            }
+        } else {
+            throw new Error('Could not get input of #' + index);
+        }
+      } catch (e) { console.log("_______eee", e); }
   });
+
+  console.log("____inputs", inputs)
 
     for (let cc = 0; cc < psbt.inputCount; cc++) {
 
       try {
         psbt.signInputHD(cc, hdRoot);
-      } catch (_) { } // protects agains duplicate cosignings
+      } catch (e) { console.log("___signInputHD", e); } // protects agains duplicate cosignings
 
       if (!psbt.inputHasHDKey(cc, hdRoot)) {
         for (const derivation of psbt.data.inputs[cc].bip32Derivation || []) {
@@ -1522,7 +1532,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           const keyPair = ECPair.fromWIF(wif, DOICHAIN);
           try {
             psbt.signInput(cc, keyPair);
-          } catch (e) { console.log("___error2", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
+          } catch (e) { console.log("___signInput", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
         }
       }
       const inputAddress = inputs[cc].address;
@@ -1549,8 +1559,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
         try {
           psbt.signInput(cc, keyPair);
-        } catch (e) { console.log("___error2", e); } 
-      } else console.log('address not found');
+        } catch (e) { console.log("_______error2", e); } 
+      } else console.log('address of input not found');
     }
 
     let tx: BTransaction | false = false;
@@ -1558,7 +1568,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       tx = psbt.finalizeAllInputs().extractTransaction();
     }
 
-    return { tx };
+    return { tx, psbt };
   }
 
   /**
