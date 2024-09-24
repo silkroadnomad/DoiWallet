@@ -45,6 +45,7 @@ const SendCreate = () => {
         address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
         value: input.witnessUtxo.value,
         index: index,
+        sig: input.finalScriptSig || input.finalScriptWitness || input.partialSig,
       };
     } else if (input.nonWitnessUtxo) {
       const txin = psbt.txInputs[index];
@@ -53,11 +54,14 @@ const SendCreate = () => {
         address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
         value: txout.value,
         index: index,
+        sig: input.finalScriptSig || input.finalScriptWitness || input.partialSig,
       };
     } else {
       throw new Error("Could not get input of #" + index);
     }
   });
+
+  console.log("____inputs", inputs);
 
   const inputAndOutput = inputs.concat(recipients);
   
@@ -257,6 +261,17 @@ const SendCreate = () => {
               ]}
             >
               {loc.send.input_index}: {item.index}
+            </Text>
+          )}
+
+          {item.sig !== undefined && (
+            <Text
+              style={[
+                styles.transactionDetailsTitleRed,
+                styleHooks.transactionDetailsTitleRed,
+              ]}
+            >
+              Signed
             </Text>
           )}
 
