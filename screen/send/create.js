@@ -61,9 +61,13 @@ const SendCreate = () => {
     }
   });
 
-  console.log("____inputs", inputs);
+  
+
+  console.log("____inputs___", inputs);
 
   const inputAndOutput = inputs.concat(recipients);
+
+  //console.log("____inputAndOutput___", inputAndOutput);
   
  // const [isLoading, setIsLoading] = useState(true);
   const { isBiometricUseCapableAndEnabled } = useBiometrics();
@@ -353,17 +357,17 @@ const SendCreate = () => {
         height={72}
         multiline
         editable={false}
-        value={tx}
+        value={tx ? tx : psbt.toBase64()}
       />
 
       <TouchableOpacity
         accessibilityRole="button"
         style={styles.actionTouch}
-        onPress={() => Clipboard.setString(tx)}
+        onPress={() => Clipboard.setString(tx ? tx : psbt.toBase64())}
       >
         <Text style={styles.actionText}>{loc.send.create_copy}</Text>
       </TouchableOpacity>
-     
+
       <SecondButton
         disabled={isElectrumDisabled}
         onPress={broadcast}

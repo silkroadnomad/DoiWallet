@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteProp, StackActions, useFocusEffect, useRoute } from '@react-navigation/native';
 import BigNumber from 'bignumber.js';
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoin from "@doichain/doichainjs-lib";
 import { TextDecoder } from 'text-decoding';
 import bs58check from 'bs58check';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -1027,6 +1027,10 @@ const SendDetails = () => {
       //setIsLoading(false);
     }
 
+    console.log("__psbt", psbt.toBase64())
+
+    
+
    // if ((!tx && !psbt )|| !actWallet) return setIsLoading(false);
     //if a nameOp is stored to a changeAddress our recipient is not shown!
     // let recipients = psbt.txOutputs.filter(({ address }) => !changeAddresses.includes(String(address)));
@@ -1048,9 +1052,7 @@ const SendDetails = () => {
     });
 
     } catch (e: any) {
-
-      console.log("___message",e.message )
-      
+      console.log("___message",e.message )      
     }
   };
 
