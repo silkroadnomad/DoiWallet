@@ -1482,16 +1482,13 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @param psbt {Psbt}
    * @returns {{ tx: Transaction }}
    */
-  cosignPsbt(psbt: Psbt) {
-    console.log("___psbt_2", psbt)
-
-    const seed = this._getSeed();    
+  cosignPsbt(psbt: Psbt) {  
+    const seed = this._getSeed();
     const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 
     const inputs = psbt.data.inputs.map((input, index) => {
       console.log("____input", input)
       try {
-
         if (input.witnessUtxo) {
             return {
                 address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
@@ -1499,9 +1496,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             }
         } else if (input.nonWitnessUtxo) {
             const txin = psbt.txInputs[index];
-            console.log("_______txin", txin)
             const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
-            console.log("_______txout", txout)
             return {
                 address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
                 value: txout.value,
@@ -1509,10 +1504,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         } else {
             throw new Error('Could not get input of #' + index);
         }
-      } catch (e) { console.log("_______eee", e); }
+      } catch (_) {  }
   });
 
-  console.log("____inputs", inputs)
 
     for (let cc = 0; cc < psbt.inputCount; cc++) {
 
@@ -1559,7 +1553,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
         try {
           psbt.signInput(cc, keyPair);
-        } catch (e) { console.log("_______error2", e); } 
+        } catch (e) { } 
       } else console.log('address of input not found');
     }
 

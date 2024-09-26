@@ -61,10 +61,6 @@ const SendCreate = () => {
     }
   });
 
-  
-
-  console.log("____inputs___", inputs);
-
   const inputAndOutput = inputs.concat(recipients);
 
   //console.log("____inputAndOutput___", inputAndOutput);

@@ -1015,21 +1015,18 @@ const SendDetails = () => {
           let isIncluded =  changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
           return { ...output, isIncluded};// Return the original output if address is already set
         });
-        const retval = (actWallet as MultisigHDWallet).cosignPsbt(psbt) 
+
+        console.log("_updatedTxOutputs", updatedTxOutputs)        
+        const retval = (actWallet as MultisigHDWallet).cosignPsbt(psbt)
         tx = retval.tx
         psbt = retval.psbt
     } catch (e: any) {
-
       console.log("___message",e.message )
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
     } finally {
       //setIsLoading(false);
     }
-
-    console.log("__psbt", psbt.toBase64())
-
-    
 
    // if ((!tx && !psbt )|| !actWallet) return setIsLoading(false);
     //if a nameOp is stored to a changeAddress our recipient is not shown!
@@ -1052,7 +1049,7 @@ const SendDetails = () => {
     });
 
     } catch (e: any) {
-      console.log("___message",e.message )      
+      console.log("___message__2",e.message )
     }
   };
 
