@@ -996,7 +996,7 @@ const SendDetails = () => {
     }
 
     try {
-      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
+      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });      
       updatedTxOutputs = psbt.txOutputs.map((output, index) => {
         const chunks = bitcoin.script.decompile(output.script);
         let address = output.address; //TODO check if this is segwit if so make an error message
@@ -1021,7 +1021,7 @@ const SendDetails = () => {
         tx = retval.tx
         psbt = retval.psbt
     } catch (e: any) {
-      console.log("___message",e.message )
+      console.log("___message__3",e.message )
       presentAlert({ title: loc.errors.error, message: e.message });
       return;
     } finally {

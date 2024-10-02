@@ -1470,6 +1470,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   calculateHowManySignaturesWeHaveFromPsbt(psbt: Psbt) {
     let sigsHave = 0;
     for (const inp of psbt.data.inputs) {
+      console.log("___inp___", inp)
       if (inp.finalScriptSig || inp.finalScriptWitness || inp.partialSig) sigsHave++;
     }
     return sigsHave;
@@ -1488,8 +1489,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     const inputs = psbt.data.inputs.map((input, index) => {
       console.log("____input", input)
+      
       try {
-        if (input.witnessUtxo) {
+        if (input.witnessUtxo) {          
             return {
                 address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
                 value: input.witnessUtxo.value,
@@ -1497,6 +1499,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         } else if (input.nonWitnessUtxo) {
             const txin = psbt.txInputs[index];
             const txout = bitcoin.Transaction.fromBuffer(input.nonWitnessUtxo).outs[txin.index];
+            console.log("____input_adress", bitcoin.address.fromOutputScript(txout.script, DOICHAIN))
             return {
                 address: bitcoin.address.fromOutputScript(txout.script, DOICHAIN),
                 value: txout.value,
@@ -1512,7 +1515,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
       try {
         psbt.signInputHD(cc, hdRoot);
-      } catch (e) { console.log("___signInputHD", e); } // protects agains duplicate cosignings
+      } catch (e) { console.log("___signInputHD_1", e); } // protects agains duplicate cosignings
 
       if (!psbt.inputHasHDKey(cc, hdRoot)) {
         for (const derivation of psbt.data.inputs[cc].bip32Derivation || []) {
@@ -1526,7 +1529,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           const keyPair = ECPair.fromWIF(wif, DOICHAIN);
           try {
             psbt.signInput(cc, keyPair);
-          } catch (e) { console.log("___signInput", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
+          } catch (e) { console.log("___signInput__2", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
         }
       }
       const inputAddress = inputs[cc].address;
@@ -1550,14 +1553,18 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         }
 
         const keyPair = ECPair.fromWIF(wif, DOICHAIN);
-
         try {
+          console.log("____psbt.data.inputs", psbt.data.inputs)
           psbt.signInput(cc, keyPair);
-        } catch (e) { } 
+          console.log("____psbt.data.inputs_2", psbt.data.inputs)
+        } catch (e) { console.log("___signInput__3", e)} 
       } else console.log('address of input not found');
     }
 
     let tx: BTransaction | false = false;
+
+    
+
     if (this.calculateHowManySignaturesWeHaveFromPsbt(psbt) === psbt.inputCount) {
       tx = psbt.finalizeAllInputs().extractTransaction();
     }
