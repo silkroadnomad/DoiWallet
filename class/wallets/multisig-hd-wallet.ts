@@ -746,7 +746,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
 
       const xpub = this._getXpubFromCosignerIndex(cosignerIndex);
-      const hdNode0 = bip32.fromBase58(xpub , DOICHAIN);
+      const hdNode0 = bip32.fromBase58(xpub, DOICHAIN);
 
       const splt = path.split('/');
       const internal = +splt[splt.length - 2];

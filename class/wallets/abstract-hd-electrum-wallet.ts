@@ -1488,8 +1488,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 
     const inputs = psbt.data.inputs.map((input, index) => {
-      console.log("____input", input)
-      
+      console.log("____input", input);
       try {
         if (input.witnessUtxo) {
             return {
@@ -1528,11 +1527,11 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           const keyPair = ECPair.fromWIF(wif, DOICHAIN);
           try {
             psbt.signInput(cc, keyPair);
-          } catch (e) { console.log("___signInput__2", e); } // protects agains duplicate cosignings or if this output can't be signed with current wallet
+          } catch (e) { console.log('___signInput__2', e) } // protects agains duplicate cosignings or if this output can't be signed with current wallet
         }
       }
-      console.log("_____cc",cc)
-      console.log("_____inputs[cc]",inputs[cc])
+      console.log('_____cc', cc);
+      console.log('_____inputs[cc]', inputs[cc]);
       const inputAddress = inputs[cc].address;
       const allAddresses = this.getAllExternalAddresses();
 
@@ -1555,23 +1554,21 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
         const keyPair = ECPair.fromWIF(wif, DOICHAIN);
         try {
-          console.log("____psbt.data.inputs", psbt.data.inputs)
+          console.log('____psbt.data.inputs', psbt.data.inputs);
 
-          console.log("____keyPair", keyPair)
-          console.log("____cc_3", cc)
+          console.log('____keyPair', keyPair);
+          console.log('____cc_3', cc);
 
           psbt.signInput(cc, keyPair);
-          console.log("____psbt.data.inputs_2", psbt.data.inputs)
-        } catch (e) {  
-          console.log("___signInput__3", e);
+          console.log('____psbt.data.inputs_2', psbt.data.inputs);
+        } catch (e) {
+          console.log('___signInput__3', e);
           throw new Error(e);
-        } 
+        }
       } else console.log('address of input not found');
     }
 
     let tx: BTransaction | false = false;
-
-    
 
     if (this.calculateHowManySignaturesWeHaveFromPsbt(psbt) === psbt.inputCount) {
       tx = psbt.finalizeAllInputs().extractTransaction();

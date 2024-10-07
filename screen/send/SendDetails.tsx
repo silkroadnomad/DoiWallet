@@ -5,6 +5,7 @@ import * as bitcoin from "@doichain/doichainjs-lib";
 import { TextDecoder } from 'text-decoding';
 import bs58check from 'bs58check';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { VERSION } from '../../blue_modules/network.js';
 //import * as Progress from 'react-native-progress';
 import {
   ActivityIndicator,
@@ -996,11 +997,12 @@ const SendDetails = () => {
     }
 
     try {
-      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });      
+      psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
       updatedTxOutputs = psbt.txOutputs.map((output, index) => {
         const chunks = bitcoin.script.decompile(output.script);
         let address = output.address; //TODO check if this is segwit if so make an error message
           if(chunks[0] === 90){ //make this const and support also name_new, name_update, name_firstupdate
+            psbt.setVersion(VERSION);           
             try { 
                 let isIncluded = changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
                 const utf16Decoder = new TextDecoder('ascii');
