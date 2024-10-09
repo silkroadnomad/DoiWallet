@@ -966,8 +966,7 @@ const SendDetails = () => {
     navigation.navigate('PaymentCodeList', { walletID: wallet.getID() });
   };
 
-  const handlePsbtSign = async (weOwnWallet: string | undefined) => {
-    
+  const handlePsbtSign = async (weOwnWallet: string | undefined) => {    
     const actWallet =  wallet?.type !== undefined  ? wallet : weOwnWallet;
     if (!actWallet) return; // Early return if no wallet is available
     setIsLoading(true);
@@ -1049,7 +1048,6 @@ const SendDetails = () => {
       showAnimatedQr: true,
       psbt,
     });
-
     } catch (e: any) {
       console.log("___message__2",e.message )
     }
