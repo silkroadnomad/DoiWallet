@@ -1002,7 +1002,7 @@ const SendDetails = () => {
         const chunks = bitcoin.script.decompile(output.script);
         let address = output.address; //TODO check if this is segwit if so make an error message
           if(chunks[0] === 90){ //make this const and support also name_new, name_update, name_firstupdate
-            psbt.setVersion(VERSION);           
+            psbt.setVersion(VERSION);
             try { 
                 let isIncluded = changeAddresses.includes(String(address)) || externalAddresses.includes(String(address)) ? true : false;
                 const utf16Decoder = new TextDecoder('ascii');
