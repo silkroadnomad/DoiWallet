@@ -1560,7 +1560,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           console.log('____cc_3', cc);
 
           psbt.signInput(cc, keyPair);
-          console.log('____psbt.data.inputs_2', psbt.data.inputs);
+          console.log('____psbt.data.inputs_2', psbt.data.inputs); 
         } catch (e) {
           console.log('___signInput__3', e);
           throw new Error(e);
@@ -1573,7 +1573,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     if (this.calculateHowManySignaturesWeHaveFromPsbt(psbt) === psbt.inputCount) {
       tx = psbt.finalizeAllInputs().extractTransaction();
     }
-
     return { tx, psbt };
   }
 
