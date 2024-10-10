@@ -1018,7 +1018,7 @@ const SendDetails = () => {
           return { ...output, isIncluded};// Return the original output if address is already set
         });
 
-        console.log("_updatedTxOutputs", updatedTxOutputs)        
+        console.log("_updatedTxOutputs", updatedTxOutputs)
         const retval = (actWallet as MultisigHDWallet).cosignPsbt(psbt)
         tx = retval.tx
         psbt = retval.psbt
