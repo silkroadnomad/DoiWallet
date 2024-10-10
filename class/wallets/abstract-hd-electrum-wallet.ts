@@ -1483,7 +1483,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @param psbt {Psbt}
    * @returns {{ tx: Transaction }}
    */
-  cosignPsbt(psbt: Psbt) {  
+  cosignPsbt(psbt: Psbt) {
     const seed = this._getSeed();
     const hdRoot = bip32.fromSeed(seed, DOICHAIN);
 

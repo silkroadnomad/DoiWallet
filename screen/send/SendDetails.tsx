@@ -997,6 +997,7 @@ const SendDetails = () => {
 
     try {
       psbt = bitcoin.Psbt.fromBase64(scannedData, { network: DOICHAIN });
+      console.log("_____psbt.inputs",psbt.data.inputs);
       updatedTxOutputs = psbt.txOutputs.map((output, index) => {
         const chunks = bitcoin.script.decompile(output.script);
         let address = output.address; //TODO check if this is segwit if so make an error message
