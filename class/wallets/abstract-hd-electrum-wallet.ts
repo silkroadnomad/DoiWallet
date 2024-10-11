@@ -1490,7 +1490,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     const inputs = psbt.data.inputs.map((input, index) => {
       console.log("____input", input);
       try {
-        if (input.witnessUtxo) {
+        if (input.witnessUtxo){
             return {
                 address: bitcoin.address.fromOutputScript(input.witnessUtxo.script, DOICHAIN),
                 value: input.witnessUtxo.value,
@@ -1555,7 +1555,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         const keyPair = ECPair.fromWIF(wif, DOICHAIN);
         try {
           console.log('____psbt.data.inputs', psbt.data.inputs);
-
           console.log('____keyPair', keyPair);
           console.log('____cc_3', cc);
 
