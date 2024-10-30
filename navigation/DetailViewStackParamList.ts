@@ -3,13 +3,10 @@ import { SendDetailsParams } from './SendDetailsStackParamList';
 
 export type DetailViewStackParamList = {
   UnlockWithScreen: undefined;
-  WalletsList: undefined;
-  WalletTransactions: { walletID: string; walletType: string };
-  LDKOpenChannelRoot: undefined;
-  LdkInfo: undefined;
+  WalletsList: { scannedData?: string };
+  WalletTransactions: { isLoading?: boolean; walletID: string; walletType: string };
   WalletDetails: { walletID: string };
-  LdkViewLogs: undefined;
-  TransactionDetails: { transactionId: string };
+  TransactionDetails: { transactionId: string; hash: string; walletID: string };
   TransactionStatus: { hash?: string; walletID?: string };
   CPFP: { transactionId: string };
   RBFBumpFee: { transactionId: string };
@@ -18,7 +15,7 @@ export type DetailViewStackParamList = {
   LNDViewInvoice: { invoice: LightningTransaction; walletID: string };
   LNDViewAdditionalInvoiceInformation: { invoiceId: string };
   LNDViewAdditionalInvoicePreImage: { invoiceId: string };
-  Broadcast: undefined;
+  Broadcast: { scannedData?: string };
   IsItMyAddress: undefined;
   GenerateWord: undefined;
   LnurlPay: undefined;
@@ -103,5 +100,5 @@ export type DetailViewStackParamList = {
     paymentCode: string;
     walletID: string;
   };
-  ReorderWallets: undefined;
+  ManageWallets: undefined;
 };

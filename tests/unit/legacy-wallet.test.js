@@ -6,6 +6,7 @@ import { LegacyWallet } from '../../class';
 describe('Legacy wallet', () => {
   it('can validate addresses', () => {
     const w = new LegacyWallet();
+    console.log("____", w);
     assert.ok(w.isAddressValid('12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG'));
     assert.ok(!w.isAddressValid('12eQ9m4sgAwTSQoNXkRABKhCXCsjm2j'));
     assert.ok(w.isAddressValid('3BDsBDxDimYgNZzsqszNZobqQq3yeUoJf2'));

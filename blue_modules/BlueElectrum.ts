@@ -887,7 +887,7 @@ export async function multiGetTransactionByTxid<T extends boolean>(
       const tx = ret[txid];
       // dont cache immature txs, but only for 'verbose', since its fully decoded tx jsons. non-verbose are just plain
       // strings txhex
-      if (verbose && typeof tx !== 'string' && (!tx.confirmations || tx.confirmations < 7)) {
+      if (verbose && typeof tx !== 'string' && (!tx?.confirmations || tx.confirmations < 7)) {
         continue;
       }
 

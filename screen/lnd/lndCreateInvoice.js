@@ -5,7 +5,6 @@ import {
   I18nManager,
   Image,
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
@@ -80,12 +79,11 @@ const LNDCreateInvoice = () => {
   });
 
   useEffect(() => {
-    // console.log(params)
-    Keyboard.addListener('keyboardDidShow', _keyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', _keyboardDidHide);
+    const showSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', _keyboardDidShow);
+    const hideSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', _keyboardDidHide);
     return () => {
-      Keyboard.removeAllListeners('keyboardDidShow');
-      Keyboard.removeAllListeners('keyboardDidHide');
+      showSubscription.remove();
+      hideSubscription.remove();
     };
   }, []);
 
@@ -409,33 +407,31 @@ const LNDCreateInvoice = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View style={[styles.root, styleHooks.root]}>
         <View style={[styles.amount, styleHooks.amount]}>
-          <KeyboardAvoidingView enabled={!Platform.isPad} behavior="position">
-            <AmountInput
-              isLoading={isLoading}
-              amount={amount}
-              onAmountUnitChange={setUnit}
-              onChangeText={setAmount}
-              disabled={isLoading || (lnurlParams && lnurlParams.fixed)}
-              unit={unit}
+          <AmountInput
+            isLoading={isLoading}
+            amount={amount}
+            onAmountUnitChange={setUnit}
+            onChangeText={setAmount}
+            disabled={isLoading || (lnurlParams && lnurlParams.fixed)}
+            unit={unit}
+            inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+          />
+          <View style={[styles.fiat, styleHooks.fiat]}>
+            <TextInput
+              onChangeText={setDescription}
+              placeholder={loc.receive.details_label}
+              value={description}
+              numberOfLines={1}
+              placeholderTextColor="#81868e"
+              style={styles.fiat2}
+              editable={!isLoading}
+              onSubmitEditing={Keyboard.dismiss}
               inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
             />
-            <View style={[styles.fiat, styleHooks.fiat]}>
-              <TextInput
-                onChangeText={setDescription}
-                placeholder={loc.receive.details_label}
-                value={description}
-                numberOfLines={1}
-                placeholderTextColor="#81868e"
-                style={styles.fiat2}
-                editable={!isLoading}
-                onSubmitEditing={Keyboard.dismiss}
-                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              />
-              {lnurlParams ? null : renderScanClickable()}
-            </View>
-            <BlueDismissKeyboardInputAccessory />
-            {renderCreateButton()}
-          </KeyboardAvoidingView>
+            {lnurlParams ? null : renderScanClickable()}
+          </View>
+          <BlueDismissKeyboardInputAccessory />
+          {renderCreateButton()}
         </View>
         {renderWalletSelectionButton()}
       </View>

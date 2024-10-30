@@ -7,13 +7,13 @@ import PayjoinTransaction from '../../class/payjoin-transaction';
 
 const utxos = [
   {
-    height: 666,
-    value: 100000,
-    address: 'bc1q2j76s63hx6ue4hfklhtkny4fx822kzw2ycyn5r',
+    height: 5,
+    value: 0.09862349,
+    address: "MzWJj9JpjxoJwavdsVuGJyDoD3ECBskQCJ",
     vout: 0,
-    txid: '8e8c982479c18b4331748c97c424891a4a474a61e5fdf6ac442c47cd44f13614',
-    wif: '',
-    confirmations: 666,
+    txid: "5114f4abc2292e71086490d137b812ce7757f919fa86085bf0bf13d8458a3e97",
+    wif: "",
+    confirmations: 5,
   },
 ];
 
@@ -27,9 +27,9 @@ describe('PayjoinTransaction', () => {
     w.setSecret(process.env.MNEMONICS_COLDCARD);
     const { tx: txOrig, psbt: psbtOrig } = w.createTransaction(
       utxos,
-      [{ address: 'bc1qyvdzueznsh0rsyfqzdtj9ce7nlx4rlg2v93lcl', value: 10000 }],
+      [{ address: "MzWJj9JpjxoJwavdsVuGJyDoD3ECBskQCJ", value: 0.09862349 }],
       6,
-      w._getInternalAddressByIndex(0),
+      w._getInternalAddressByIndex(0)
     );
 
     assert.strictEqual(txOrig.ins.length, 1);
@@ -54,7 +54,7 @@ describe('PayjoinTransaction', () => {
     };
 
     const payjoinClient = new PayjoinClient({
-      paymentScript: bitcoin.address.toOutputScript('bc1qyvdzueznsh0rsyfqzdtj9ce7nlx4rlg2v93lcl'),
+      paymentScript: bitcoin.address.toOutputScript('MzWJj9JpjxoJwavdsVuGJyDoD3ECBskQCJ'),
       wallet,
       payjoinRequester: payjoinRequesterMock,
     });

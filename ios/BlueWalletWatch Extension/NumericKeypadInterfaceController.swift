@@ -34,7 +34,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       amount = context.amountStringArray
       keyPadType = context.doichainUnit
     }
-    periodButton.setEnabled(keyPadType == .SATS)
+    periodButton.setEnabled(keyPadType == .SWARTZ)
   }
   
   override func willActivate() {
@@ -63,7 +63,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       return
     }
     switch keyPadType {
-    case .SATS:
+    case .SWARTZ:
       if amount.first == "0" {
         if value == "0" {
           return
@@ -72,7 +72,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       } else {
         amount.append(value)
       }
-    case .BTC:
+    case .DOI:
       if amount.isEmpty {
         if (value == "0") {
           amount.append("0")
@@ -139,7 +139,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
   }
   
   @IBAction func keypadNumberDotTapped() {
-    guard !amount.contains("."), keyPadType == .BTC else { return }
+    guard !amount.contains("."), keyPadType == .DOI else { return }
     append(value: ".")
   }
   

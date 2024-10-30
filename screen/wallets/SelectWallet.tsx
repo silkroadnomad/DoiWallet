@@ -81,10 +81,6 @@ const SelectWallet: React.FC = () => {
     }
   };
 
-  const handleLongPress = (item: TWallet) => {
-    // place holder. remove once WalletsCarousel is TSX
-  };
-
   if (isLoading) {
     return (
       <View style={[styles.loading, stylesHook.loading]}>
@@ -103,15 +99,9 @@ const SelectWallet: React.FC = () => {
     );
   } else {
     return (
-      <WalletsCarousel
-        // @ts-ignore: refactor later
-        data={data}
-        onPress={onPress}
-        handleLongPress={handleLongPress}
-        ref={walletsCarousel}
-        testID="WalletsList"
-        horizontal={false}
-      />
+      <View style={styles.walletsCarousel}>
+        <WalletsCarousel data={data} scrollEnabled onPress={onPress} ref={walletsCarousel} testID="WalletsList" horizontal={false} />
+      </View>
     );
   }
 };
@@ -133,5 +123,9 @@ const styles = StyleSheet.create({
   },
   center: {
     textAlign: 'center',
+  },
+  walletsCarousel: {
+    flex: 1,
+    paddingHorizontal: 16,
   },
 });

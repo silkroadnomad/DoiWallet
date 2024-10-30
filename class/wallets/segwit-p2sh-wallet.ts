@@ -34,7 +34,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
   static witnessToAddress(witness: string): string | false {
     try {
       const pubKey = Buffer.from(witness, 'hex');
-      return pubkeyToP2shSegwitAddress(pubKey, DOICHAIN);
+      return pubkeyToP2shSegwitAddress(pubKey);
     } catch (_) {
       return false;
     }

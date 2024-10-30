@@ -64,6 +64,10 @@ platform :ios do
     }
 
     platform = options[:platform] || "ios" # Default to iOS if not specified
+  
+    # Remove local master branch if it exists (Exit status: 128 - 'fatal: a branch named 'master' already exists')
+    sh("git branch -D master || true")
+  
     target_to_app_identifier.each do |target, app_identifier|
       match(
         git_basic_authorization: ENV["GIT_ACCESS_TOKEN"],
@@ -102,13 +106,13 @@ lane :fetch_appstore_profiles_catalyst do
 end
 
 
-  desc "Clear derived data"
+desc "Clear derived data"
   lane :clear_derived_data_lane do
     UI.message("Clearing derived data...")
     clear_derived_data
-  end
+end
 
-  desc "Increment build number"
+desc "Increment build number"
   lane :increment_build_number_lane do
     UI.message("Incrementing build number to current timestamp...")
     
@@ -134,7 +138,7 @@ end
       scheme: "BlueWallet",
       workspace: "BlueWallet.xcworkspace",
       export_method: "app-store",
-      include_bitcode: true,
+      include_bitcode: false,
       configuration: "Release",
       skip_profile_detection: true,
       include_symbols: true,
@@ -211,38 +215,47 @@ end
     last_commit = last_git_commit
     already_built_flag = ".already_built_#{last_commit[:sha]}"
     File.write(already_built_flag, Time.now.to_s)
-  end
-
-  desc "Build and distribute the Mac Catalyst app for BlueWallet-NoLDK (Universal)"
-lane :build_and_distribute_catalyst_universal do |options|
-  # Conditionally fetch the right provisioning profiles
-  if options[:type] == "development"
-    fetch_dev_profiles_catalyst
-  else
-    fetch_appstore_profiles_catalyst
-  end
-
-  # Build the Mac Catalyst app (Universal Build for Apple Silicon and Intel)
-  build_app(
-    scheme: "BlueWallet-NoLDK",
-    configuration: "Release",
-    catalyst_platform: "macos",
-    export_method: options[:type] || "app-store", # Default to app-store if not specified
-    xcargs: "ARCHS='arm64 x86_64' VALID_ARCHS='arm64 x86_64'",
-    export_options: {
-      provisioningProfiles: {
-        "io.bluewallet.bluewallet" => "Provisioning Profile Name for Catalyst",
-        # Include other identifiers as necessary
-      },
-      signingStyle: "manual",
-    }
-  )
-
-  # Optionally, upload the build to TestFlight or App Store Connect for app-store type
-  if options[:type] != "development"
-    upload_to_testflight(skip_waiting_for_build_processing: true)
-  end
 end
+end
+
+desc "Fetch development certificates and provisioning profiles for Mac Catalyst"
+  lane :fetch_dev_profiles_catalyst do
+    match(
+      type: "development",
+      platform: "catalyst",
+      app_identifier: app_identifiers,
+      readonly: true
+    )
+  end
+
+  desc "Fetch App Store certificates and provisioning profiles for Mac Catalyst"
+  lane :fetch_appstore_profiles_catalyst do
+    match(
+      type: "appstore",
+      platform: "catalyst",
+      app_identifier: app_identifiers,
+      readonly: true
+    )
+  end
+
+  desc "Setup provisioning profiles for Mac Catalyst"
+  lane :setup_catalyst_provisioning_profiles do
+    app_identifiers.each do |app_identifier|
+      match(
+        type: "development",
+        platform: "catalyst",
+        app_identifier: app_identifier,
+        readonly: false,
+        force_for_new_devices: true
+      )
+
+      match(
+        type: "appstore",
+        platform: "catalyst",
+        app_identifier: app_identifier,
+        readonly: false
+      )
+    end
 
 desc "Update 'What's New' section in App Store Connect for all localizations"
   lane :update_release_notes do

@@ -21,6 +21,7 @@ import { DoichainUnit} from '../../models/doichainUnits';
 import { useStorage } from '../../hooks/context/useStorage';
 import { HandOffActivityType } from '../../components/types';
 import HeaderRightButton from '../../components/HeaderRightButton';
+import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 
 enum ButtonStatus {
   Possible,
@@ -28,8 +29,10 @@ enum ButtonStatus {
   NotPossible,
 }
 
+type RouteProps = RouteProp<DetailViewStackParamList, 'TransactionStatus'>;
+
 interface TransactionStatusProps {
-  route: RouteProp<{ params: { hash: string; walletID: string } }, 'params'>;
+  route: RouteProps;
   navigation: NativeStackNavigationProp<any>;
 }
 

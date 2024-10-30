@@ -27,17 +27,17 @@ describe('HDLegacyElectrumSeedP2PKHWallet', () => {
     );
 
     let address = hd._getExternalAddressByIndex(0);
-    assert.strictEqual(address, '1Ca9ZVshGdKiiMEMNTG1bYqbifYMZMwV8');
-    assert.ok(hd.getAllExternalAddresses().includes('1Ca9ZVshGdKiiMEMNTG1bYqbifYMZMwV8'));
+    assert.strictEqual(address, 'MvmwMCzrceitFFbjdBmqE7hkKx4bJZZVMc');
+    assert.ok(hd.getAllExternalAddresses().includes('MvmwMCzrceitFFbjdBmqE7hkKx4bJZZVMc'));
 
     address = hd._getInternalAddressByIndex(0);
-    assert.strictEqual(address, '1JygAvTQS9haAYgRfPSdHgmXd3syjB8Fnp');
+    assert.strictEqual(address, 'NEZ3NZxPMXo8h5vvwCmCWCvSMHH2jQoUHu');
 
     let wif = hd._getExternalWIFByIndex(0);
-    assert.strictEqual(wif, 'KxGPz9dyib26p6bL2vQPvBPHBMA8iHVqEetg3x5XA4Rk1trZ11Kz');
+    assert.strictEqual(wif, 'TeRBiYNkpafFV1HGnrvqKEJc7wc483bdhdHT9a6Sgwckf7H4uFSs');
 
     wif = hd._getInternalWIFByIndex(0);
-    assert.strictEqual(wif, 'L52d26QmYGW8ctHo1omM5fZeJMgaonSkEWCGpnEekNvkVUoqTsNF');
+    assert.strictEqual(wif, 'TmBQkV9YeG9HHnyjmkHnUiUyEx8WDYYYhUb3vQFaHG7m8hCgSdcc');
 
     assert.strictEqual(
       hd._getPubkeyByAddress(hd._getExternalAddressByIndex(0)).toString('hex'),
@@ -64,8 +64,8 @@ describe('HDLegacyElectrumSeedP2PKHWallet', () => {
       'xpub661MyMwAqRbcGSUBZaVtq8qEoRkJM1TZNNvUJEgQvtiZE73gS1wKWQoTj6R2E46UDYS2SBpmGGrSHGsJUNxtr1krixFuq8JA772pG43Mo6R',
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), '13sPvsrgRN8XibZNHtZXNqVDJPnNZLjTap');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), '16oEuy5H7ejmapqc2AtKAYerdfkDkoyrDX');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Ky9WTDUTTZUKKYSPEE6uah2y5sJa89z6177kD23xh5cq1znX2HDj');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'MySm8XMfLkE6F8osZht6bMe82dBRajT5Qw');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'N2Nc7caG32qL7N67HzCtP4omMu9GiNdT3g');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'TfJJBcDEZZ7TzT8KzAdLyjxJ2TkVXv5tU5WXJe4tDxoqfD4PiMaV');
   });
 });

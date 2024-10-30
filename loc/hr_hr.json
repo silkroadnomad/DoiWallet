@@ -34,7 +34,7 @@
     "help2": "Novi spremnik će biti posve funkcionalan, možeš pohraniti koliko misliš da je potrebno da izgleda uvjerljivo.",
     "password_should_not_match": "Lozinka za fejk spremnik treba biti drugačija od lozinke za oriđi spremnik",
     "passwords_do_not_match": "Lozinke ne pašu, pokušaj ponovo",
-    "retype_password": "Ponovi lozinku",
+    "confirm_password": "Ponovi lozinku",
     "success": "Uspjeh",
     "title": "Fejk volet"
   },
@@ -81,7 +81,7 @@
     "password_explain": "Upiši lozinku koja će dekriptirati spremnik.",
     "passwords_do_not_match": "Lozinke su različite",
     "plausible_deniability": "Fejk volet...",
-    "retype_password": "Ponovi lozinku",
+    "confirm_password": "Ponovi lozinku",
     "save": "Spremi"
   },
   "transactions": {
@@ -91,7 +91,8 @@
     "details_show_in_block_explorer": "Prikaži u blok eksploreru",
     "details_title": "Transakcija",
     "details_to": "Za",
-    "list_title": "transakcije"
+    "list_title": "transakcije",
+    "transaction": "Transakcija"
   },
   "wallets": {
     "add_create": "Stvori",
@@ -122,7 +123,6 @@
     "list_empty_txs1": "Vaše transakcije će se pojaviti ovdje",
     "list_latest_transaction": "posljednja transakcija",
     "list_title": "Voleti",
-    "reorder_title": "Uredi volete",
     "select_wallet": "Odaberi volet",
     "xpub_copiedToClipboard": "Kopirano u međuspremnik.",
     "xpub_title": "volet XPUB"

@@ -21,7 +21,7 @@ class SpecifyInterfaceController: WKInterfaceController {
     var amount: Double?
     var description: String?
     var amountStringArray: [String] = ["0"]
-    var doichainUnit.: NumericKeypadInterfaceController.NumericKeypadType = .DOI
+    var doichainUnit: NumericKeypadInterfaceController.NumericKeypadType = .DOI
   }
   var specifiedQRContent: SpecificQRCodeContent = SpecificQRCodeContent(amount: nil, description: nil, amountStringArray: ["0"], doichainUnit: .DOI)
   var wallet: Wallet?
@@ -40,7 +40,8 @@ class SpecifyInterfaceController: WKInterfaceController {
     let wallet = WatchDataSource.shared.wallets[identifier]
     self.wallet = wallet
     self.createButton.setAlpha(0.5)
-    self.specifiedQRContent.doichainUnit = (wallet.type == WalletGradient.LightningCustodial.rawValue || wallet.type == WalletGradient.LightningLDK.rawValue) ? .SATS : .BTC
+    self.specifiedQRContent.doichainUnit = (wallet.type == WalletGradient.LightningCustodial.rawValue) ? .SWARTZ : .DOI
+
     NotificationCenter.default.addObserver(forName: NumericKeypadInterfaceController.NotificationName.keypadDataChanged, object: nil, queue: nil) { [weak self] (notification) in
       guard let amountObject = notification.object as? [String], !amountObject.isEmpty else { return }
       if amountObject.count == 1 && (amountObject.first == "." || amountObject.first == "0") {
@@ -60,7 +61,7 @@ class SpecifyInterfaceController: WKInterfaceController {
         
         var isShouldCreateButtonBeEnabled = amountDouble > 0 && !title.isEmpty
         
-        if (wallet.type == WalletGradient.LightningCustodial.rawValue || wallet.type == WalletGradient.LightningLDK.rawValue) && !WCSession.default.isReachable {
+        if (wallet.type == WalletGradient.LightningCustodial.rawValue) && !WCSession.default.isReachable {
           isShouldCreateButtonBeEnabled = false
         }
         

@@ -279,7 +279,7 @@ export const saveLanguage = async (lang: string) => {
   await setDateTimeLocale();
 };
 
-export const transactionTimeToReadable = (time: number) => {
+export const transactionTimeToReadable = (time: number | string) => {
   if (time === -1) {
     return 'unknown';
   }
@@ -320,13 +320,14 @@ export function formatBalance(balance: number, toUnit: string, withFormatting = 
     return balance + ' ' + loc.units[DoichainUnit.DOI];
   }
   if (toUnit === DoichainUnit.DOI) {
-    const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);    
+    const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
     return removeTrailingZeros(+value) + ' ' + loc.units[DoichainUnit.DOI];
   } else if (toUnit === DoichainUnit.SWARTZ) {
-    return (withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance)) + ' ' + loc.units[DoichainUnit.SWARTZ];
-  } else if (toUnit === DoichainUnit.LOCAL_CURRENCY) {
+    return (withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance)) + ' ' + loc.units[DoichainUnit.SWARTZ];  
+  } else {
     return satoshiToLocalCurrency(balance);
   }
+  
 }
 
 /**
@@ -340,17 +341,15 @@ export function formatBalanceWithoutSuffix(balance = 0, toUnit: string, withForm
   if (toUnit === undefined) {
     return balance;
   }
-  if (balance !== 0) {
-    if (toUnit === DoichainUnit.DOI) {
-      const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
-      return removeTrailingZeros(value);
-    } else if (toUnit === DoichainUnit.SWARTZ) {
-      return withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance);
-    } else {
-      return satoshiToLocalCurrency(balance);
-    }
+  if (toUnit === DoichainUnit.DOI) {
+    const value = new BigNumber(balance).dividedBy(100000000).toFixed(8);
+    return removeTrailingZeros(value);
+  } else if (toUnit === DoichainUnit.SWARTZ) {
+    return withFormatting ? new Intl.NumberFormat().format(balance).toString() : String(balance);
+  } else {
+    return satoshiToLocalCurrency(balance);
+
   }
-  return balance.toString();
 }
 
 /**

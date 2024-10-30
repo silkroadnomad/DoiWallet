@@ -1,15 +1,5 @@
 import React, { Component } from 'react';
-import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Linking, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import PropTypes from 'prop-types';
 import { Text } from '@rneui/themed';
@@ -18,9 +8,8 @@ import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/h
 import Notifications from '../../blue_modules/notifications';
 import { BlueCard, BlueSpacing, BlueSpacing20, BlueText } from '../../BlueComponents';
 import { HDSegwitBech32Transaction, HDSegwitBech32Wallet } from '../../class';
-import presentAlert from '../../components/Alert';
+import presentAlert, { AlertType } from '../../components/Alert';
 import Button from '../../components/Button';
-import navigationStyle from '../../components/navigationStyle';
 import SafeArea from '../../components/SafeArea';
 import { BlueCurrentTheme } from '../../components/themes';
 import loc from '../../loc';
@@ -101,7 +90,7 @@ export default class CPFP extends Component {
       } catch (error) {
         triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
         this.setState({ isLoading: false });
-        presentAlert({ message: error.message });
+        presentAlert({ message: error.message, type: AlertType.Toast });
       }
     });
   };
@@ -162,22 +151,20 @@ export default class CPFP extends Component {
 
   renderStage1(text) {
     return (
-      <KeyboardAvoidingView enabled={!Platform.isPad} behavior="position">
-        <SafeArea style={styles.root}>
+      <SafeArea style={styles.root}>
+        <BlueSpacing />
+        <BlueCard style={styles.center}>
+          <BlueText>{text}</BlueText>
+          <BlueSpacing20 />
+          <ReplaceFeeSuggestions onFeeSelected={fee => this.setState({ newFeeRate: fee })} transactionMinimum={this.state.feeRate} />
           <BlueSpacing />
-          <BlueCard style={styles.center}>
-            <BlueText>{text}</BlueText>
-            <BlueSpacing20 />
-            <ReplaceFeeSuggestions onFeeSelected={fee => this.setState({ newFeeRate: fee })} transactionMinimum={this.state.feeRate} />
-            <BlueSpacing />
-            <Button
-              disabled={this.state.newFeeRate <= this.state.feeRate}
-              onPress={() => this.createTransaction()}
-              title={loc.transactions.cpfp_create}
-            />
-          </BlueCard>
-        </SafeArea>
-      </KeyboardAvoidingView>
+          <Button
+            disabled={this.state.newFeeRate <= this.state.feeRate}
+            onPress={() => this.createTransaction()}
+            title={loc.transactions.cpfp_create}
+          />
+        </BlueCard>
+      </SafeArea>
     );
   }
 
@@ -251,4 +238,3 @@ CPFP.propTypes = {
     }),
   }),
 };
-CPFP.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.transactions.cpfp_title }));

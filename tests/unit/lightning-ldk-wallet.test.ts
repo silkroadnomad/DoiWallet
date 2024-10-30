@@ -59,6 +59,6 @@ describe('', () => {
   it('can unwrap address', () => {
     const ldk = new LightningLdkWallet();
     ldk.setSecret('ldk://abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
-    assert.strictEqual(ldk.unwrapFirstExternalAddressFromMnemonics(), 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu');
+    assert.strictEqual(ldk.unwrapFirstExternalAddressFromMnemonics(), 'dc1qcr8te4kr609gcawutmrza0j4xv80jy8zxfp7yf');
   });
 });

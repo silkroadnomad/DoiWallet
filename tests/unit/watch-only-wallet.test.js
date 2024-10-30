@@ -8,16 +8,16 @@ describe('Watch only wallet', () => {
   it('can validate address', async () => {
     const w = new WatchOnlyWallet();
     for (const secret of [
-      'bc1quhnve8q4tk3unhmjts7ymxv8cd6w9xv8wy29uv',
-      '12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG',
-      '3BDsBDxDimYgNZzsqszNZobqQq3yeUoJf2',
-      'BC1QUHNVE8Q4TK3UNHMJTS7YMXV8CD6W9XV8WY29UV',
+      "dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk",
+      "MzvCv7j88MuxLXcKcRAS8EksTL9D6gEevU",
+      "3C5iv2Hp6nfuhkfTZibb7GJPkXj367eurD",
+      "dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk",
     ]) {
       w.setSecret(secret);
       assert.ok(w.valid());
       assert.deepStrictEqual(
-        w.getAllExternalAddresses().map(elem => elem.toUpperCase()),
-        [secret.toUpperCase()],
+        w.getAllExternalAddresses().map((elem) => elem.toUpperCase()),
+        [secret.toUpperCase()]
       );
       assert.strictEqual(w.isHd(), false);
       assert.ok(!w.useWithHardwareWalletEnabled());
@@ -145,6 +145,8 @@ describe('Watch only wallet', () => {
     const w = new WatchOnlyWallet();
     w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-coldcard.txt', 'ascii'));
     w.init();
+
+    console.log("_____w", w)
     assert.ok(w.valid());
     assert.strictEqual(
       w.getSecret(),
@@ -318,7 +320,7 @@ describe('Watch only wallet', () => {
       'zpub6rutAggZJCvkgZg3BAqNGAxCkx1khxCE6g6jyJugMfZ1zgkVdUWSdnzSRpWX1GYVZXCpQFS87BUsvgXXJBpsJVroiHbu4Js2TY69zbWcTNb',
     );
 
-    assert.strictEqual(w._getExternalAddressByIndex(0), 'bc1q68y6r45k4kvxe42xl37dgjueg2suqwnh4ze0sr');
+    assert.strictEqual(w._getExternalAddressByIndex(0), 'dc1q68y6r45k4kvxe42xl37dgjueg2suqwnhzyzcsk');
 
     assert.ok(!w.useWithHardwareWalletEnabled());
   });
@@ -342,7 +344,7 @@ describe('Watch only wallet', () => {
     assert.strictEqual(w.getMasterFingerprintHex(), '3c7f1a52');
     assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
 
-    assert.strictEqual(w._getExternalAddressByIndex(0), 'bc1qr0y5c96xtfeulnzxnjl086f2njcmf8qmhenvpp');
+    assert.strictEqual(w._getExternalAddressByIndex(0), 'dc1qr0y5c96xtfeulnzxnjl086f2njcmf8qmqlgmp5');
 
     assert.strictEqual(
       w.getSecret(),

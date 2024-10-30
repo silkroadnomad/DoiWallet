@@ -52,7 +52,7 @@
     "help2": "Igumbi lokugcina elitsha liza kusebenza ngokupheleleyo, kwaye unako ukugcina okunye ‘ + ‘lxabiso elincinci apho likhangeleka ngakumbi.",
     "password_should_not_match": "Inombolo yakho yokuvula igumbi lokugcina inkohliso akumele ifane ne nombolo yokuvula  igumbi lakho  elinyanisekileyo",
     "passwords_do_not_match": "Inombolo yokuvula ayihambelani, zama kwakhona",
-    "retype_password": "Phinda inombolo yokuvula",
+    "confirm_password": "Phinda inombolo yokuvula",
     "success": "Iphumelele",
     "title": "Ukuphika"
   },
@@ -98,7 +98,7 @@
     "password_explain": "Ukudala iinombolo yokuvula oyisebenzisayo ukucima ukugcina",
     "passwords_do_not_match": "Inombolo yokuvula azifani",
     "plausible_deniability": "Ukuphika...",
-    "retype_password": "Phina inombolo yokuvula",
+    "confirm_password": "Phina inombolo yokuvula",
     "save": "ndoloza"
   },
   "transactions": {
@@ -108,7 +108,8 @@
     "details_show_in_block_explorer": "Bonisa ibhloko umhloi",
     "details_title": "Ngeniswa",
     "details_to": "Mveliso",
-    "list_title": "ngeniswa"
+    "list_title": "ngeniswa",
+    "transaction": "Ngeniswa"
   },
   "wallets": {
     "add_bitcoin_explain": "Simple and powerful Doi wallet",
@@ -141,7 +142,6 @@
     "list_empty_txs1": "Intengiso yakho iya kubonakala apha,",
     "list_latest_transaction": "Utshintsho olutsha",
     "list_title": "Ingxowa",
-    "reorder_title": "Yenza kwakhona ingxowa",
     "select_wallet": "Khetha ingxowa",
     "xpub_copiedToClipboard": "Ikopishwe kwi-clipboard",
     "xpub_title": "ingxowa XPUB"

@@ -232,6 +232,7 @@ export {
   initCurrencyDaemon,
   isRateOutdated,
   LAST_UPDATED,
+  GROUP_IO_BLUEWALLET,
   mostRecentFetchedRate,
   PREFERRED_CURRENCY_STORAGE_KEY,
   restoreSavedPreferredFiatCurrencyAndExchangeFromStorage,

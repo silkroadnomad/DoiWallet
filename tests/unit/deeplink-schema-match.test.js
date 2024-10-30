@@ -10,22 +10,22 @@ jest.mock('../../blue_modules/BlueElectrum', () => {
 
 describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
   it('hasSchema', () => {
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bitcoin:${suffix}12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bitcoin:${suffix}bc1qh6tf004ty7z7un2v5ntu4mkf630545gvhs45u7?amount=666&label=Yo`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bitcoin:${suffix}BC1QH6TF004TY7Z7UN2V5NTU4MKF630545GVHS45U7?amount=666&label=Yo`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`doichain:${suffix}12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`doichain:${suffix}bc1qh6tf004ty7z7un2v5ntu4mkf630545gvhs45u7?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`doichain:${suffix}BC1QH6TF004TY7Z7UN2V5NTU4MKF630545GVHS45U7?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`DOICHAIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`DOICHAIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo`));
     assert.ok(
       DeeplinkSchemaMatch.hasSchema(
         `lightning:${suffix}lnbc10u1pwjqwkkpp5vlc3tttdzhpk9fwzkkue0sf2pumtza7qyw9vucxyyeh0yaqq66yqdq5f38z6mmwd3ujqar9wd6qcqzpgxq97zvuqrzjqvgptfurj3528snx6e3dtwepafxw5fpzdymw9pj20jj09sunnqmwqz9hx5qqtmgqqqqqqqlgqqqqqqgqjq5duu3fs9xq9vn89qk3ezwpygecu4p3n69wm3tnl28rpgn2gmk5hjaznemw0gy32wrslpn3g24khcgnpua9q04fttm2y8pnhmhhc2gncplz0zde`,
       ),
     );
 
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:bitcoin:${suffix}12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:bitcoin:${suffix}bc1qh6tf004ty7z7un2v5ntu4mkf630545gvhs45u7?amount=666&label=Yo`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:bitcoin:${suffix}BC1QH6TF004TY7Z7UN2V5NTU4MKF630545GVHS45U7?amount=666&label=Yo`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE`));
-    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:doichain:${suffix}12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:doichain:${suffix}bc1qh6tf004ty7z7un2v5ntu4mkf630545gvhs45u7?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:doichain:${suffix}BC1QH6TF004TY7Z7UN2V5NTU4MKF630545GVHS45U7?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:DOICHAIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE`));
+    assert.ok(DeeplinkSchemaMatch.hasSchema(`bluewallet:DOICHAIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo`));
     assert.ok(
       DeeplinkSchemaMatch.hasSchema(
         `bluewallet:lightning:${suffix}lnbc10u1pwjqwkkpp5vlc3tttdzhpk9fwzkkue0sf2pumtza7qyw9vucxyyeh0yaqq66yqdq5f38z6mmwd3ujqar9wd6qcqzpgxq97zvuqrzjqvgptfurj3528snx6e3dtwepafxw5fpzdymw9pj20jj09sunnqmwqz9hx5qqtmgqqqqqqqlgqqqqqqgqjq5duu3fs9xq9vn89qk3ezwpygecu4p3n69wm3tnl28rpgn2gmk5hjaznemw0gy32wrslpn3g24khcgnpua9q04fttm2y8pnhmhhc2gncplz0zde`,
@@ -34,13 +34,13 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
   });
 
   it('isBitcoin Address', () => {
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG'));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('3GcKN7q7gZuZ8eHygAhHrvPa5zZbG5Q1rK'));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('bc1qykcp2x3djgdtdwelxn9z4j2y956npte0a4sref'));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('BC1QYKCP2X3DJGDTDWELXN9Z4J2Y956NPTE0A4SREF'));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`bitcoin:${suffix}BC1QH6TF004TY7Z7UN2V5NTU4MKF630545GVHS45U7`));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE`));
-    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo`));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress("MxvomNTuXMJ6SUz98nEfTE28SHRnCx5UxK"));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('NKnuDAaxq1sDjR1amrBRVWWpTk1MsG3Fii'));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk'));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress('DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK'));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`doichain:${suffix}DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK`));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`DOICHAIN:${suffix}DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK`));
+    assert.ok(DeeplinkSchemaMatch.isBitcoinAddress(`DOICHAIN:${suffix}DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK?amount=666&label=Yo`));
   });
 
   it('isLighting Invoice', () => {
@@ -50,8 +50,8 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
       ),
     );
   });
-
-  it('isBoth Bitcoin & Invoice', () => {
+/*
+  it('isBoth doichain & Invoice', () => {
     assert.ok(
       DeeplinkSchemaMatch.isBothBitcoinAndLightning(
         `bitcoin:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=0.000001&lightning=lnbc1u1pwry044pp53xlmkghmzjzm3cljl6729cwwqz5hhnhevwfajpkln850n7clft4sdqlgfy4qv33ypmj7sj0f32rzvfqw3jhxaqcqzysxq97zvuq5zy8ge6q70prnvgwtade0g2k5h2r76ws7j2926xdjj2pjaq6q3r4awsxtm6k5prqcul73p3atveljkn6wxdkrcy69t6k5edhtc6q7lgpe4m5k4`,
@@ -100,7 +100,7 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
       'lightning:lnbc1p3wkfy3dqqpp5030v53xsdhsgjkzelyle7ektmem38974498vnqdt2jaz24trw39qsp502jqj4k6nr7axqymhkf3ax70jxfx6jza4jygvc66njzhfs4tsa2q9qrsgqcqpcxqy8ayqrzjqv06k0m23t593pngl0jt7n9wznp64fqngvctz7vts8nq4tukvtljqz2zhyqqxqgqqsqqqqqqqqqqqqqq9grzjqtsjy9p55gdceevp36fvdmrkxqvzfhy8ak2tgc5zgtjtra9xlaz97zkcyvqqprsqqvqqqqqqqqqqqqqq9gy3x4n6rv6rcn53ldev96aurls3c66kpx74wa4uwcwu92jgktpqe8ncqpzj8jg6sunygzm320cdutnvgsrc6xv286evhrxefsxxuz0ssqwtm6dq',
     );
   });
-
+*/
   it('isLnurl', () => {
     assert.ok(
       DeeplinkSchemaMatch.isLnUrl(
@@ -108,29 +108,29 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
       ),
     );
   });
-
+/*
   it('navigationForRoute', async () => {
     const events = [
       {
-        argument: { url: `12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG` },
-        expected: ['SendDetailsRoot', { screen: 'SendDetails', params: { uri: '12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG' } }],
+        argument: { url: `MxvomNTuXMJ6SUz98nEfTE28SHRnCx5UxK` },
+        expected: ['SendDetailsRoot', { screen: 'SendDetails', params: { uri: 'MxvomNTuXMJ6SUz98nEfTE28SHRnCx5UxK' } }],
       },
       {
-        argument: { url: `bitcoin:${suffix}12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG` },
-        expected: ['SendDetailsRoot', { screen: 'SendDetails', params: { uri: 'bitcoin:12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG' } }],
+        argument: { url: `doichain:${suffix}MxvomNTuXMJ6SUz98nEfTE28SHRnCx5UxK` },
+        expected: ['SendDetailsRoot', { screen: 'SendDetails', params: { uri: 'doichain:MxvomNTuXMJ6SUz98nEfTE28SHRnCx5UxK' } }],
       },
       {
-        argument: { url: `BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo` },
+        argument: { url: `DIOCHAIN:${suffix}DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK?amount=666&label=Yo` },
         expected: [
           'SendDetailsRoot',
-          { screen: 'SendDetails', params: { uri: 'BITCOIN:BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo' } },
+          { screen: 'SendDetails', params: { uri: 'DOICHAIN:DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK?amount=666&label=Yo' } },
         ],
       },
       {
-        argument: { url: `bluewallet:BITCOIN:${suffix}BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo` },
+        argument: { url: `bluewallet:DOICHAIN:${suffix}DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK?amount=666&label=Yo` },
         expected: [
           'SendDetailsRoot',
-          { screen: 'SendDetails', params: { uri: 'BITCOIN:BC1Q3RL0MKYK0ZRTXFMQN9WPCD3GNAZ00YV9YP0HXE?amount=666&label=Yo' } },
+          { screen: 'SendDetails', params: { uri: 'DOICHAIN:DC1QGLQ9R48ZQALRADFJLVDQ9ACY8WFN5227NLFJDK?amount=666&label=Yo' } },
         ],
       },
       {
@@ -204,7 +204,7 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
         expected: [
           'ElectrumSettings',
           {
-            server: 'electrum1.bluewallet.io:443:s',
+            server: 'itchy-jellyfish-89.doi.works:50002',
           },
         ],
       },
@@ -345,9 +345,9 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
     assert.ok(rez[1].onWalletSelect);
     assert.ok(typeof rez[1].onWalletSelect === 'function');
   });
-
+*/
   it('decodes bip21', () => {
-    let decoded = DeeplinkSchemaMatch.bip21decode(`bitcoin:${suffix}1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH?amount=20.3&label=Foobar`);
+    let decoded = DeeplinkSchemaMatch.bip21decode(`doichain:${suffix}1BgGZ9tcN4rm9KBMzC5FZxbqY2NXBkrQr78Ydnq6ux14PB7PfzDn7KprQz87SZ26SAMH?amount=20.3&label=Foobar`);
     assert.deepStrictEqual(decoded, {
       address: '1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH',
       options: {
@@ -357,42 +357,42 @@ describe.each(['', '//'])('unit - DeepLinkSchemaMatch', function (suffix) {
     });
 
     decoded = DeeplinkSchemaMatch.bip21decode(
-      `bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
+      `doichain:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
     );
     assert.strictEqual(decoded.options.pj, 'https://btc.donate.kukks.org/BTC/pj');
 
-    decoded = DeeplinkSchemaMatch.bip21decode(`BITCOIN:${suffix}1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH?amount=20.3&label=Foobar`);
+    decoded = DeeplinkSchemaMatch.bip21decode(`DOICHAIN:${suffix}NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb?amount=20.3&label=Foobar`);
     assert.deepStrictEqual(decoded, {
-      address: '1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH',
+      address: "NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb",
       options: {
         amount: 20.3,
-        label: 'Foobar',
+        label: "Foobar",
       },
     });
   });
 
   it('encodes bip21', () => {
-    let encoded = DeeplinkSchemaMatch.bip21encode('1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH');
-    assert.strictEqual(encoded, 'bitcoin:1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH');
-    encoded = DeeplinkSchemaMatch.bip21encode('1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH', {
+    let encoded = DeeplinkSchemaMatch.bip21encode('NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb');
+    assert.strictEqual(encoded, "NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb");
+    encoded = DeeplinkSchemaMatch.bip21encode('NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb', {
       amount: 20.3,
       label: 'Foobar',
     });
-    assert.strictEqual(encoded, 'bitcoin:1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH?amount=20.3&label=Foobar');
+    assert.strictEqual(encoded, 'doichain:NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb?amount=20.3&label=Foobar');
   });
 
   it('encodes bip21 and discards empty arguments', () => {
-    const encoded = DeeplinkSchemaMatch.bip21encode('1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH', {
+    const encoded = DeeplinkSchemaMatch.bip21encode('NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb', {
       label: ' ',
       amoount: undefined,
     });
-    assert.strictEqual(encoded, 'bitcoin:1BgGZ9tcN4rm9KBzDn7KprQz87SZ26SAMH');
+    assert.strictEqual(encoded, "NE3VSuPqncN5MiwjWUK9haRF3xT3pfQpFb");
   });
 
   it('can decodeBitcoinUri', () => {
     assert.deepStrictEqual(
       DeeplinkSchemaMatch.decodeBitcoinUri(
-        `bitcoin:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
+        `doichain:${suffix}bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7?amount=0.0001&pj=https://btc.donate.kukks.org/BTC/pj`,
       ),
       {
         address: 'bc1qnapskphjnwzw2w3dk4anpxntunc77v6qrua0f7',

@@ -210,6 +210,16 @@ class DeeplinkSchemaMatch {
           },
         },
       ]);
+    } else if (DeeplinkSchemaMatch.isPsbtNameOpTransactions(event.url)) {
+      completionHandler([
+        'SendDetailsRoot',
+        {
+          screen: 'SendDetails',
+          params: {
+            uri: event.url,
+          },
+        },
+      ]);
     } else {
       const urlObject = URL.parse(event.url, true); // eslint-disable-line n/no-deprecated-api
       (async () => {
@@ -320,7 +330,7 @@ class DeeplinkSchemaMatch {
   }
 
   static isBitcoinAddress(address: string): boolean {
-    address = address.replace('://', ':').replace('bitcoin:', '').replace('BITCOIN:', '').replace('bitcoin=', '').split('?')[0];
+    address = address.replace('://', ':').replace('doichain:', '').replace('DOICHAIN:', '').replace('doichain=', '').split('?')[0];
     let isValidBitcoinAddress = false;
     try {
       bitcoin.address.toOutputScript(address, DOICHAIN);
@@ -329,6 +339,15 @@ class DeeplinkSchemaMatch {
       isValidBitcoinAddress = false;
     }
     return isValidBitcoinAddress;
+  }
+  
+  static isPsbtNameOpTransactions(psbt: string): boolean {
+    let isPsbtNameOpTransactions = false;
+    try {
+      bitcoin.Psbt.fromBase64(psbt, { network: DOICHAIN });
+      isPsbtNameOpTransactions = true;
+    } catch (err) {}
+    return isPsbtNameOpTransactions;
   }
 
   static isLightningInvoice(invoice: string): boolean {
@@ -366,14 +385,14 @@ class DeeplinkSchemaMatch {
   }
 
   static isBothBitcoinAndLightning(url: string): TBothBitcoinAndLightning {
-    if (url.includes('lightning') && (url.includes('bitcoin') || url.includes('BITCOIN'))) {
-      const txInfo = url.split(/(bitcoin:\/\/|BITCOIN:\/\/|bitcoin:|BITCOIN:|lightning:|lightning=|bitcoin=)+/);
+    if (url.includes('lightning') && (url.includes('doichain') || url.includes('DOICHAIN'))) {
+      const txInfo = url.split(/(doichain:\/\/|DOICHAIN:\/\/|doichain:|DOICHAIN:|lightning:|lightning=|doichain=)+/);
       let btc: string | false = false;
       let lndInvoice: string | false = false;
       for (const [index, value] of txInfo.entries()) {
         try {
           // Inside try-catch. We dont wan't to  crash in case of an out-of-bounds error.
-          if (value.startsWith('bitcoin') || value.startsWith('BITCOIN')) {
+          if (value.startsWith('bitcoin') || value.startsWith('DOICHAIN')) {
             btc = `bitcoin:${txInfo[index + 1]}`;
             if (!DeeplinkSchemaMatch.isBitcoinAddress(btc)) {
               btc = false;
@@ -406,7 +425,7 @@ class DeeplinkSchemaMatch {
       throw new Error('No URI provided');
     }
     let replacedUri = uri;
-    for (const replaceMe of ['BITCOIN://', 'bitcoin://', 'BITCOIN:']) {
+    for (const replaceMe of ['DOICHAIN://', 'doichain://', 'DOICHAIN:']) {
       replacedUri = replacedUri.replace(replaceMe, 'doichain:');
     }
 

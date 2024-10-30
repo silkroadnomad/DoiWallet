@@ -141,7 +141,7 @@ const About: React.FC = () => {
       <BlueTextCentered>
         {getApplicationName()} ver {getVersion()} (build {getBuildNumber() + ' ' + branch})
       </BlueTextCentered>
-      <BlueTextCentered>{new Date(firstInstallTime).toGMTString()   }</BlueTextCentered>
+      <BlueTextCentered>{new Date(firstInstallTime).toString()   }</BlueTextCentered>
       <BlueTextCentered>{getBundleId()}</BlueTextCentered>
       <BlueTextCentered>
         w, h = {width}, {height}

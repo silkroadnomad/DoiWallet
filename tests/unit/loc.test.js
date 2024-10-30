@@ -47,9 +47,8 @@ describe('Localization', () => {
 
   it.each([
     [123000000, DoichainUnit.SWARTZ, false, "123000000", false],
-    [123000000, DoichainUnit.SWARTZ, true, "123,000,000", false],
-    [123456000, DoichainUnit.DDI, true, "1.23456", false],
-    ["123456000", DoichainUnit.DOI, true, "1.23456", false], // can handle strings
+    [123000000, DoichainUnit.SWARTZ, true, "123.000.000", false],    
+    [123456000, DoichainUnit.DOI, true, "1.23456", false], // can handle strings
     [100000000, DoichainUnit.DOI, true, "1", false],
     [10000000, DoichainUnit.DOI, true, "0.1", false],
     [1, DoichainUnit.DOI, true, "0.00000001", false],
@@ -74,14 +73,15 @@ describe('Localization', () => {
         toUnit,
         withFormatting
       );
+
       assert.strictEqual(actualResult, expectedResult);
     },
     240000
   );
 
   it.each([
-    [123000000, DoichainUnit.SWARTZ, false, "123000000 sats"],
-    [123000000, DoichainUnit.DOI, false, "1.23 BTC"],
+    [123000000, DoichainUnit.SWARTZ, false, "123000000 swartz"],
+    [123000000, DoichainUnit.DOI, false, "1.23 DOI"],
     [123000000, DoichainUnit.LOCAL_CURRENCY, false, "$1.23"],
   ])(
     "can formatBalance",

@@ -4,7 +4,7 @@ import { openSettings } from 'react-native-permissions';
 import A from '../../blue_modules/analytics';
 import { BlueCard, BlueSpacing20, BlueSpacing40, BlueText } from '../../BlueComponents';
 import { Header } from '../../components/Header';
-import ListItem from '../../components/ListItem';
+import ListItem, { PressableWrapper } from '../../components/ListItem';
 import { useTheme } from '../../components/themes';
 import { setBalanceDisplayAllowed } from '../../components/WidgetCommunication';
 import loc from '../../loc';
@@ -17,14 +17,17 @@ enum SettingsPrivacySection {
   ReadClipboard,
   QuickActions,
   Widget,
+  TemporaryScreenshots,
+  TotalBalance,
 }
 
 const SettingsPrivacy: React.FC = () => {
   const { colors } = useTheme();
-  const { isStorageEncrypted } = useStorage();
+  const { isStorageEncrypted, wallets } = useStorage();
   const {
     isDoNotTrackEnabled,
     setDoNotTrackStorage,
+    isPrivacyBlurEnabled,
     setIsPrivacyBlurEnabledState,
     isWidgetBalanceDisplayAllowed,
     setIsWidgetBalanceDisplayAllowedStorage,
@@ -32,11 +35,12 @@ const SettingsPrivacy: React.FC = () => {
     setIsClipboardGetContentEnabledStorage,
     isQuickActionsEnabled,
     setIsQuickActionsEnabledStorage,
+    isTotalBalanceEnabled,
+    setIsTotalBalanceEnabledStorage,
   } = useSettings();
   const [isLoading, setIsLoading] = useState<number>(SettingsPrivacySection.All);
 
   const [storageIsEncrypted, setStorageIsEncrypted] = useState<boolean>(true);
-  const [isPrivacyBlurEnabledTapped, setIsPrivacyBlurEnabledTapped] = useState<number>(0);
   const styleHooks = StyleSheet.create({
     root: {
       backgroundColor: colors.background,
@@ -89,13 +93,24 @@ const SettingsPrivacy: React.FC = () => {
     setIsLoading(SettingsPrivacySection.None);
   };
 
-  const openApplicationSettings = () => {
-    openSettings();
+  const onTotalBalanceEnabledValueChange = async (value: boolean) => {
+    setIsLoading(SettingsPrivacySection.TotalBalance);
+    try {
+      setIsTotalBalanceEnabledStorage(value);
+    } catch (e) {
+      console.debug('onTotalBalanceEnabledValueChange catch', e);
+    }
+    setIsLoading(SettingsPrivacySection.None);
   };
 
-  const onDisablePrivacyTapped = () => {
-    setIsPrivacyBlurEnabledState(!(isPrivacyBlurEnabledTapped >= 10));
-    setIsPrivacyBlurEnabledTapped(prev => prev + 1);
+  const onTemporaryScreenshotsValueChange = (value: boolean) => {
+    setIsLoading(SettingsPrivacySection.TemporaryScreenshots);
+    setIsPrivacyBlurEnabledState(!value);
+    setIsLoading(SettingsPrivacySection.None);
+  };
+
+  const openApplicationSettings = () => {
+    openSettings();
   };
 
   return (
@@ -117,7 +132,7 @@ const SettingsPrivacy: React.FC = () => {
         }}
       />
       <BlueCard>
-        <Pressable accessibilityRole="button" onPress={onDisablePrivacyTapped}>
+        <Pressable accessibilityRole="button">
           <BlueText>{loc.settings.privacy_clipboard_explanation}</BlueText>
         </Pressable>
       </BlueCard>
@@ -132,13 +147,37 @@ const SettingsPrivacy: React.FC = () => {
           testID: 'QuickActionsSwitch',
         }}
       />
-      {}
       <BlueCard>
         <BlueText>{loc.settings.privacy_quickactions_explanation}</BlueText>
         <BlueSpacing20 />
         {storageIsEncrypted && <BlueText>{loc.settings.encrypted_feature_disabled}</BlueText>}
       </BlueCard>
-
+      <ListItem
+        title={loc.total_balance_view.title}
+        Component={PressableWrapper}
+        switch={{
+          onValueChange: onTotalBalanceEnabledValueChange,
+          value: isTotalBalanceEnabled,
+          disabled: isLoading === SettingsPrivacySection.All || wallets.length < 2,
+          testID: 'TotalBalanceSwitch',
+        }}
+      />
+      <BlueCard>
+        <BlueText>{loc.total_balance_view.explanation}</BlueText>
+        <BlueSpacing20 />
+      </BlueCard>
+      <ListItem
+        title={loc.settings.privacy_temporary_screenshots}
+        Component={TouchableWithoutFeedback}
+        switch={{
+          onValueChange: onTemporaryScreenshotsValueChange,
+          value: !isPrivacyBlurEnabled,
+          disabled: isLoading === SettingsPrivacySection.All,
+        }}
+      />
+      <BlueCard>
+        <BlueText>{loc.settings.privacy_temporary_screenshots_instructions}</BlueText>
+      </BlueCard>
       <ListItem
         title={loc.settings.privacy_do_not_track}
         Component={TouchableWithoutFeedback}
@@ -169,7 +208,6 @@ const SettingsPrivacy: React.FC = () => {
           </BlueCard>
         </>
       )}
-      <BlueSpacing20 />
 
       <BlueSpacing20 />
       <ListItem title={loc.settings.privacy_system_settings} chevron onPress={openApplicationSettings} testID="PrivacySystemSettings" />

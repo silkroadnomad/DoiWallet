@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { useRoute } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import * as bitcoin from 'bitcoinjs-lib';
-import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Linking, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Keyboard, Linking, StyleSheet, TextInput, View } from 'react-native';
 
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
-import { isTablet } from '../../blue_modules/environment';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import Notifications from '../../blue_modules/notifications';
 import {
@@ -23,6 +22,7 @@ import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
 import { scanQrHelper } from '../../helpers/scan-qr';
 import loc from '../../loc';
+import { DetailViewStackParamList } from '../../navigation/DetailViewStackParamList';
 
 const BROADCAST_RESULT = Object.freeze({
   none: 'Input transaction hex',
@@ -31,12 +31,10 @@ const BROADCAST_RESULT = Object.freeze({
   error: 'error',
 });
 
-interface SuccessScreenProps {
-  tx: string;
-}
+type RouteProps = RouteProp<DetailViewStackParamList, 'Broadcast'>;
 
 const Broadcast: React.FC = () => {
-  const { name } = useRoute();
+  const { name, params } = useRoute<RouteProps>();
   const [tx, setTx] = useState<string | undefined>();
   const [txHex, setTxHex] = useState<string | undefined>();
   const { colors } = useTheme();
@@ -49,6 +47,14 @@ const Broadcast: React.FC = () => {
       backgroundColor: colors.inputBackgroundColor,
     },
   });
+
+  useEffect(() => {
+    const scannedData = params?.scannedData;
+    if (scannedData) {
+      handleScannedData(scannedData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params?.scannedData]);
 
   const handleUpdateTxHex = (nextValue: string) => setTxHex(nextValue.trim());
 
@@ -81,10 +87,7 @@ const Broadcast: React.FC = () => {
     }
   };
 
-  const handleQRScan = async () => {
-    const scannedData = await scanQrHelper(name);
-    if (!scannedData) return;
-
+  const handleScannedData = (scannedData: string) => {
     if (scannedData.indexOf('+') === -1 && scannedData.indexOf('=') === -1 && scannedData.indexOf('=') === -1) {
       // this looks like NOT base64, so maybe its transaction's hex
       return handleUpdateTxHex(scannedData);
@@ -95,6 +98,10 @@ const Broadcast: React.FC = () => {
       const validTx = bitcoin.Psbt.fromBase64(scannedData).extractTransaction();
       return handleUpdateTxHex(validTx.toHex());
     } catch (e) {}
+  };
+
+  const handleQRScan = () => {
+    scanQrHelper(name, true, undefined, false);
   };
 
   let status;
@@ -117,49 +124,47 @@ const Broadcast: React.FC = () => {
 
   return (
     <SafeArea>
-      <KeyboardAvoidingView enabled={!isTablet} behavior={Platform.OS === 'ios' ? 'position' : undefined}>
-        <View style={styles.wrapper} testID="BroadcastView">
-          {BROADCAST_RESULT.success !== broadcastResult && (
-            <BlueCard style={styles.mainCard}>
-              <View style={styles.topFormRow}>
-                <BlueFormLabel>{status}</BlueFormLabel>
-                {BROADCAST_RESULT.pending === broadcastResult && <ActivityIndicator size="small" />}
-              </View>
+      <View style={styles.wrapper} testID="BroadcastView">
+        {BROADCAST_RESULT.success !== broadcastResult && (
+          <BlueCard style={styles.mainCard}>
+            <View style={styles.topFormRow}>
+              <BlueFormLabel>{status}</BlueFormLabel>
+              {BROADCAST_RESULT.pending === broadcastResult && <ActivityIndicator size="small" />}
+            </View>
 
-              <View style={[styles.input, stylesHooks.input]}>
-                <TextInput
-                  style={styles.text}
-                  multiline
-                  editable
-                  placeholderTextColor="#81868e"
-                  value={txHex}
-                  onChangeText={handleUpdateTxHex}
-                  onSubmitEditing={Keyboard.dismiss}
-                  testID="TxHex"
-                />
-              </View>
-              <BlueSpacing20 />
-
-              <Button title={loc.multisig.scan_or_open_file} onPress={handleQRScan} />
-              <BlueSpacing20 />
-
-              <Button
-                title={loc.send.broadcastButton}
-                onPress={handleBroadcast}
-                disabled={broadcastResult === BROADCAST_RESULT.pending || txHex?.length === 0 || txHex === undefined}
-                testID="BroadcastButton"
+            <View style={[styles.input, stylesHooks.input]}>
+              <TextInput
+                style={styles.text}
+                multiline
+                editable
+                placeholderTextColor="#81868e"
+                value={txHex}
+                onChangeText={handleUpdateTxHex}
+                onSubmitEditing={Keyboard.dismiss}
+                testID="TxHex"
               />
-              <BlueSpacing20 />
-            </BlueCard>
-          )}
-          {BROADCAST_RESULT.success === broadcastResult && tx && <SuccessScreen tx={tx} />}
-        </View>
-      </KeyboardAvoidingView>
+            </View>
+            <BlueSpacing20 />
+
+            <Button title={loc.multisig.scan_or_open_file} onPress={handleQRScan} />
+            <BlueSpacing20 />
+
+            <Button
+              title={loc.send.broadcastButton}
+              onPress={handleBroadcast}
+              disabled={broadcastResult === BROADCAST_RESULT.pending || txHex?.length === 0 || txHex === undefined}
+              testID="BroadcastButton"
+            />
+            <BlueSpacing20 />
+          </BlueCard>
+        )}
+        {BROADCAST_RESULT.success === broadcastResult && tx && <SuccessScreen tx={tx} />}
+      </View>
     </SafeArea>
   );
 };
 
-const SuccessScreen: React.FC<SuccessScreenProps> = ({ tx }) => {
+const SuccessScreen: React.FC<{ tx: string }> = ({ tx }) => {
   if (!tx) {
     return null;
   }

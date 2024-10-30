@@ -25,17 +25,17 @@ describe('HDSegwitElectrumSeedP2WPKHWallet', () => {
     );
 
     let address = hd._getExternalAddressByIndex(0);
-    assert.strictEqual(address, 'bc1q2yv6rhtw9ycqeq2rkch65sucf66ytwsd3csawr');
-    assert.ok(hd.getAllExternalAddresses().includes('bc1q2yv6rhtw9ycqeq2rkch65sucf66ytwsd3csawr'));
+    assert.strictEqual(address, 'dc1q2yv6rhtw9ycqeq2rkch65sucf66ytwsdx7t2wk');
+    assert.ok(hd.getAllExternalAddresses().includes('dc1q2yv6rhtw9ycqeq2rkch65sucf66ytwsdx7t2wk'));
 
     address = hd._getInternalAddressByIndex(0);
-    assert.strictEqual(address, 'bc1qvdu80q26ghe66zq8tf5y09qr29vay4cg65mvuk');
+    assert.strictEqual(address, 'dc1qvdu80q26ghe66zq8tf5y09qr29vay4cgdjqmur');
 
     let wif = hd._getExternalWIFByIndex(0);
-    assert.strictEqual(wif, 'L5a1N5JQzT9wDUmVS9hb2mrd1SMkwPfrWYS8C3Kngp7kiuBkpY2V');
+    assert.strictEqual(wif, 'Tmio6U3C6So5tPTSC6E2Rpmwx2ogM9meyWpuHfLiDhJmN7TEp5Na');
 
     wif = hd._getInternalWIFByIndex(0);
-    assert.strictEqual(wif, 'KwsLfaB2y9QZRd5cxY3uM3L4r2fE7ZPzocwjkPbp1cSFMFfE9tBq');
+    assert.strictEqual(wif, 'Te28Pxup593i6XmZiUaLk6FPnd79XKVoGbLWr1cjYVdFzU142h23');
 
     assert.strictEqual(
       hd._getPubkeyByAddress(hd._getExternalAddressByIndex(0)).toString('hex'),
@@ -63,8 +63,8 @@ describe('HDSegwitElectrumSeedP2WPKHWallet', () => {
       'zpub6nD7dvF6ArArjskKHZLmEL9ky8FqaSti1LN5maDWGwFrqwwGTp1b6ic4EHwciFNaYDmCXcQYxXSiF9BjcLCMPcaYkVN2nQD6QjYQ8vpSR3Z',
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), 'bc1qx94dutas7ysn2my645cyttujrms5d9p57f6aam');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1qcywwsy87sdp8vz5rfjh3sxdv6rt95kujdqq38g');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'KyBagP6JHrNTGanqBSDVzKrsBTVbD9hhkTeVe1zEhewKeCU6wJb7');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'dc1qx94dutas7ysn2my645cyttujrms5d9p5f0p2aw');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'dc1qcywwsy87sdp8vz5rfjh3sxdv6rt95kuj6xmx8a');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'TfLNQmq5Pr1bwVUmwNjwPNnC83wWcuoWDS3Gje1AEY8LHQouYYFx');
   });
 });

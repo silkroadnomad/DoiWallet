@@ -254,7 +254,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   }
 
   static convertXprvToXpub(xprv: string) {
-    const restored = bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv, DOICHAIN));
+    const restored = bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv));
     return restored.neutered().toBase58();
   }
 
@@ -746,7 +746,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
 
       const xpub = this._getXpubFromCosignerIndex(cosignerIndex);
-      const hdNode0 = bip32.fromBase58(xpub , DOICHAIN);
+      const hdNode0 = bip32.fromBase58(xpub, DOICHAIN);
 
       const splt = path.split('/');
       const internal = +splt[splt.length - 2];

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Clipboard from '@react-native-clipboard/clipboard';
 import { I18nManager, Image, LayoutAnimation, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { LightningCustodianWallet, LightningLdkWallet, MultisigHDWallet } from '../class';
+import { LightningCustodianWallet, MultisigHDWallet } from '../class';
 import WalletGradient from '../class/wallet-gradient';
 import { TWallet } from '../class/wallets/types';
 import loc, { formatBalance, formatBalanceWithoutSuffix } from '../loc';
@@ -175,26 +175,24 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
         ];
   }, [wallet.hideBalance]);
 
+  const imageSource = useMemo(() => {
+    switch (wallet.type) {
+      case LightningCustodianWallet.type:
+        return I18nManager.isRTL ? require('../img/lnd-shape-rtl.png') : require('../img/lnd-shape.png');
+      case MultisigHDWallet.type:
+        return I18nManager.isRTL ? require('../img/vault-shape-rtl.png') : require('../img/vault-shape.png');
+      default:
+        return I18nManager.isRTL ? require('../img/btc-shape-rtl.png') : require('../img/btc-shape.png');
+    }
+  }, [wallet.type]);
+
   return (
     <LinearGradient
       colors={WalletGradient.gradientsFor(wallet.type)}
       style={styles.lineaderGradient}
       {...WalletGradient.linearGradientProps(wallet.type)}
     >
-      <Image
-        source={(() => {
-          switch (wallet.type) {
-            case LightningLdkWallet.type:
-            case LightningCustodianWallet.type:
-              return I18nManager.isRTL ? require('../img/lnd-shape-rtl.png') : require('../img/lnd-shape.png');
-            case MultisigHDWallet.type:
-              return I18nManager.isRTL ? require('../img/vault-shape-rtl.png') : require('../img/vault-shape.png');
-            default:
-              return I18nManager.isRTL ? require('../img/btc-shape-rtl.png') : require('../img/btc-shape.png');
-          }
-        })()}
-        style={styles.chainIcon}
-      />
+      <Image source={imageSource} defaultSource={imageSource} style={styles.chainIcon} />
 
       <Text testID="WalletLabel" numberOfLines={1} style={styles.walletLabel} selectable>
         {wallet.getLabel()}
@@ -246,16 +244,6 @@ const TransactionsNavigationHeader: React.FC<TransactionsNavigationHeaderProps> 
         >
           <Text style={styles.manageFundsButtonText}>{loc.lnd.title}</Text>
         </ToolTipMenu>
-      )}
-      {wallet.type === LightningLdkWallet.type && (
-        <TouchableOpacity
-          style={styles.manageFundsButton}
-          accessibilityRole="button"
-          accessibilityLabel={loc.lnd.title}
-          onPress={() => handleManageFundsPressed()}
-        >
-          <Text style={styles.manageFundsButtonText}>{loc.lnd.title}</Text>
-        </TouchableOpacity>
       )}
       {wallet.type === MultisigHDWallet.type && (
         <TouchableOpacity style={styles.manageFundsButton} accessibilityRole="button" onPress={() => handleManageFundsPressed()}>
