@@ -1,11 +1,10 @@
-import React, { useMemo, useState, useContext, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useRoute } from '@react-navigation/native';
 import PropTypes from 'prop-types';
-import { Avatar, Badge, Icon, ListItem } from 'react-native-elements';
 import {
   ActivityIndicator,
   FlatList,
   Keyboard,
-  KeyboardAvoidingView,
   LayoutAnimation,
   PixelRatio,
   Platform,
@@ -16,29 +15,22 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useRoute, useTheme, useNavigation } from '@react-navigation/native';
-
-import loc, { formatBalance } from '../../loc';
-import { DoichainUnit } from '../../models/doichainUnits';
-import { SafeBlueArea, BlueSpacing10, BlueSpacing20, BlueButton, BlueListItem } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import BottomModal from '../../components/BottomModal';
-import { FContainer, FButton } from '../../components/FloatButtons';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import { Avatar, Badge, Icon, ListItem as RNElementsListItem } from '@rneui/themed';
 import * as RNLocalize from 'react-native-localize';
 
-// https://levelup.gitconnected.com/debounce-in-javascript-improve-your-applications-performance-5b01855e086
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      timeout = null;
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
+import { DoichainUnit } from "../../models/doichainUnits";
+import debounce from '../../blue_modules/debounce';
+import { BlueSpacing10, BlueSpacing20 } from '../../BlueComponents';
+import BottomModal from '../../components/BottomModal';
+import Button from '../../components/Button';
+import { FButton, FContainer } from '../../components/FloatButtons';
+import ListItem from '../../components/ListItem';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import loc, { formatBalance } from '../../loc';
+
+import { useStorage } from '../../hooks/context/useStorage';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
 
 const FrozenBadge = () => {
   const { colors } = useTheme();
@@ -71,19 +63,22 @@ const OutputList = ({
   onDeSelect,
 }) => {
   const { colors } = useTheme();
-  const { txMetadata } = useContext(BlueStorageContext);
+  const { txMetadata } = useStorage();
   const memo = oMemo || txMetadata[txid]?.memo || '';
   const color = `#${txid.substring(0, 6)}`;
   const amount = formatBalance(value, balanceUnit, true);
 
   const oStyles = StyleSheet.create({
-    container: { borderBottomColor: colors.lightBorder, backgroundColor: colors.elevated },
+    container: {
+      borderBottomColor: colors.lightBorder,
+      backgroundColor: colors.elevated,
+    },
     containerSelected: {
       backgroundColor: colors.ballOutgoingExpired,
-      borderBottomColor: 'rgba(0, 0, 0, 0)',
+      borderBottomColor: "rgba(0, 0, 0, 0)",
     },
-    avatar: { borderColor: 'white', borderWidth: 1, backgroundColor: color },
-    amount: { fontWeight: 'bold', color: colors.foregroundColor },
+    avatar: { borderColor: "white", borderWidth: 1, backgroundColor: color },
+    amount: { fontWeight: "bold", color: colors.foregroundColor },
     memo: { fontSize: 13, marginTop: 3, color: colors.alternativeTextColor },
   });
 
@@ -93,22 +88,29 @@ const OutputList = ({
   }
 
   return (
-    <ListItem bottomDivider onPress={onPress} containerStyle={selected ? oStyles.containerSelected : oStyles.container}>
-      <Avatar
-        rounded
-        overlayContainerStyle={oStyles.avatar}
+    <RNElementsListItem bottomDivider onPress={onPress} containerStyle={selected ? oStyles.containerSelected : oStyles.container}>
+      <RNElementsListItem.CheckBox
+        checkedColor="#0070FF"
+        iconType="font-awesome"
+        checkedIcon="check-square"
+        checked={selected}
         onPress={selected ? onDeSelect : onSelect}
-        icon={selected ? { name: 'check' } : undefined}
       />
-      <ListItem.Content>
-        <ListItem.Title style={oStyles.amount}>{amount}</ListItem.Title>
-        <ListItem.Subtitle style={oStyles.memo} numberOfLines={1} ellipsizeMode="middle">
+      <RNElementsListItem.Content>
+        <RNElementsListItem.Title style={oStyles.amount}>
+          {amount}
+        </RNElementsListItem.Title>
+        <RNElementsListItem.Subtitle
+          style={oStyles.memo}
+          numberOfLines={1}
+          ellipsizeMode="middle"
+        >
           {memo || address}
-        </ListItem.Subtitle>
-      </ListItem.Content>
+        </RNElementsListItem.Subtitle>
+      </RNElementsListItem.Content>
       {change && <ChangeBadge />}
       {frozen && <FrozenBadge />}
-    </ListItem>
+    </RNElementsListItem>
   );
 };
 
@@ -133,14 +135,14 @@ OutputList.propTypes = {
 
 const OutputModal = ({ item: { address, txid, value, vout, confirmations = 0 }, balanceUnit = DoichainUnit.DOI, oMemo }) => {
   const { colors } = useTheme();
-  const { txMetadata } = useContext(BlueStorageContext);
+  const { txMetadata } = useStorage();
   const memo = oMemo || txMetadata[txid]?.memo || '';
   const fullId = `${txid}:${vout}`;
   const color = `#${txid.substring(0, 6)}`;
   const amount = formatBalance(value, balanceUnit, true);
 
   const oStyles = StyleSheet.create({
-    container: { paddingHorizontal: 0, borderBottomColor: colors.lightBorder, backgroundColor: colors.elevated },
+    container: { paddingHorizontal: 0, borderBottomColor: colors.lightBorder, backgroundColor: 'transparent' },
     avatar: { borderColor: 'white', borderWidth: 1, backgroundColor: color },
     amount: { fontWeight: 'bold', color: colors.foregroundColor },
     tranContainer: { paddingLeft: 20 },
@@ -152,26 +154,26 @@ const OutputModal = ({ item: { address, txid, value, vout, confirmations = 0 }, 
   );
 
   return (
-    <ListItem bottomDivider containerStyle={oStyles.container}>
+    <RNElementsListItem bottomDivider containerStyle={oStyles.container}>
       <Avatar rounded overlayContainerStyle={oStyles.avatar} />
-      <ListItem.Content>
-        <ListItem.Title numberOfLines={1} adjustsFontSizeToFit style={oStyles.amount}>
+      <RNElementsListItem.Content>
+        <RNElementsListItem.Title numberOfLines={1} adjustsFontSizeToFit style={oStyles.amount}>
           {amount}
           <View style={oStyles.tranContainer}>
             <Text style={oStyles.tranText}>{loc.formatString(loc.transactions.list_conf, { number: confirmationsFormatted })}</Text>
           </View>
-        </ListItem.Title>
+        </RNElementsListItem.Title>
         {memo ? (
           <>
-            <ListItem.Subtitle style={oStyles.memo}>{memo}</ListItem.Subtitle>
+            <RNElementsListItem.Subtitle style={oStyles.memo}>{memo}</RNElementsListItem.Subtitle>
             <BlueSpacing10 />
           </>
         ) : null}
-        <ListItem.Subtitle style={oStyles.memo}>{address}</ListItem.Subtitle>
+        <RNElementsListItem.Subtitle style={oStyles.memo}>{address}</RNElementsListItem.Subtitle>
         <BlueSpacing10 />
-        <ListItem.Subtitle style={oStyles.memo}>{fullId}</ListItem.Subtitle>
-      </ListItem.Content>
-    </ListItem>
+        <RNElementsListItem.Subtitle style={oStyles.memo}>{fullId}</RNElementsListItem.Subtitle>
+      </RNElementsListItem.Content>
+    </RNElementsListItem>
   );
 };
 
@@ -202,20 +204,23 @@ const mStyles = StyleSheet.create({
   },
   buttonContainer: {
     height: 45,
+    marginBottom: 36,
+    marginHorizontal: 24,
   },
 });
 
+const transparentBackground = { backgroundColor: 'transparent' };
 const OutputModalContent = ({ output, wallet, onUseCoin, frozen, setFrozen }) => {
   const { colors } = useTheme();
-  const { txMetadata, saveToDisk } = useContext(BlueStorageContext);
+  const { txMetadata, saveToDisk } = useStorage();
   const [memo, setMemo] = useState(wallet.getUTXOMetadata(output.txid, output.vout).memo || txMetadata[output.txid]?.memo || '');
   const onMemoChange = value => setMemo(value);
   const switchValue = useMemo(() => ({ value: frozen, onValueChange: value => setFrozen(value) }), [frozen, setFrozen]);
 
   // save on form change. Because effect called on each event, debounce it.
   const debouncedSaveMemo = useRef(
-    debounce(async memo => {
-      wallet.setUTXOMetadata(output.txid, output.vout, { memo });
+    debounce(async m => {
+      wallet.setUTXOMetadata(output.txid, output.vout, { memo: m });
       await saveToDisk();
     }, 500),
   );
@@ -242,11 +247,12 @@ const OutputModalContent = ({ output, wallet, onUseCoin, frozen, setFrozen }) =>
         ]}
         onChangeText={onMemoChange}
       />
-      <BlueListItem title={loc.cc.freezeLabel} Component={TouchableWithoutFeedback} switch={switchValue} />
-      <BlueSpacing20 />
-      <View style={mStyles.buttonContainer}>
-        <BlueButton testID="UseCoin" title={loc.cc.use_coin} onPress={() => onUseCoin([output])} />
-      </View>
+      <ListItem
+        title={loc.cc.freezeLabel}
+        containerStyle={transparentBackground}
+        Component={TouchableWithoutFeedback}
+        switch={switchValue}
+      />
       <BlueSpacing20 />
     </>
   );
@@ -262,10 +268,11 @@ OutputModalContent.propTypes = {
 
 const CoinControl = () => {
   const { colors } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useExtendedNavigation();
   const { width } = useWindowDimensions();
+  const bottomModalRef = useRef(null);
   const { walletID, onUTXOChoose } = useRoute().params;
-  const { wallets, saveToDisk, sleep } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, sleep } = useStorage();
   const wallet = wallets.find(w => w.getID() === walletID);
   // sort by height ascending, txid , vout ascending
   const utxo = wallet.getUtxo(true).sort((a, b) => a.height - b.height || a.txid.localeCompare(b.txid) || a.vout - b.vout);
@@ -273,14 +280,14 @@ const CoinControl = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]);
   const [frozen, setFrozen] = useState(
-    utxo.filter(output => wallet.getUTXOMetadata(output.txid, output.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
+    utxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
   );
 
   // save frozen status. Because effect called on each event, debounce it.
   const debouncedSaveFronen = useRef(
-    debounce(async frozen => {
+    debounce(async frzn => {
       utxo.forEach(({ txid, vout }) => {
-        wallet.setUTXOMetadata(txid, vout, { frozen: frozen.includes(`${txid}:${vout}`) });
+        wallet.setUTXOMetadata(txid, vout, { frozen: frzn.includes(`${txid}:${vout}`) });
       });
       await saveToDisk();
     }, 500),
@@ -297,9 +304,7 @@ const CoinControl = () => {
         console.log('coincontrol wallet.fetchUtxo() failed'); // either sleep expired or fetchUtxo threw an exception
       }
       const freshUtxo = wallet.getUtxo(true);
-      setFrozen(
-        freshUtxo.filter(output => wallet.getUTXOMetadata(output.txid, output.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`),
-      );
+      setFrozen(freshUtxo.filter(out => wallet.getUTXOMetadata(out.txid, out.vout).frozen).map(({ txid, vout }) => `${txid}:${vout}`));
       setLoading(false);
     })();
   }, [wallet, setLoading, sleep]);
@@ -311,21 +316,33 @@ const CoinControl = () => {
   });
 
   const tipCoins = () => {
+    if (utxo.length === 0) return null;
+
+    let text = loc.cc.tip;
+    if (selected.length > 0) {
+      // show summ of coins if any selected
+      const summ = selected.reduce((prev, curr) => {
+        return prev + utxo.find(({ txid, vout }) => `${txid}:${vout}` === curr).value;
+      }, 0);
+
+      const value = formatBalance(summ, wallet.getPreferredBalanceUnit(), true);
+      text = loc.formatString(loc.cc.selected_summ, { value });
+    }
+
     return (
-      utxo.length >= 1 && (
-        <View style={[styles.tip, stylesHook.tip]}>
-          <Text style={{ color: colors.foregroundColor }}>{loc.cc.tip}</Text>
-        </View>
-      )
+      <View style={[styles.tip, stylesHook.tip]}>
+        <Text style={{ color: colors.foregroundColor }}>{text}</Text>
+      </View>
     );
   };
 
   const handleChoose = item => setOutput(item);
 
-  const handleUseCoin = utxo => {
+  const handleUseCoin = async u => {
+    await bottomModalRef.current?.dismiss();
     setOutput(null);
     navigation.pop();
-    onUTXOChoose(utxo);
+    onUTXOChoose(u);
   };
 
   const handleMassFreeze = () => {
@@ -363,11 +380,11 @@ const CoinControl = () => {
         selectionStarted={selectionStarted}
         onSelect={() => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // animate buttons show
-          setSelected(selected => [...selected, `${p.item.txid}:${p.item.vout}`]);
+          setSelected(s => [...s, `${p.item.txid}:${p.item.vout}`]);
         }}
         onDeSelect={() => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); // animate buttons show
-          setSelected(selected => selected.filter(i => i !== `${p.item.txid}:${p.item.vout}`));
+          setSelected(s => s.filter(i => i !== `${p.item.txid}:${p.item.vout}`));
         }}
       />
     );
@@ -385,11 +402,17 @@ const CoinControl = () => {
     return <OutputModalContent output={output} wallet={wallet} onUseCoin={handleUseCoin} frozen={oFrozen} setFrozen={setOFrozen} />;
   };
 
+  useEffect(() => {
+    if (output) {
+      bottomModalRef.current?.present();
+    }
+  }, [output]);
+
   if (loading) {
     return (
-      <SafeBlueArea style={[styles.center, { backgroundColor: colors.elevated }]}>
+      <SafeArea style={[styles.center, { backgroundColor: colors.elevated }]}>
         <ActivityIndicator testID="Loading" />
-      </SafeBlueArea>
+      </SafeArea>
     );
   }
 
@@ -402,17 +425,22 @@ const CoinControl = () => {
       )}
 
       <BottomModal
-        isVisible={Boolean(output)}
+        ref={bottomModalRef}
         onClose={() => {
           Keyboard.dismiss();
           setOutput(false);
         }}
+        backgroundColor={colors.elevated}
+        footer={
+          <View style={mStyles.buttonContainer}>
+            <Button testID="UseCoin" title={loc.cc.use_coin} onPress={() => handleUseCoin([output])} />
+          </View>
+        }
+        footerDefaultMargins
+        contentContainerStyle={[styles.modalContent, styles.modalMinHeight]}
       >
-        <KeyboardAvoidingView enabled={!Platform.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
-          <View style={[styles.modalContent, { backgroundColor: colors.elevated }]}>{output && renderOutputModalContent()}</View>
-        </KeyboardAvoidingView>
+        {output && renderOutputModalContent()}
       </BottomModal>
-
       <FlatList
         ListHeaderComponent={tipCoins}
         data={utxo}
@@ -453,11 +481,8 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 22,
-    justifyContent: 'center',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
   },
+  modalMinHeight: Platform.OS === 'android' ? { minHeight: 500 } : {},
   empty: {
     flex: 1,
     justifyContent: 'center',
@@ -474,7 +499,5 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '225deg' }],
   },
 });
-
-CoinControl.navigationOptions = navigationStyle({}, opts => ({ ...opts, title: loc.cc.header }));
 
 export default CoinControl;

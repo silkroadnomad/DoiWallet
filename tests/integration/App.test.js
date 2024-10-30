@@ -1,33 +1,30 @@
+import assert from 'assert';
 import React from 'react';
 import TestRenderer from 'react-test-renderer';
-import Settings from '../../screen/settings/settings';
-import Selftest from '../../screen/selftest';
-import { BlueHeader } from '../../BlueComponents';
-const assert = require('assert');
-jest.mock('react-native-qrcode-svg', () => 'Video');
-jest.useFakeTimers();
 
-jest.mock('amplitude-js', () => ({
-  getInstance: function () {
-    return {
-      init: jest.fn(),
-      logEvent: jest.fn(),
-    };
-  },
-}));
+import { Header } from '../../components/Header';
+import SelfTest from '../../screen/settings/SelfTest';
+import Settings from '../../screen/settings/Settings';
 
-it('BlueHeader works', () => {
-  const rendered = TestRenderer.create(<BlueHeader />).toJSON();
+jest.mock('../../blue_modules/BlueElectrum', () => {
+  return {
+    connectMain: jest.fn(),
+  };
+});
+
+it('Header works', () => {
+  const rendered = TestRenderer.create(<Header />).toJSON();
   expect(rendered).toBeTruthy();
 });
 
+// eslint-disable-next-line jest/no-disabled-tests
 it.skip('Settings work', () => {
   const rendered = TestRenderer.create(<Settings />).toJSON();
   expect(rendered).toBeTruthy();
 });
 
-it('Selftest work', () => {
-  const component = TestRenderer.create(<Selftest />);
+it('SelfTest work', () => {
+  const component = TestRenderer.create(<SelfTest />);
   const root = component.root;
   const rendered = component.toJSON();
   expect(rendered).toBeTruthy();

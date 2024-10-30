@@ -1,35 +1,85 @@
-version: 2
+version: 2.1
 jobs:
-  build:
+
+  lint:
     docker:
-      - image: cimg/node:16.14.2
-      - image: davidreband/doiwallet-release:latest 
+      - image: cimg/node:20.17.0
 
     working_directory: ~/repo
 
     steps:
       - checkout
-      - run: yarn install       
 
-      - run: test -d node_modules || npm i      
+      - restore_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
 
-      - setup_remote_docker:
-          version: 20.10.14
-          docker_layer_caching: false
-          
-      - run: echo $JSON_KEY_FILE  
-      - run: echo $RELEASE_KEYSTORE_PROPERTIES  
+      - run: test -d node_modules || npm i
 
-      - run: echo $CIRCLE_BRANCH 
-      - run: echo $CIRCLE_TAG
-
-      - run: echo $API_TOKEN
-      - run: echo $GITUSERMAIL
-      - run: echo $GITUSERNAME      
-
-      - run: docker run -e API_TOKEN=$API_TOKEN -e GITUSERMAIL=$GITUSERMAIL -e GITUSERNAME=$GITUSERNAME -e KEYSTORE_BASE64=$KEYSTORE_BASE64  -e RELEASE_KEYSTORE_PROPERTIES=$RELEASE_KEYSTORE_PROPERTIES -e JSON_KEY_FILE=$JSON_KEY_FILE  -e BRANCH=$CIRCLE_BRANCH davidreband/doiwallet-release        
+      - save_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
 
       # run tests!
-      #- run: npm t || npm t || npm t
+      - run:
+          command: npm run tslint && npm run lint
+
+  unit:
+    docker:
+      - image: cimg/node:20.17.0
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+
+      - run: test -d node_modules || npm i
+
+      - save_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+      # run tests!
+      - run:
+          command: npm run unit
 
 
+  integration:
+    docker:
+      - image: cimg/node:20.17.0
+
+    environment:
+      RETRY: "1"
+
+    working_directory: ~/repo
+
+    resource_class: large
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+
+      - run: test -d node_modules || npm i
+
+      - save_cache:
+          key: node_modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+
+      # run tests!
+      - run:
+          command: npm run jest || npm run jest || npm run jest || npm run jest
+
+# Orchestrate our job run sequence
+workflows:
+  build_and_test:
+    jobs:
+      - lint
+      - unit
+      - integration

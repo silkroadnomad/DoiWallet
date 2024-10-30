@@ -1,12 +1,12 @@
-import React from 'react';
 import PropTypes from 'prop-types';
-import { Text } from 'react-native-elements';
-import { InputAccessoryView, StyleSheet, Keyboard, Platform, View } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import React from 'react';
+import { InputAccessoryView, Keyboard, Platform, StyleSheet, View } from 'react-native';
+import { Text } from '@rneui/themed';
 
-import loc from '../loc';
-import { DoichainUnit } from '../models/doichainUnits';
 import { BlueButtonLink } from '../BlueComponents';
+import loc from '../loc';
+import { DoichainUnit } from "../models/doichainUnits";
+import { useTheme } from './themes';
 
 const InputAccessoryAllFunds = ({ balance, canUseAll, onUseAllPressed }) => {
   const { colors } = useTheme();
@@ -31,9 +31,7 @@ const InputAccessoryAllFunds = ({ balance, canUseAll, onUseAllPressed }) => {
           <BlueButtonLink onPress={onUseAllPressed} style={styles.totalCan} title={`${balance} ${DoichainUnit.DOI}`} />
         ) : (
           <Text style={[styles.totalCanNot, stylesHook.totalCanNot]}>
-
-            {balance}
-
+            {balance} {DoichainUnit.DOI}
           </Text>
         )}
       </View>

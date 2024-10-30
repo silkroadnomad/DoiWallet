@@ -1,15 +1,13 @@
-/* global alert */
-import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Keyboard, Text, TouchableOpacity, StatusBar, TouchableWithoutFeedback, View, StyleSheet, I18nManager } from 'react-native';
-import { Icon } from 'react-native-elements';
-
-import { BlueButton, BlueLoading, BlueSpacing, BlueText } from '../../BlueComponents';
-import { navigationStyleTx } from '../../components/navigationStyle';
-import loc from '../../loc';
-import { PlaceholderWallet } from '../../class';
+import React, { Component } from 'react';
+import { I18nManager, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { Icon } from '@rneui/themed';
+import { BlueLoading, BlueSpacing, BlueText } from '../../BlueComponents';
 import Azteco from '../../class/azteco';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import presentAlert from '../../components/Alert';
+import Button from '../../components/Button';
+import loc from '../../loc';
+import { StorageContext } from '../../components/Context/StorageProvider';
 
 const styles = StyleSheet.create({
   loading: {
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
 });
 
 export default class AztecoRedeem extends Component {
-  static contextType = BlueStorageContext;
+  static contextType = StorageContext;
   state = { isLoading: true };
 
   constructor(props, context) {
@@ -61,10 +59,10 @@ export default class AztecoRedeem extends Component {
     /** @type {AbstractWallet} */
     let toWallet = null;
 
-    const wallets = context.wallets.filter(wallet => wallet.type !== PlaceholderWallet.type);
+    const wallets = context.wallets;
 
     if (wallets.length === 0) {
-      alert(loc.azteco.errorBeforeRefeem);
+      presentAlert({ message: loc.azteco.errorBeforeRefeem });
       return props.navigation.goBack(null);
     } else {
       if (wallets.length > 0) {
@@ -97,12 +95,12 @@ export default class AztecoRedeem extends Component {
     const address = await this.state.toWallet.getAddressAsync();
     const result = await Azteco.redeem([this.state.c1, this.state.c2, this.state.c3, this.state.c4], address);
     if (!result) {
-      alert(loc.azteco.errorSomething);
+      presentAlert({ message: loc.azteco.errorSomething });
       this.setState({ isLoading: false });
     } else {
       this.props.navigation.pop();
       // remote because we want to refetch from server tx list and balance
-      alert(loc.azteco.success);
+      presentAlert({ message: loc.azteco.success });
     }
   };
 
@@ -154,14 +152,13 @@ export default class AztecoRedeem extends Component {
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View>
-          <StatusBar barStyle="default" />
           <View style={styles.root}>
             <Text>{loc.azteco.codeIs}</Text>
             <BlueText style={styles.code}>
               {this.state.c1}-{this.state.c2}-{this.state.c3}-{this.state.c4}
             </BlueText>
             {this.renderWalletSelectionButton()}
-            <BlueButton onPress={this.redeem} title={loc.azteco.redeemButton} />
+            <Button onPress={this.redeem} title={loc.azteco.redeemButton} />
             <BlueSpacing />
           </View>
         </View>
@@ -185,5 +182,3 @@ AztecoRedeem.propTypes = {
     }),
   }),
 };
-
-AztecoRedeem.navigationOptions = navigationStyleTx({}, opts => ({ ...opts, title: loc.azteco.title }));

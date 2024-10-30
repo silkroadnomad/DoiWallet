@@ -3,7 +3,7 @@
 //  BlueWalletWatch Extension
 //
 //  Created by Marcos Rodriguez on 3/23/19.
-//  Copyright © 2019 Facebook. All rights reserved.
+
 //
 
 import WatchKit
@@ -14,7 +14,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
   
   static let identifier = "NumericKeypadInterfaceController"
   private var amount: [String] = ["0"]
-  var keyPadType: NumericKeypadType = .BTC
+  var keyPadType: NumericKeypadType = .DOI
   struct NotificationName {
     static let keypadDataChanged = Notification.Name(rawValue: "Notification.NumericKeypadInterfaceController.keypadDataChanged")
   }
@@ -22,8 +22,8 @@ class NumericKeypadInterfaceController: WKInterfaceController {
     static let keypadDataChanged = Notification(name: NotificationName.keypadDataChanged)
   }
   enum NumericKeypadType: String {
-    case BTC = "BTC"
-    case SATS = "sats"
+    case DOI = "DOI"
+    case SWARTZ = "SWARTZ"
   }
   
   @IBOutlet weak var periodButton: WKInterfaceButton!
@@ -32,9 +32,9 @@ class NumericKeypadInterfaceController: WKInterfaceController {
     super.awake(withContext: context)
     if let context = context as? SpecifyInterfaceController.SpecificQRCodeContent {
       amount = context.amountStringArray
-      keyPadType = context.bitcoinUnit
+      keyPadType = context.doichainUnit
     }
-    periodButton.setEnabled(keyPadType == .SATS)
+    periodButton.setEnabled(keyPadType == .SWARTZ)
   }
   
   override func willActivate() {
@@ -63,7 +63,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       return
     }
     switch keyPadType {
-    case .SATS:
+    case .SWARTZ:
       if amount.first == "0" {
         if value == "0" {
           return
@@ -72,7 +72,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
       } else {
         amount.append(value)
       }
-    case .BTC:
+    case .DOI:
       if amount.isEmpty {
         if (value == "0") {
           amount.append("0")
@@ -139,7 +139,7 @@ class NumericKeypadInterfaceController: WKInterfaceController {
   }
   
   @IBAction func keypadNumberDotTapped() {
-    guard !amount.contains("."), keyPadType == .BTC else { return }
+    guard !amount.contains("."), keyPadType == .DOI else { return }
     append(value: ".")
   }
   

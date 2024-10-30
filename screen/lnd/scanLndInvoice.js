@@ -1,41 +1,34 @@
-/* global alert */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import {
-  Text,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  View,
-  TouchableOpacity,
-  StatusBar,
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  I18nManager,
-} from 'react-native';
-import { Icon } from 'react-native-elements';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { useFocusEffect, useNavigation, useRoute, useTheme } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, I18nManager, Keyboard, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Icon } from '@rneui/themed';
 
-import { BlueButton, BlueCard, BlueDismissKeyboardInputAccessory, BlueLoading, SafeBlueArea } from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import AddressInput from '../../components/AddressInput';
-import AmountInput from '../../components/AmountInput';
-import { LightningCustodianWallet } from '../../class/wallets/lightning-custodian-wallet';
+
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+import { btcToSatoshi, fiatToBTC } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
+import { BlueCard, BlueDismissKeyboardInputAccessory, BlueLoading } from '../../BlueComponents';
 import Lnurl from '../../class/lnurl';
-import { DoichainUnit, Chain } from '../../models/doichainUnits';
-import Biometric from '../../class/biometrics';
+import AddressInput from '../../components/AddressInput';
+import presentAlert from '../../components/Alert';
+import AmountInput from '../../components/AmountInput';
+import Button from '../../components/Button';
+import SafeArea from '../../components/SafeArea';
+import { useTheme } from '../../components/themes';
+import { useBiometrics, unlockWithBiometrics } from '../../hooks/useBiometrics';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
-const currency = require('../../blue_modules/currency');
+
+import { useStorage } from '../../hooks/context/useStorage';
 
 const ScanLndInvoice = () => {
-  const { wallets, fetchAndSaveWalletTransactions } = useContext(BlueStorageContext);
+  const { wallets, fetchAndSaveWalletTransactions } = useStorage();
+  const { isBiometricUseCapableAndEnabled } = useBiometrics();
   const { colors } = useTheme();
   const { walletID, uri, invoice } = useRoute().params;
   const name = useRoute().name;
   /** @type {LightningCustodianWallet} */
   const [wallet, setWallet] = useState(
-    wallets.find(item => item.getID() === walletID) || wallets.find(item => item.type === LightningCustodianWallet.type),
+    wallets.find(item => item.getID() === walletID) || wallets.find(item => item.chain === Chain.OFFCHAIN),
   );
   const { navigate, setParams, goBack, pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
@@ -62,14 +55,12 @@ const ScanLndInvoice = () => {
   });
 
   useEffect(() => {
-    console.log('scanLndInvoice useEffect');
-    Keyboard.addListener('keyboardDidShow', _keyboardDidShow);
-    Keyboard.addListener('keyboardDidHide', _keyboardDidHide);
+    const showSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', _keyboardDidShow);
+    const hideSubscription = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', _keyboardDidHide);
     return () => {
-      Keyboard.removeListener('keyboardDidShow', _keyboardDidShow);
-      Keyboard.removeListener('keyboardDidHide', _keyboardDidHide);
+      showSubscription.remove();
+      hideSubscription.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -82,9 +73,9 @@ const ScanLndInvoice = () => {
   useFocusEffect(
     useCallback(() => {
       if (!wallet) {
-        ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
         goBack();
-        setTimeout(() => alert(loc.wallets.no_ln_wallet_error), 500);
+        setTimeout(() => presentAlert({ message: loc.wallets.no_ln_wallet_error }), 500);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [wallet]),
@@ -92,6 +83,9 @@ const ScanLndInvoice = () => {
 
   useEffect(() => {
     if (wallet && uri) {
+      if (Lnurl.isLnurl(uri)) return processLnurlPay(uri);
+      if (Lnurl.isLightningAddress(uri)) return processLnurlPay(uri);
+
       let data = uri;
       // handling BIP21 w/BOLT11 support
       const ind = data.indexOf('lightning=');
@@ -102,33 +96,35 @@ const ScanLndInvoice = () => {
       data = data.replace('LIGHTNING:', '').replace('lightning:', '');
       console.log(data);
 
-      /**
-       * @type {LightningCustodianWallet}
-       */
-      let decoded;
+      let newDecoded;
       try {
-        decoded = wallet.decodeInvoice(data);
+        newDecoded = wallet.decodeInvoice(data);
 
-        let expiresIn = (decoded.timestamp * 1 + decoded.expiry * 1) * 1000; // ms
-        if (+new Date() > expiresIn) {
-          expiresIn = loc.lnd.expiredLow;
+        let newExpiresIn = (newDecoded.timestamp * 1 + newDecoded.expiry * 1) * 1000; // ms
+        if (+new Date() > newExpiresIn) {
+          newExpiresIn = loc.lnd.expired;
         } else {
-          expiresIn = Math.round((expiresIn - +new Date()) / (60 * 1000)) + ' min';
+          const time = Math.round((newExpiresIn - +new Date()) / (60 * 1000));
+          newExpiresIn = loc.formatString(loc.lnd.expiresIn, { time });
         }
         Keyboard.dismiss();
         setParams({ uri: undefined, invoice: data });
-        setIsAmountInitiallyEmpty(decoded.num_satoshis === '0');
+        setIsAmountInitiallyEmpty(newDecoded.num_satoshis === '0');
         setDestination(data);
         setIsLoading(false);
-        setAmount(decoded.num_satoshis);
-        setExpiresIn(expiresIn);
-        setDecoded(decoded);
+        setAmount(newDecoded.num_satoshis);
+        setExpiresIn(newExpiresIn);
+        setDecoded(newDecoded);
       } catch (Err) {
-        ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
+        triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
         Keyboard.dismiss();
         setParams({ uri: undefined });
-        setTimeout(() => alert(Err.message), 10);
+        setTimeout(() => presentAlert({ message: Err.message }), 10);
         setIsLoading(false);
+        setAmount();
+        setDestination();
+        setExpiresIn();
+        setDecoded();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,6 +140,7 @@ const ScanLndInvoice = () => {
 
   const processInvoice = data => {
     if (Lnurl.isLnurl(data)) return processLnurlPay(data);
+    if (Lnurl.isLightningAddress(data)) return processLnurlPay(data);
     setParams({ uri: data });
   };
 
@@ -152,7 +149,7 @@ const ScanLndInvoice = () => {
       screen: 'LnurlPay',
       params: {
         lnurl: data,
-        fromWalletID: walletID || wallet.getID(),
+        walletID: walletID || wallet.getID(),
       },
     });
   };
@@ -162,10 +159,10 @@ const ScanLndInvoice = () => {
       return null;
     }
 
-    const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+    const isBiometricsEnabled = await isBiometricUseCapableAndEnabled();
 
     if (isBiometricsEnabled) {
-      if (!(await Biometric.unlockWithBiometrics())) {
+      if (!(await unlockWithBiometrics())) {
         return;
       }
     }
@@ -173,29 +170,29 @@ const ScanLndInvoice = () => {
     let amountSats = amount;
     switch (unit) {
       case DoichainUnit.SWARTZ:
-        amountSats = parseInt(amountSats); // nop
+        amountSats = parseInt(amountSats, 10); // nop
         break;
-      case DoichainUnit.DOI:
-        amountSats = currency.btcToSatoshi(amountSats);
+      case DoichainUnit.SWARTZ:
+        amountSats = btcToSatoshi(amountSats);
         break;
       case DoichainUnit.LOCAL_CURRENCY:
-        amountSats = currency.btcToSatoshi(currency.fiatToBTC(amountSats));
+        amountSats = btcToSatoshi(fiatToBTC(amountSats));
         break;
     }
     setIsLoading(true);
 
-    const expiresIn = (decoded.timestamp * 1 + decoded.expiry * 1) * 1000; // ms
-    if (+new Date() > expiresIn) {
+    const newExpiresIn = (decoded.timestamp * 1 + decoded.expiry * 1) * 1000; // ms
+    if (+new Date() > newExpiresIn) {
       setIsLoading(false);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      return alert(loc.lnd.errorInvoiceExpired);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      return presentAlert({ message: loc.lnd.errorInvoiceExpired });
     }
 
     const currentUserInvoices = wallet.user_invoices_raw; // not fetching invoices, as we assume they were loaded previously
-    if (currentUserInvoices.some(invoice => invoice.payment_hash === decoded.payment_hash)) {
+    if (currentUserInvoices.some(i => i.payment_hash === decoded.payment_hash)) {
       setIsLoading(false);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      return alert(loc.lnd.sameWalletAsInvoiceError);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      return presentAlert({ message: loc.lnd.sameWalletAsInvoiceError });
     }
 
     try {
@@ -203,20 +200,25 @@ const ScanLndInvoice = () => {
     } catch (Err) {
       console.log(Err.message);
       setIsLoading(false);
-      ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-      return alert(Err.message);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationError);
+      return presentAlert({ message: Err.message });
     }
 
-    navigate('Success', {
+    navigate("Success", {
       amount: amountSats,
       amountUnit: DoichainUnit.SWARTZ,
       invoiceDescription: decoded.description,
     });
-    fetchAndSaveWalletTransactions(walletID);
+    fetchAndSaveWalletTransactions(wallet.getID());
   };
 
   const processTextForInvoice = text => {
-    if (text.toLowerCase().startsWith('lnb') || text.toLowerCase().startsWith('lightning:lnb') || Lnurl.isLnurl(text)) {
+    if (
+      (text && text.toLowerCase().startsWith('lnb')) ||
+      text.toLowerCase().startsWith('lightning:lnb') ||
+      Lnurl.isLnurl(text) ||
+      Lnurl.isLightningAddress(text)
+    ) {
       processInvoice(text);
     } else {
       setDecoded(undefined);
@@ -253,10 +255,10 @@ const ScanLndInvoice = () => {
           </TouchableOpacity>
         )}
         <View style={styles.walletWrap}>
-          <TouchableOpacity accessibilityRole="button" style={styles.walletWrapTouch} onPress={naviageToSelectWallet}>
+          <TouchableOpacity accessibilityRole="button" disabled={isLoading} style={styles.walletWrapTouch} onPress={naviageToSelectWallet}>
             <Text style={[styles.walletWrapLabel, stylesHook.walletWrapLabel]}>{walletLabel}</Text>
             <Text style={[styles.walletWrapBalance, stylesHook.walletWrapBalance]}>
-              {formatBalanceWithoutSuffix(wallet.getBalance(), DoichainUnit.SWARTZ, false)}
+              {formatBalanceWithoutSuffix(wallet.getBalance(), DoichainUnit.SATS, false)}
             </Text>
             <Text style={[styles.walletWrapSats, stylesHook.walletWrapSats]}>{DoichainUnit.SWARTZ}</Text>
           </TouchableOpacity>
@@ -268,7 +270,11 @@ const ScanLndInvoice = () => {
   const getFees = () => {
     const min = Math.floor(decoded.num_satoshis * 0.003);
     const max = Math.floor(decoded.num_satoshis * 0.01) + 1;
-    return `${min} swartz - ${max} swartz`;
+    return `${min} ${DoichainUnit.SWARTZ} - ${max} ${DoichainUnit.SWARTZ}`;
+  };
+
+  const onBlur = () => {
+    processTextForInvoice(destination);
   };
 
   const onWalletSelect = selectedWallet => {
@@ -285,79 +291,78 @@ const ScanLndInvoice = () => {
   }
 
   return (
-    <SafeBlueArea style={stylesHook.root}>
-      <StatusBar barStyle="light-content" />
+    <SafeArea style={stylesHook.root}>
       <View style={[styles.root, stylesHook.root]}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <KeyboardAvoidingView enabled behavior="position" keyboardVerticalOffset={20}>
-            <View style={styles.scrollMargin}>
-              <AmountInput
-                pointerEvents={isAmountInitiallyEmpty ? 'auto' : 'none'}
-                isLoading={isLoading}
-                amount={amount}
-                onAmountUnitChange={setUnit}
-                onChangeText={setAmount}
-                disabled={!decoded || isLoading || decoded.num_satoshis > 0}
-                unit={unit}
-                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-              />
-            </View>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustContentInsets
+          automaticallyAdjustKeyboardInsets
+          contentInsetAdjustmentBehavior="automatic"
+        >
+          <View style={styles.scrollMargin}>
+            <AmountInput
+              pointerEvents={isAmountInitiallyEmpty ? 'auto' : 'none'}
+              isLoading={isLoading}
+              amount={amount}
+              onAmountUnitChange={setUnit}
+              onChangeText={setAmount}
+              disabled={!decoded || isLoading || decoded.num_satoshis > 0}
+              unit={unit}
+              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+            />
+          </View>
 
-            <BlueCard>
-              <AddressInput
-                onChangeText={text => {
-                  text = text.trim();
-                  processTextForInvoice(text);
-                }}
-                onBarScanned={processInvoice}
-                address={destination}
-                isLoading={isLoading}
-                placeholder={loc.lnd.placeholder}
-                inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
-                launchedBy={name}
-              />
-              <View style={styles.description}>
-                <Text numberOfLines={0} style={styles.descriptionText}>
-                  {decoded !== undefined ? decoded.description : ''}
-                </Text>
+          <BlueCard>
+            <AddressInput
+              onChangeText={text => {
+                text = text.trim();
+                setDestination(text);
+              }}
+              onBarScanned={data => processTextForInvoice(data.data)}
+              address={destination}
+              isLoading={isLoading}
+              placeholder={loc.lnd.placeholder}
+              inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
+              launchedBy={name}
+              onBlur={onBlur}
+              keyboardType="email-address"
+            />
+            <View style={styles.description}>
+              <Text numberOfLines={0} style={styles.descriptionText}>
+                {decoded !== undefined ? decoded.description : ''}
+              </Text>
+            </View>
+            {expiresIn !== undefined && (
+              <View>
+                <Text style={styles.expiresIn}>{expiresIn}</Text>
+                {decoded && decoded.num_satoshis > 0 && (
+                  <Text style={styles.expiresIn}>{loc.formatString(loc.lnd.potentialFee, { fee: getFees() })}</Text>
+                )}
               </View>
-              {expiresIn !== undefined && (
+            )}
+            <BlueCard>
+              {isLoading ? (
                 <View>
-                  <Text style={styles.expiresIn}>{loc.formatString(loc.lnd.expiresIn, { time: expiresIn })}</Text>
-                  {decoded && decoded.num_satoshis > 0 && (
-                    <Text style={styles.expiresIn}>{loc.formatString(loc.lnd.potentialFee, { fee: getFees() })}</Text>
-                  )}
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <View>
+                  <Button title={loc.lnd.payButton} onPress={pay} disabled={shouldDisablePayButton()} />
                 </View>
               )}
-              <BlueCard>
-                {isLoading ? (
-                  <View>
-                    <ActivityIndicator />
-                  </View>
-                ) : (
-                  <View>
-                    <BlueButton title={loc.lnd.payButton} onPress={pay} disabled={shouldDisablePayButton()} />
-                  </View>
-                )}
-              </BlueCard>
             </BlueCard>
-          </KeyboardAvoidingView>
+          </BlueCard>
+
           {renderWalletSelectionButton()}
         </ScrollView>
       </View>
       <BlueDismissKeyboardInputAccessory />
-    </SafeBlueArea>
+    </SafeArea>
   );
 };
 
 export default ScanLndInvoice;
-ScanLndInvoice.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerLeft: null,
-  },
-  opts => ({ ...opts, title: loc.send.header }),
-);
 
 const styles = StyleSheet.create({
   walletSelectRoot: {
@@ -425,6 +430,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   expiresIn: {
+    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
     color: '#81868e',
     fontSize: 12,
     left: 20,

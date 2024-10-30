@@ -1,227 +1,274 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
-import {
-  InteractionManager,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
-import { useNavigation, useRoute, useTheme, useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { BackHandler, InteractionManager, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import Share from 'react-native-share';
-
-import {
-  BlueLoading,
-  BlueCopyTextToClipboard,
-  BlueButton,
-  BlueButtonLink,
-  is,
-  BlueText,
-  BlueSpacing20,
-  BlueAlertWalletExportReminder,
-  BlueCard,
-} from '../../BlueComponents';
-import navigationStyle from '../../components/navigationStyle';
-import BottomModal from '../../components/BottomModal';
-import Privacy from '../../blue_modules/Privacy';
-import { Chain, DoichainUnit } from '../../models/doichainUnits';
-import HandoffComponent from '../../components/handoff';
-import AmountInput from '../../components/AmountInput';
-import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
-import loc from '../../loc';
-import { BlueStorageContext } from '../../blue_modules/storage-context';
+import * as BlueElectrum from '../../blue_modules/BlueElectrum';
+import { fiatToBTC, satoshiToBTC } from '../../blue_modules/currency';
+import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import Notifications from '../../blue_modules/notifications';
-import ToolTipMenu from '../../components/TooltipMenu';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-const currency = require('../../blue_modules/currency');
+import { BlueButtonLink, BlueCard, BlueLoading, BlueSpacing20, BlueSpacing40, BlueText } from '../../BlueComponents';
+import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
+import AmountInput from '../../components/AmountInput';
+import BottomModal from '../../components/BottomModal';
+import Button from '../../components/Button';
+import CopyTextToClipboard from '../../components/CopyTextToClipboard';
+
+import HandOffComponent from '../../components/HandOffComponent';
+import QRCodeComponent from '../../components/QRCodeComponent';
+import { useTheme } from '../../components/themes';
+import { TransactionPendingIconBig } from '../../components/TransactionPendingIconBig';
+import { useExtendedNavigation } from '../../hooks/useExtendedNavigation';
+import loc, { formatBalance } from '../../loc';
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+import { SuccessView } from '../send/success';
+import { useStorage } from '../../hooks/context/useStorage';
+import { HandOffActivityType } from '../../components/types';
+import SegmentedControl from '../../components/SegmentControl';
+import { DOICHAIN } from '../../blue_modules/network';
+
+const segmentControlValues = [loc.wallets.details_address, loc.bip47.payment_code];
+
 
 const ReceiveDetails = () => {
   const { walletID, address } = useRoute().params;
-  const { wallets, saveToDisk, sleep } = useContext(BlueStorageContext);
+  const { wallets, saveToDisk, sleep, isElectrumDisabled, fetchAndSaveWalletTransactions } = useStorage();
   const wallet = wallets.find(w => w.getID() === walletID);
-  const [customLabel, setCustomLabel] = useState();
-  const [customAmount, setCustomAmount] = useState();
+  const [customLabel, setCustomLabel] = useState('');
+  const [customAmount, setCustomAmount] = useState('');
   const [customUnit, setCustomUnit] = useState(DoichainUnit.DOI);
-  const [bip21encoded, setBip21encoded] = useState();
+  const [bip21encoded, setBip21encoded] = useState('');
   const [isCustom, setIsCustom] = useState(false);
-  const [isCustomModalVisible, setIsCustomModalVisible] = useState(false);
+  const [tempCustomLabel, setTempCustomLabel] = useState('');
+  const [tempCustomAmount, setTempCustomAmount] = useState('');
+  const [tempCustomUnit, setTempCustomUnit] = useState(DoichainUnit.DOI);
+  const [showPendingBalance, setShowPendingBalance] = useState(false);
+  const [showConfirmedBalance, setShowConfirmedBalance] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
-  const { navigate, goBack, setParams } = useNavigation();
+  const [currentTab, setCurrentTab] = useState(segmentControlValues[0]);
+  const { goBack, setParams } = useExtendedNavigation();
+  const bottomModalRef = useRef(null);
   const { colors } = useTheme();
-  const toolTip = useRef();
-  const qrCode = useRef();
-  const styles = StyleSheet.create({
-    modalContent: {
-      backgroundColor: colors.modal,
-      padding: 22,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      borderTopColor: colors.foregroundColor,
-      borderWidth: colors.borderWidth,
-      minHeight: 350,
-      height: 350,
-    },
+  const [intervalMs, setIntervalMs] = useState(5000);
+  const [eta, setEta] = useState('');
+  const [initialConfirmed, setInitialConfirmed] = useState(0);
+  const [initialUnconfirmed, setInitialUnconfirmed] = useState(0);
+  const [displayBalance, setDisplayBalance] = useState('');
+  const fetchAddressInterval = useRef();
+  const receiveAddressButton = useRef();
+  const stylesHook = StyleSheet.create({
     customAmount: {
-      flexDirection: 'row',
       borderColor: colors.formBorder,
       borderBottomColor: colors.formBorder,
-      borderWidth: 1.0,
-      borderBottomWidth: 0.5,
       backgroundColor: colors.inputBackgroundColor,
-      minHeight: 44,
-      height: 44,
-      marginHorizontal: 20,
-      alignItems: 'center',
-      marginVertical: 8,
-      borderRadius: 4,
     },
     customAmountText: {
-      flex: 1,
-      marginHorizontal: 8,
       color: colors.foregroundColor,
-      minHeight: 33,
     },
-    qrCodeContainer: { borderWidth: 6, borderRadius: 8, borderColor: '#FFFFFF' },
     root: {
-      flexGrow: 1,
       backgroundColor: colors.elevated,
-      justifyContent: 'space-between',
-    },
-    scrollBody: {
-      marginTop: 32,
-      flexGrow: 1,
-      alignItems: 'center',
-      paddingHorizontal: 16,
-    },
-    share: {
-      justifyContent: 'flex-end',
-      paddingVertical: 16,
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    link: {
-      marginVertical: 16,
-      paddingHorizontal: 32,
     },
     amount: {
       color: colors.foregroundColor,
-      fontWeight: '600',
-      fontSize: 36,
-      textAlign: 'center',
     },
     label: {
       color: colors.foregroundColor,
-      fontWeight: '600',
-      textAlign: 'center',
-      paddingBottom: 24,
-    },
-    loading: {
-      alignItems: 'center',
-      width: 300,
-      height: 300,
-      backgroundColor: colors.elevated,
     },
     modalButton: {
       backgroundColor: colors.modalButton,
-      paddingVertical: 14,
-      paddingHorizontal: 70,
-      maxWidth: '80%',
-      borderRadius: 50,
-      fontWeight: '700',
+    },
+    tip: {
+      backgroundColor: colors.ballOutgoingExpired,
     },
   });
 
-  const handleShareQRCode = () => {
-    qrCode.current.toDataURL(data => {
-      const shareImageBase64 = {
-        url: `data:image/png;base64,${data}`,
-      };
-      Share.open(shareImageBase64).catch(error => console.log(error));
-    });
+  useEffect(() => {
+    if (showConfirmedBalance) {
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+    }
+  }, [showConfirmedBalance]);
+
+  // re-fetching address balance periodically
+  useEffect(() => {
+    console.log('receive/details - useEffect');
+
+    const intervalId = setInterval(async () => {
+      try {
+        const decoded = DeeplinkSchemaMatch.bip21decode(bip21encoded);
+        const addressToUse = address || decoded.address;
+        if (!addressToUse) return;
+
+        console.log('checking address', addressToUse, 'for balance...');
+        const balance = await BlueElectrum.getBalanceByAddress(addressToUse);
+        console.log('...got', balance);
+
+        if (balance.unconfirmed > 0) {
+          if (initialConfirmed === 0 && initialUnconfirmed === 0) {
+            setInitialConfirmed(balance.confirmed);
+            setInitialUnconfirmed(balance.unconfirmed);
+            setIntervalMs(25000);
+            triggerHapticFeedback(HapticFeedbackTypes.ImpactHeavy);
+          }
+
+          const txs = await BlueElectrum.getMempoolTransactionsByAddress(addressToUse);
+          const tx = txs.pop();
+          if (tx) {
+            const rez = await BlueElectrum.multiGetTransactionByTxid([tx.tx_hash], true, 10);
+            if (rez && rez[tx.tx_hash] && rez[tx.tx_hash].vsize) {
+              const satPerVbyte = Math.round(tx.fee / rez[tx.tx_hash].vsize);
+              const fees = await BlueElectrum.estimateFees();
+              if (satPerVbyte >= fees.fast) {
+                setEta(loc.formatString(loc.transactions.eta_10m));
+              } else if (satPerVbyte >= fees.medium) {
+                setEta(loc.formatString(loc.transactions.eta_3h));
+              } else {
+                setEta(loc.formatString(loc.transactions.eta_1d));
+              }
+            }
+          }
+
+          setDisplayBalance(
+            loc.formatString(loc.transactions.pending_with_amount, {
+              amt1: formatBalance(balance.unconfirmed, DoichainUnit.LOCAL_CURRENCY, true).toString(),
+              amt2: formatBalance(balance.unconfirmed, DoichainUnit.DOI, true).toString(),
+            }),
+          );
+          setShowPendingBalance(true);
+          setShowAddress(false);
+        } else if (balance.unconfirmed === 0 && initialUnconfirmed !== 0) {
+          // now, handling a case when unconfirmed == 0, but in past it wasnt (i.e. it changed while user was
+          // staring at the screen)
+          const balanceToShow = balance.confirmed - initialConfirmed;
+
+          if (balanceToShow > 0) {
+            // address has actually more coins than initially, so we definitely gained something
+            setShowConfirmedBalance(true);
+            setShowPendingBalance(false);
+            setShowAddress(false);
+            setDisplayBalance(
+              loc.formatString(loc.transactions.received_with_amount, {
+                amt1: formatBalance(balanceToShow, DoichainUnit.LOCAL_CURRENCY, true).toString(),
+                amt2: formatBalance(balanceToShow, DoichainUnit.DOI, true).toString(),
+              }),
+            );
+            fetchAndSaveWalletTransactions(walletID);
+          } else {
+            // rare case, but probable. transaction evicted from mempool (maybe cancelled by the sender)
+            setShowConfirmedBalance(false);
+            setShowPendingBalance(false);
+            setShowAddress(true);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }, intervalMs);
+
+    return () => clearInterval(intervalId);
+  }, [bip21encoded, address, initialConfirmed, initialUnconfirmed, intervalMs, fetchAndSaveWalletTransactions, walletID]);
+
+  const renderConfirmedBalance = () => {
+    return (
+      <View style={styles.scrollBody}>
+        {isCustom && (
+          <>
+            <BlueText style={[styles.label, stylesHook.label]} numberOfLines={1}>
+              {customLabel}
+            </BlueText>
+          </>
+        )}
+        <SuccessView />
+        <BlueText style={[styles.label, stylesHook.label]} numberOfLines={1}>
+          {displayBalance}
+        </BlueText>
+      </View>
+    );
   };
 
-  const showToolTipMenu = () => {
-    toolTip.current.showMenu();
+  const renderPendingBalance = () => {
+    return (
+      <View style={styles.scrollBody}>
+        {isCustom && (
+          <>
+            <BlueText style={[styles.label, stylesHook.label]} numberOfLines={1}>
+              {customLabel}
+            </BlueText>
+          </>
+        )}
+        <TransactionPendingIconBig />
+        <BlueSpacing40 />
+        <BlueText style={[styles.label, stylesHook.label]} numberOfLines={1}>
+          {displayBalance}
+        </BlueText>
+        <BlueText style={[styles.label, stylesHook.label]} numberOfLines={1}>
+          {eta}
+        </BlueText>
+      </View>
+    );
   };
+
+  const handleBackButton = () => {
+    goBack(null);
+    return true;
+  };
+
+  const setAddressBIP21Encoded = useCallback(
+    addr => {
+      const newBip21encoded = DeeplinkSchemaMatch.bip21encode(addr);
+      setParams({ address: addr });
+      setBip21encoded(newBip21encoded);
+      setShowAddress(true);
+    },
+    [setParams],
+  );
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+      clearInterval(fetchAddressInterval.current);
+      fetchAddressInterval.current = undefined;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const renderReceiveDetails = () => {
     return (
-      <ScrollView contentContainerStyle={styles.root} keyboardShouldPersistTaps="always">
+      <>
         <View style={styles.scrollBody}>
           {isCustom && (
             <>
-              <BlueText testID="CustomAmountText" style={styles.amount} numberOfLines={1}>
-                {getDisplayAmount()}
-              </BlueText>
-              <BlueText testID="CustomAmountDescriptionText" style={styles.label} numberOfLines={1}>
-                {customLabel}
-              </BlueText>
+              {getDisplayAmount() && (
+                <BlueText testID="BitcoinAmountText" style={[styles.amount, stylesHook.amount]} numberOfLines={1}>
+                  {getDisplayAmount()}
+                </BlueText>
+              )}
+              {customLabel?.length > 0 && (
+                <BlueText testID="CustomAmountDescriptionText" style={[styles.label, stylesHook.label]} numberOfLines={1}>
+                  {customLabel}
+                </BlueText>
+              )}
             </>
           )}
-          <TouchableWithoutFeedback style={styles.qrCodeContainer} testID="BitcoinAddressQRCodeContainer" onLongPress={showToolTipMenu}>
-            <>
-              <ToolTipMenu
-                ref={toolTip}
-                anchorRef={qrCode}
-                actions={[
-                  {
-                    id: 'shareQRCode',
-                    text: loc.receive.details_share,
-                    onPress: handleShareQRCode,
-                  },
-                ]}
-              />
 
-              <QRCode
-                value={bip21encoded}
-                logo={require('../../img/qr-code.png')}
-                size={(is.ipad() && 300) || 300}
-                logoSize={90}
-                color="#000000"
-                logoBackgroundColor={colors.brandingColor}
-                backgroundColor="#FFFFFF"
-                ecl="H"
-                getRef={qrCode}
-              />
-            </>
-          </TouchableWithoutFeedback>
-          <BlueCopyTextToClipboard text={isCustom ? bip21encoded : address} />
+          <QRCodeComponent value={bip21encoded} />
+          <CopyTextToClipboard text={isCustom ? bip21encoded : address} ref={receiveAddressButton} />
         </View>
-        <View style={styles.share}>
-          <BlueCard>
-            <BlueButtonLink
-              style={styles.link}
-              testID="SetCustomAmountButton"
-              title={loc.receive.details_setAmount}
-              onPress={showCustomAmountModal}
-            />
-            <BlueButton onPress={handleShareButtonPressed} title={loc.receive.details_share} />
-          </BlueCard>
-        </View>
-        {renderCustomAmountModal()}
-      </ScrollView>
+      </>
     );
   };
 
   const obtainWalletAddress = useCallback(async () => {
-    Privacy.enableBlur();
     console.log('receive/details - componentDidMount');
-    wallet.setUserHasSavedExport(true);
-    await saveToDisk();
     let newAddress;
     if (address) {
       setAddressBIP21Encoded(address);
-      await Notifications.tryToObtainPermissions();
+      await Notifications.tryToObtainPermissions(receiveAddressButton);
       Notifications.majorTomToGroundControl([address], [], []);
     } else {
       if (wallet.chain === Chain.ONCHAIN) {
         try {
-          newAddress = await Promise.race([wallet.getAddressAsync(), sleep(1000)]);
+          if (!isElectrumDisabled) newAddress = await Promise.race([wallet.getAddressAsync(), sleep(1000)]);
         } catch (_) {}
         if (newAddress === undefined) {
           // either sleep expired or getAddressAsync threw an exception
@@ -244,156 +291,291 @@ const ReceiveDetails = () => {
         }
       }
       setAddressBIP21Encoded(newAddress);
-      await Notifications.tryToObtainPermissions();
+      await Notifications.tryToObtainPermissions(receiveAddressButton);
       Notifications.majorTomToGroundControl([newAddress], [], []);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const setAddressBIP21Encoded = address => {
-    const bip21encoded = DeeplinkSchemaMatch.bip21encode(address);
-    setParams({ address });
-    setBip21encoded(bip21encoded);
-    setShowAddress(true);
-  };
+  }, [wallet, saveToDisk, address, setAddressBIP21Encoded, isElectrumDisabled, sleep]);
 
   useFocusEffect(
     useCallback(() => {
       const task = InteractionManager.runAfterInteractions(async () => {
         if (wallet) {
-          if (!wallet.getUserHasSavedExport()) {
-            BlueAlertWalletExportReminder({
-              onSuccess: obtainWalletAddress,
-              onFailure: () => {
-                goBack();
-                navigate('WalletExportRoot', {
-                  screen: 'WalletExport',
-                  params: {
-                    walletID: wallet.getID(),
-                  },
-                });
-              },
-            });
-          } else {
-            obtainWalletAddress();
-          }
+          obtainWalletAddress();
+        } else if (!wallet && address) {
+          setAddressBIP21Encoded(address);
         }
       });
       return () => {
         task.cancel();
-        Privacy.disableBlur();
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [wallet]),
+    }, [wallet, address, obtainWalletAddress, setAddressBIP21Encoded]),
   );
 
-  const dismissCustomAmountModal = () => {
-    Keyboard.dismiss();
-    setIsCustomModalVisible(false);
-  };
-
   const showCustomAmountModal = () => {
-    setIsCustomModalVisible(true);
+    setTempCustomLabel(customLabel);
+    setTempCustomAmount(customAmount);
+    setTempCustomUnit(customUnit);
+    bottomModalRef.current.present();
   };
 
   const createCustomAmountAddress = () => {
+    bottomModalRef.current.dismiss();
     setIsCustom(true);
-    setIsCustomModalVisible(false);
-    let amount = customAmount;
-    switch (customUnit) {
+    let amount = tempCustomAmount;
+    switch (tempCustomUnit) {
       case DoichainUnit.DOI:
         // nop
         break;
       case DoichainUnit.SWARTZ:
-        amount = currency.satoshiToBTC(customAmount);
+        amount = satoshiToBTC(tempCustomAmount);
+
         break;
       case DoichainUnit.LOCAL_CURRENCY:
         if (AmountInput.conversionCache[amount + DoichainUnit.LOCAL_CURRENCY]) {
           // cache hit! we reuse old value that supposedly doesnt have rounding errors
-          amount = currency.satoshiToBTC(AmountInput.conversionCache[amount + DoichainUnit.LOCAL_CURRENCY]);
+          amount = satoshiToBTC(
+            AmountInput.conversionCache[amount + DoichainUnit.LOCAL_CURRENCY]
+          );
         } else {
-          amount = currency.fiatToBTC(customAmount);
+          amount = fiatToBTC(tempCustomAmount);
         }
         break;
     }
-    setBip21encoded(DeeplinkSchemaMatch.bip21encode(address, { amount, label: customLabel }));
+    setCustomLabel(tempCustomLabel);
+    setCustomAmount(tempCustomAmount);
+    setCustomUnit(tempCustomUnit);
+    setBip21encoded(DeeplinkSchemaMatch.bip21encode(address, { amount, label: tempCustomLabel }));
     setShowAddress(true);
   };
 
-  const renderCustomAmountModal = () => {
-    return (
-      <BottomModal isVisible={isCustomModalVisible} onClose={dismissCustomAmountModal}>
-        <KeyboardAvoidingView enabled={!Platform.isPad} behavior={Platform.OS === 'ios' ? 'position' : null}>
-          <View style={styles.modalContent}>
-            <AmountInput unit={customUnit} amount={customAmount || ''} onChangeText={setCustomAmount} onAmountUnitChange={setCustomUnit} />
-            <View style={styles.customAmount}>
-              <TextInput
-                onChangeText={setCustomLabel}
-                placeholderTextColor="#81868e"
-                placeholder={loc.receive.details_label}
-                value={customLabel || ''}
-                numberOfLines={1}
-                style={styles.customAmountText}
-                testID="CustomAmountDescription"
-              />
-            </View>
-            <BlueSpacing20 />
-            <View>
-              <BlueButton
-                testID="CustomAmountSaveButton"
-                style={styles.modalButton}
-                title={loc.receive.details_create}
-                onPress={createCustomAmountAddress}
-              />
-              <BlueSpacing20 />
-            </View>
-            <BlueSpacing20 />
-          </View>
-        </KeyboardAvoidingView>
-      </BottomModal>
-    );
+  const resetCustomAmount = () => {
+    setTempCustomLabel('');
+    setTempCustomAmount('');
+    setTempCustomUnit(wallet.getPreferredBalanceUnit());
+    setCustomLabel();
+    setCustomAmount();
+    setCustomUnit(wallet.getPreferredBalanceUnit());
+    setBip21encoded(DeeplinkSchemaMatch.bip21encode(address));
+    setShowAddress(true);
+    bottomModalRef.current.dismiss();
   };
 
   const handleShareButtonPressed = () => {
-    Share.open({ message: bip21encoded }).catch(error => console.log(error));
+    Share.open({ message: currentTab === loc.wallets.details_address ? bip21encoded : wallet.getBIP47PaymentCode() }).catch(error =>
+      console.log(error),
+    );
   };
 
   /**
    * @returns {string} BTC amount, accounting for current `customUnit` and `customUnit`
    */
   const getDisplayAmount = () => {
-    switch (customUnit) {
-      case DoichainUnit.DOI:
-        return customAmount + ' BTC';
-      case DoichainUnit.SWARTZ:
-        return currency.satoshiToBTC(customAmount) + ' BTC';
-      case DoichainUnit.LOCAL_CURRENCY:
-        return currency.fiatToBTC(customAmount) + ' BTC';
+    if (Number(customAmount) > 0) {
+      switch (customUnit) {
+        case DoichainUnit.DOI:
+          return customAmount + " BTC";
+        case DoichainUnit.SWARTZ:
+          return satoshiToBTC(customAmount) + " BTC";
+        case DoichainUnit.LOCAL_CURRENCY:
+          return fiatToBTC(customAmount) + " BTC";
+      }
+      return customAmount + ' ' + customUnit;
+    } else {
+      return null;
     }
-    return customAmount + ' ' + customUnit;
+  };
+
+  const renderTabContent = () => {
+    const qrValue = currentTab === segmentControlValues[0] ? bip21encoded : wallet.getBIP47PaymentCode();
+
+    if (currentTab === segmentControlValues[0]) {
+      return <View style={styles.container}>{address && renderReceiveDetails()}</View>;
+    } else {
+      return (
+        <View style={styles.container}>
+          {!qrValue && <Text>{loc.bip47.not_found}</Text>}
+          {qrValue && (
+            <>
+              <View style={[styles.tip, stylesHook.tip]}>
+                <Text style={{ color: colors.foregroundColor }}>{loc.receive.bip47_explanation}</Text>
+              </View>
+              <QRCodeComponent value={qrValue} />
+              <CopyTextToClipboard text={qrValue} truncated={false} />
+            </>
+          )}
+        </View>
+      );
+    }
   };
 
   return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
-      {address !== undefined && showAddress && (
-        <HandoffComponent
-          title={`Bitcoin Transaction ${address}`}
-          type="org.doichain.doiwallet"
-          url={`https://blockstream.info/address/${address}`}
+    <>
+      <ScrollView
+        testID="ReceiveDetailsScrollView"
+        contentContainerStyle={[styles.root, stylesHook.root]}
+        keyboardShouldPersistTaps="always"
+      >
+        {wallet?.allowBIP47() && wallet.isBIP47Enabled() && (
+          <View style={styles.tabsContainer}>
+            <SegmentedControl
+              values={segmentControlValues}
+              selectedIndex={segmentControlValues.findIndex(tab => tab === currentTab)}
+              onChange={index => {
+                setCurrentTab(segmentControlValues[index]);
+              }}
+            />
+          </View>
+        )}
+        {showAddress && renderTabContent()}
+        {address !== undefined && showAddress && (
+          <HandOffComponent title={loc.send.details_address} type={HandOffActivityType.ReceiveOnchain} userInfo={{ address }} />
+        )}
+        {showConfirmedBalance ? renderConfirmedBalance() : null}
+        {showPendingBalance ? renderPendingBalance() : null}
+        {!showAddress && !showPendingBalance && !showConfirmedBalance ? <BlueLoading /> : null}
+        <View style={styles.share}>
+          <BlueCard>
+            {showAddress && currentTab === loc.wallets.details_address && (
+              <BlueButtonLink
+                style={styles.link}
+                testID="SetCustomAmountButton"
+                title={loc.receive.details_setAmount}
+                onPress={showCustomAmountModal}
+              />
+            )}
+            <Button onPress={handleShareButtonPressed} title={loc.receive.details_share} />
+          </BlueCard>
+        </View>
+      </ScrollView>
+      <BottomModal
+        ref={bottomModalRef}
+        contentContainerStyle={styles.modalContainerJustify}
+        backgroundColor={colors.modal}
+        footer={
+          <View style={styles.modalButtonContainer}>
+            <Button
+              testID="CustomAmountResetButton"
+              style={[styles.modalButton, stylesHook.modalButton]}
+              title={loc.receive.reset}
+              onPress={resetCustomAmount}
+            />
+            <View style={styles.modalButtonSpacing} />
+            <Button
+              testID="CustomAmountSaveButton"
+              style={[styles.modalButton, stylesHook.modalButton]}
+              title={loc.receive.details_create}
+              onPress={createCustomAmountAddress}
+            />
+          </View>
+        }
+      >
+        <AmountInput
+          unit={tempCustomUnit}
+          amount={tempCustomAmount || ''}
+          onChangeText={setTempCustomAmount}
+          onAmountUnitChange={setTempCustomUnit}
         />
-      )}
-      {showAddress ? renderReceiveDetails() : <BlueLoading />}
-    </View>
+        <View style={[styles.customAmount, stylesHook.customAmount]}>
+          <TextInput
+            onChangeText={setTempCustomLabel}
+            placeholderTextColor="#81868e"
+            placeholder={loc.receive.details_label}
+            value={tempCustomLabel || ''}
+            numberOfLines={1}
+            style={[styles.customAmountText, stylesHook.customAmountText]}
+            testID="CustomAmountDescription"
+          />
+        </View>
+        <BlueSpacing20 />
+
+        <BlueSpacing20 />
+      </BottomModal>
+    </>
   );
 };
 
-ReceiveDetails.navigationOptions = navigationStyle(
-  {
-    closeButton: true,
-    headerLeft: null,
+const styles = StyleSheet.create({
+  modalContainerJustify: {
+    alignContent: 'center',
+    padding: 22,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  opts => ({ ...opts, title: loc.receive.header }),
-);
+  customAmount: {
+    flexDirection: 'row',
+    borderWidth: 1.0,
+    borderBottomWidth: 0.5,
+    minHeight: 44,
+    height: 44,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    marginVertical: 8,
+    borderRadius: 4,
+  },
+  root: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+  },
+  tabsContainer: {
+    marginTop: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollBody: {
+    marginTop: 32,
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  share: {
+    justifyContent: 'flex-end',
+    paddingHorizontal: 32,
+    marginVertical: 16,
+  },
+  link: {
+    marginVertical: 32,
+    paddingHorizontal: 32,
+  },
+  amount: {
+    fontWeight: '600',
+    fontSize: 36,
+    textAlign: 'center',
+  },
+  label: {
+    fontWeight: '600',
+    textAlign: 'center',
+    paddingBottom: 24,
+  },
+  modalButton: {
+    paddingVertical: 14,
+    borderRadius: 50,
+    fontWeight: '700',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 34,
+  },
+  modalButtonSpacing: {
+    width: 16,
+  },
+  customAmountText: {
+    flex: 1,
+    marginHorizontal: 8,
+    minHeight: 33,
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tip: {
+    marginHorizontal: 16,
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 24,
+  },
+});
 
 export default ReceiveDetails;

@@ -10,4 +10,4 @@ export const Chain = {
   ONCHAIN: 'ONCHAIN',
   OFFCHAIN: 'OFFCHAIN',
 } as const;
-export type Chain = typeof Chain[keyof typeof Chain];
+export type Chain = (typeof Chain)[keyof typeof Chain];

@@ -3,7 +3,7 @@
 //  BlueWalletWatch Extension
 //
 //  Created by Marcos Rodriguez on 3/23/19.
-//  Copyright © 2019 Facebook. All rights reserved.
+
 //
 
 import WatchKit
@@ -21,9 +21,9 @@ class SpecifyInterfaceController: WKInterfaceController {
     var amount: Double?
     var description: String?
     var amountStringArray: [String] = ["0"]
-    var bitcoinUnit: NumericKeypadInterfaceController.NumericKeypadType = .BTC
+    var doichainUnit: NumericKeypadInterfaceController.NumericKeypadType = .DOI
   }
-  var specifiedQRContent: SpecificQRCodeContent = SpecificQRCodeContent(amount: nil, description: nil, amountStringArray: ["0"], bitcoinUnit: .BTC)
+  var specifiedQRContent: SpecificQRCodeContent = SpecificQRCodeContent(amount: nil, description: nil, amountStringArray: ["0"], doichainUnit: .DOI)
   var wallet: Wallet?
   struct NotificationName {
     static let createQRCode = Notification.Name(rawValue: "Notification.SpecifyInterfaceController.createQRCode")
@@ -40,7 +40,8 @@ class SpecifyInterfaceController: WKInterfaceController {
     let wallet = WatchDataSource.shared.wallets[identifier]
     self.wallet = wallet
     self.createButton.setAlpha(0.5)
-    self.specifiedQRContent.bitcoinUnit = wallet.type == "lightningCustodianWallet" ? .SATS : .BTC
+    self.specifiedQRContent.doichainUnit = (wallet.type == WalletGradient.LightningCustodial.rawValue) ? .SWARTZ : .DOI
+
     NotificationCenter.default.addObserver(forName: NumericKeypadInterfaceController.NotificationName.keypadDataChanged, object: nil, queue: nil) { [weak self] (notification) in
       guard let amountObject = notification.object as? [String], !amountObject.isEmpty else { return }
       if amountObject.count == 1 && (amountObject.first == "." || amountObject.first == "0") {
@@ -54,13 +55,13 @@ class SpecifyInterfaceController: WKInterfaceController {
         }
       }
       self?.specifiedQRContent.amountStringArray = amountObject
-      if let amountDouble = Double(title), let keyPadType = self?.specifiedQRContent.bitcoinUnit {
+      if let amountDouble = Double(title), let keyPadType = self?.specifiedQRContent.doichainUnit {
         self?.specifiedQRContent.amount = amountDouble
         self?.amountButton.setTitle("\(title) \(keyPadType)")
         
         var isShouldCreateButtonBeEnabled = amountDouble > 0 && !title.isEmpty
         
-        if (wallet.type == "lightningCustodianWallet" && !WCSession.default.isReachable) {
+        if (wallet.type == WalletGradient.LightningCustodial.rawValue) && !WCSession.default.isReachable {
           isShouldCreateButtonBeEnabled = false
         }
         

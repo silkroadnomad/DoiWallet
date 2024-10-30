@@ -1,41 +1,50 @@
 import assert from 'assert';
+
 import { HDLegacyBreadwalletWallet } from '../../class';
 
-it('Legacy HD Breadwallet works', async () => {
-  if (!process.env.HD_MNEMONIC_BREAD) {
-    console.error('process.env.HD_MNEMONIC_BREAD not set, skipped');
-    return;
-  }
-  const hdBread = new HDLegacyBreadwalletWallet();
-  hdBread.setSecret(process.env.HD_MNEMONIC_BREAD);
+describe('HDLegacyBreadwalletWallet', () => {
+  it('Legacy HD Breadwallet works', async () => {
+    if (!process.env.HD_MNEMONIC_BREAD) {
+      console.error('process.env.HD_MNEMONIC_BREAD not set, skipped');
+      return;
+    }
+    const hdBread = new HDLegacyBreadwalletWallet();
+    hdBread.setSecret(process.env.HD_MNEMONIC_BREAD);
 
-  assert.strictEqual(hdBread.validateMnemonic(), true);
-  assert.strictEqual(hdBread._getExternalAddressByIndex(0), '1M1UphJDb1mpXV3FVEg6b2qqaBieNuaNrt');
-  assert.strictEqual(hdBread._getInternalAddressByIndex(0), '1A9Sc4opR6c7Ui6NazECiGmsmnUPh2WeHJ');
-  hdBread._internal_segwit_index = 2;
-  hdBread._external_segwit_index = 2;
-  assert.ok(hdBread._getExternalAddressByIndex(0).startsWith('1'));
-  assert.ok(hdBread._getInternalAddressByIndex(0).startsWith('1'));
-  assert.strictEqual(hdBread._getExternalAddressByIndex(2), 'bc1qh0vtrnjn7zs99j4n6xaadde95ctnnvegh9l2jn');
-  assert.strictEqual(hdBread._getInternalAddressByIndex(2), 'bc1qk9hvkxqsqmps6ex3qawr79rvtg8es4ecjfu5v0');
+    assert.strictEqual(hdBread.validateMnemonic(), true);
+    assert.strictEqual(hdBread._getExternalAddressByIndex(0), 'NBuSLSfdJqeJ479ccT4fcg2CMZLmnXYT8L');
+    assert.strictEqual(hdBread._getInternalAddressByIndex(0), 'N3Xr4U6PguMdvkLx2wi3vfsTz2JsCix8bH');
+    hdBread._internal_segwit_index = 2;
+    hdBread._external_segwit_index = 2;
+    assert.ok(hdBread._getExternalAddressByIndex(0).startsWith('N'));
+    assert.ok(hdBread._getInternalAddressByIndex(0).startsWith('N'));
+    assert.strictEqual(hdBread._getExternalAddressByIndex(2), 'dc1qym3dkfstg7xhd5l02nztmdr7auee70aw0j7x9u');
+    assert.strictEqual(hdBread._getInternalAddressByIndex(2), 'dc1qva9aq229k47k55vjpjsn94t7gs7l5tklcsurag');
+    assert.strictEqual(hdBread._getDerivationPathByAddress('NBuSLSfdJqeJ479ccT4fcg2CMZLmnXYT8L'), "m/0'/0/0");
+    assert.strictEqual(hdBread._getDerivationPathByAddress('dc1qym3dkfstg7xhd5l02nztmdr7auee70aw0j7x9u'), "m/0'/0/2");
 
-  assert.strictEqual(hdBread._getDerivationPathByAddress('1M1UphJDb1mpXV3FVEg6b2qqaBieNuaNrt'), "m/0'/0/0");
-  assert.strictEqual(hdBread._getDerivationPathByAddress('bc1qk9hvkxqsqmps6ex3qawr79rvtg8es4ecjfu5v0'), "m/0'/1/2");
+    assert.strictEqual(
+      hdBread._getPubkeyByAddress(hdBread._getExternalAddressByIndex(0)).toString('hex'),
+      '02367900d613be4ea66856315f1cda6944ff824d301dd3604e7cebf592bc29ef61',
+    );
+    assert.strictEqual(
+      hdBread._getPubkeyByAddress(hdBread._getInternalAddressByIndex(0)).toString('hex'),
+      '03288a2a7125b7b5a9e34b1d73fdc01bbd871e3b3d287a671fd289b7918deb0dd6',
+    );
 
-  assert.strictEqual(
-    hdBread._getPubkeyByAddress(hdBread._getExternalAddressByIndex(0)).toString('hex'),
-    '029ba027f3f0a9fa69ce680a246198d56a3b047108f26791d1e4aa2d10e7e7a29a',
-  );
-  assert.strictEqual(
-    hdBread._getPubkeyByAddress(hdBread._getInternalAddressByIndex(0)).toString('hex'),
-    '03074225b31a95af63de31267104e07863d892d291a33ef5b2b32d59c772d5c784',
-  );
+    assert.strictEqual(
+      hdBread.getXpub(),
+      "xpub68iahKkKPy8X7xgYGfLuSFwxMAMQk96mBSoomvgvdCezzREWVbDtg8gZm4fRAkzLGxofEPUK5REqV6R7t31UfCoYGPR6L3gFqT9HnJACCvP"
+    );
 
-  assert.strictEqual(
-    hdBread.getXpub(),
-    'xpub68hPk9CrHimZMBQEja43qWRC2TuXmCDdgZcR5YMebr38XatUEPu2Q2oaBViSMshDcyuMDGkGbTS2aqNHFKdcN1sFWaZgK6SLg84dtN7Ym64',
-  );
+    assert.ok(hdBread.getAllExternalAddresses().includes('NBuSLSfdJqeJ479ccT4fcg2CMZLmnXYT8L'));
+    assert.ok(hdBread.getAllExternalAddresses().includes('dc1qym3dkfstg7xhd5l02nztmdr7auee70aw0j7x9u'));
+  });
 
-  assert.ok(hdBread.getAllExternalAddresses().includes('1M1UphJDb1mpXV3FVEg6b2qqaBieNuaNrt'));
-  assert.ok(hdBread.getAllExternalAddresses().includes('bc1qh0vtrnjn7zs99j4n6xaadde95ctnnvegh9l2jn'));
+  it('Can use french seed', async () => {
+    const hdBread = new HDLegacyBreadwalletWallet();
+    hdBread.setSecret('abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abaisser abeille');
+    assert.strictEqual(hdBread.validateMnemonic(), true);
+    assert.strictEqual(hdBread._getExternalAddressByIndex(0), 'NDq1Cb87NDMLbsu9z2eBp4daGCKEuJ3UD6');
+  });
 });

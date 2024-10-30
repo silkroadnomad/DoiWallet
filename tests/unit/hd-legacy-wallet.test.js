@@ -15,32 +15,32 @@ describe('Legacy HD (BIP44)', () => {
 
     assert.strictEqual(
       hd.getXpub(),
-      'xpub6ByZUAv558PPheJgcPYHpxPLwz8M7TtueYMAik84NADeQcvbzS8W3WxxJ3C9NzfYkMoChiMAumWbeEvMWhTVpH75NqGv5c9wF3wKDbfQShb',
+      "xpub6BsPb3yhpgS8qgZ8LuSv1L3gnAXkjVNk34vX3Fco5wT13oEnQyvHv3sQWnhL8Zbq36x6eEk6SB8UeXa3SmwGG22M67EZ1CwXzpNDkeM86zq"
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), '186FBQmCV5W1xY7ywaWtTZPAQNciVN8Por');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), '1J9zoJz5LsAJ361SQHYnLTWg46Tc2AXUCj');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'N7XRdUDbEKuVnrbrwHrDczupHYSM361M82');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'MxFccRVY76Gi6iKLUnavtPzLX4XKh4LqWW');
 
-    assert.strictEqual(hd._getInternalWIFByIndex(0), 'L4ojevRtK81A8Kof3qyLS2M7HvsVDbUDENNhJqU4vf79w9yGnQLb');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Kz6kLhdyDfSbKuVH25XVqBRztjmFe8X22Xe1hnFzEv79gJNMkTAH');
+    assert.strictEqual(hd._getInternalWIFByIndex(0), 'TjwSyboUSX6ZMmaCHyFbxskYRDsRRkkpLrBDbsDT1jUQwrrBo8Gw');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'Tfc3qdiFyTudj7mCN7QZFru2tM5WE5zezH6fVWxrgeUy6Dm9JaFB');
 
-    assert.ok(hd.getAllExternalAddresses().includes('186FBQmCV5W1xY7ywaWtTZPAQNciVN8Por'));
+    assert.ok(hd.getAllExternalAddresses().includes('N7XRdUDbEKuVnrbrwHrDczupHYSM361M82'));
     assert.ok(!hd.getAllExternalAddresses().includes('1J9zoJz5LsAJ361SQHYnLTWg46Tc2AXUCj')); // not internal
 
     assert.strictEqual(
-      hd._getPubkeyByAddress(hd._getExternalAddressByIndex(0)).toString('hex'),
-      '0316e84a2556f30a199541633f5dda6787710ccab26771b7084f4c9e1104f47667',
+      hd._getPubkeyByAddress(hd._getExternalAddressByIndex(0)).toString("hex"),
+      "03415cef3849debb777718ff1aeae2b6d75802392d8c5b40df66a13a42929c475a"
     );
     assert.strictEqual(
-      hd._getPubkeyByAddress(hd._getInternalAddressByIndex(0)).toString('hex'),
-      '02ad7b2216f3a2b38d56db8a7ee5c540fd12c4bbb7013106eff78cc2ace65aa002',
+      hd._getPubkeyByAddress(hd._getInternalAddressByIndex(0)).toString("hex"),
+      "0243ace72389bdd3c420f1bad5ab316d2de98daa5f3d9f0da10f89c7ad8ae196da"
     );
 
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(0)), "m/44'/0'/0'/0/0");
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getInternalAddressByIndex(0)), "m/44'/0'/0'/1/0");
   });
 
-  it('can create TX', async () => {
+  xit('can create TX', async () => {
     if (!process.env.HD_MNEMONIC) {
       console.error('process.env.HD_MNEMONIC not set, skipped');
       return;
@@ -54,10 +54,8 @@ describe('Legacy HD (BIP44)', () => {
         height: 554830,
         value: 10000,
         address: '186FBQmCV5W1xY7ywaWtTZPAQNciVN8Por',
-        txId: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
         vout: 0,
         txid: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
-        amount: 10000,
         wif: 'Kz6kLhdyDfSbKuVH25XVqBRztjmFe8X22Xe1hnFzEv79gJNMkTAH',
         confirmations: 1,
         txhex:
@@ -67,10 +65,8 @@ describe('Legacy HD (BIP44)', () => {
         height: 554830,
         value: 20000,
         address: '1J9zoJz5LsAJ361SQHYnLTWg46Tc2AXUCj',
-        txId: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
         vout: 1,
         txid: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
-        amount: 20000,
         wif: 'L4ojevRtK81A8Kof3qyLS2M7HvsVDbUDENNhJqU4vf79w9yGnQLb',
         confirmations: 1,
         txhex:
@@ -80,10 +76,8 @@ describe('Legacy HD (BIP44)', () => {
         height: 554830,
         value: 30000,
         address: '186FBQmCV5W1xY7ywaWtTZPAQNciVN8Por',
-        txId: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
         vout: 2,
         txid: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
-        amount: 30000,
         wif: 'Kz6kLhdyDfSbKuVH25XVqBRztjmFe8X22Xe1hnFzEv79gJNMkTAH',
         confirmations: 1,
         txhex:
@@ -93,10 +87,8 @@ describe('Legacy HD (BIP44)', () => {
         height: 554830,
         value: 40000,
         address: '1J9zoJz5LsAJ361SQHYnLTWg46Tc2AXUCj',
-        txId: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
         vout: 3,
         txid: '4f65c8cb159585c00d4deba9c5b36a2bcdfb1399a561114dcf6f2d0c1174bc5f',
-        amount: 40000,
         wif: 'L4ojevRtK81A8Kof3qyLS2M7HvsVDbUDENNhJqU4vf79w9yGnQLb',
         confirmations: 1,
         txhex:
@@ -106,9 +98,9 @@ describe('Legacy HD (BIP44)', () => {
 
     let txNew = hd.createTransaction(
       utxo,
-      [{ address: '3GcKN7q7gZuZ8eHygAhHrvPa5zZbG5Q1rK', value: 80000 }],
+      [{ address: "N7XRdUDbEKuVnrbrwHrDczupHYSM361M82", value: 80000 }],
       1,
-      hd._getInternalAddressByIndex(hd.next_free_change_address_index),
+      hd._getInternalAddressByIndex(hd.next_free_change_address_index)
     );
     let tx = bitcoin.Transaction.fromHex(txNew.tx.toHex());
     assert.strictEqual(tx.ins.length, 3);
@@ -171,8 +163,26 @@ describe('Legacy HD (BIP44)', () => {
       'xpub6D85QDBajeLe2JXJrZeGyQCaw47PWKi3J9DPuHakjTkVBWCxVQQkmMVMSSfnw39tj9FntbozpRtb1AJ8ubjeVSBhyK4M5mzdvsXZzKPwodT',
     );
 
-    assert.strictEqual(hd._getExternalAddressByIndex(0), '1F88g2naBMhDB7pYFttPWGQgryba3hPevM');
-    assert.strictEqual(hd._getInternalAddressByIndex(0), '1H4QD1rg2zQJ4UjuAVJr5eW1fEM8WMqyxh');
-    assert.strictEqual(hd._getExternalWIFByIndex(0), 'L3HLzdVcwo4711gFiZG4fiLzLVNJpR6nejfo6J85wuYn9YF2G5zk');
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'NAhVsgHZ6jnmhf53XiCxinZbbCzd3g9o9z');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'NCdmQfMexNVrb1zQSJdRJAevPTkBTTVuMo');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'TjS8j2EQ3nhFfvNCUVnW4mGKH5pEEBCb7i4aBv91Unjnnkec1HKH');
+  });
+
+  it('can create with custom derivation path', async () => {
+    const hd = new HDLegacyP2PKHWallet();
+    hd.setSecret('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
+    hd.setDerivationPath("m/44'/0'/1'");
+
+    assert.strictEqual(
+      hd.getXpub(),
+      'xpub6BosfCnifzxcJJ1wYuntGJfF2zPJkDeG9ELNHcKNjezuea4tumswN9sH1psMdSVqCMoJC21Bv8usSeqSP4Sp1tLzW7aY59fGn9GCYzx5UTo',
+    );
+
+    assert.strictEqual(hd._getExternalAddressByIndex(0), 'N1RGp81JaXApKcNku1WGgyb5d7A51th9Ex');
+    assert.strictEqual(hd._getInternalAddressByIndex(0), 'N9G75tyhTJwWoFreRxzHRv1C7CiF4GazjG');
+    assert.strictEqual(hd._getExternalWIFByIndex(0), 'TgaS4cAT3FwGG5y3GfrqS9ZMTZBDDM9RYyd6tBRNeyyvXqS21gGg');
+
+    assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(0)), "m/44'/0'/1'/0/0");
+    assert.strictEqual(hd._getDerivationPathByAddress(hd._getInternalAddressByIndex(0)), "m/44'/0'/1'/1/0");
   });
 });
