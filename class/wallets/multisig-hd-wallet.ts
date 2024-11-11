@@ -1,7 +1,7 @@
 import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as bip39 from 'bip39';
-import * as bitcoin from 'bitcoinjs-lib';
-import { Psbt, Transaction } from 'bitcoinjs-lib';
+import * as bitcoin from '@doichain/doichainjs-lib';
+import { Psbt, Transaction } from '@doichain/doichainjs-lib';
 import b58 from 'bs58check';
 import { CoinSelectReturnInput, CoinSelectTarget } from 'coinselect';
 import createHash from 'create-hash';
@@ -1146,7 +1146,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
    * Tries to signs passed psbt object (by reference). If there are enough signatures - tries to finalize psbt
    * and returns Transaction (ready to extract hex)
    */
-  cosignPsbt(psbt: Psbt): { tx: Transaction | false } {
+  cosignPsbt(psbt: Psbt): { tx: Transaction | false, psbt: Psbt } {
     for (let cc = 0; cc < psbt.inputCount; cc++) {
       for (const [cosignerIndex, cosigner] of this._cosigners.entries()) {
         if (MultisigHDWallet.isXpubString(cosigner)) continue;
@@ -1201,10 +1201,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
     if (this.calculateHowManySignaturesWeHaveFromPsbt(psbt) >= this.getM()) {
       const tx = psbt.finalizeAllInputs().extractTransaction();
-      return { tx };
+      return { tx, psbt };
     }
 
-    return { tx: false };
+    return { tx: false, psbt };
   }
 
   /**
