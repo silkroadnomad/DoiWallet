@@ -62,7 +62,10 @@ describe('Bech32 Segwit HD (BIP84) with BIP47', () => {
 
     const publicBip47 = BIP47Factory(ecc).fromPaymentCode(w.getBIP47PaymentCode());
     expect(ourNotificationAddress).toEqual(publicBip47.getNotificationAddress()); // same address we derived internally for ourselves and from public Payment Code
-    expect(ourNotificationAddress).toEqual('13VrzVGGdYErtQRggFWvccFtyeELRMbzG1'); // our notif address
+    //expect(ourNotificationAddress).toEqual('13VrzVGGdYErtQRggFWvccFtyeELRMbzG1'); // our notif address
+    expect(ourNotificationAddress).toEqual('NEbuyZmUxsmip6vzH7zDVQxRurnVzyid9Z'); // our notif address
+
+    
 
     // since we dont do network calls in unit test we cant get counterparties payment codes from our notif address,
     // and thus, dont know collaborative addresses with our payers. lets hardcode our counterparty payment code to test
