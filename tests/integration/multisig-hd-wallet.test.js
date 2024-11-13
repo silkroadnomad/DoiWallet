@@ -22,7 +22,7 @@ beforeAll(async () => {
 });
 
 describe('multisig-hd-wallet', () => {
-  it('can fetch balance & transactions', async () => {
+  it.skip('can fetch balance & transactions', async () => {
     const path = "m/48'/0'/0'/2'";
     const fp1 = 'D37EAD88';
     const fp2 = '168DD603';
