@@ -74,7 +74,6 @@ export class LegacyWallet extends AbstractWallet {
     if (this._address) return this._address;
     let address;
     try {
-      console.log("____secret", this.secret) 
       const keyPair = ECPair.fromWIF(this.secret, DOICHAIN);
       address = bitcoin.payments.p2pkh({
         pubkey: keyPair.publicKey,
@@ -382,7 +381,7 @@ export class LegacyWallet extends AbstractWallet {
 
     // .inputs and .outputs will be undefined if no solution was found
     if (!inputs || !outputs) {
-      throw new Error('Not enough balance. Try sending smaller amount or decrease the fee.');
+     // throw new Error('Not enough balance. Try sending smaller amount or decrease the fee.');
     }
 
     return { inputs, outputs, fee };
