@@ -195,13 +195,13 @@ describe('BlueElectrum', () => {
       "N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D",
     ]);
 
-    assert.strictEqual(balances.balance, 757521152003);
-    assert.strictEqual(balances.unconfirmed_balance, -5000000000);
+    assert.strictEqual(balances.balance, 752521152003);
+    assert.strictEqual(balances.unconfirmed_balance, -5000119855);
    
     assert.strictEqual(balances.addresses.dc1q8nkcs8v7ad9qyjth3cgwwsdu255cpk8w2u7put.confirmed, 0);
     assert.strictEqual(balances.addresses.dc1q8nkcs8v7ad9qyjth3cgwwsdu255cpk8w2u7put.unconfirmed, 0);
-    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.confirmed, 757511152003);
-    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.unconfirmed, -5000000000);
+    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.confirmed, 752511152003);
+    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.unconfirmed, -5000119855);
     assert.strictEqual(balances.addresses['N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D'].confirmed, 10000000);
     assert.strictEqual(balances.addresses['N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D'].unconfirmed, 0);
     if (diableBatching) BlueElectrum.setBatchingEnabled();

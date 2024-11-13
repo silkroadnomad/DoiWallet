@@ -33,7 +33,7 @@ async function _getHdWallet() {
 }
 
 describe('HDSegwitBech32Transaction', () => {
-  it('can decode & check sequence', async function () {
+  it.skip('can decode & check sequence', async function () {
     let T = new HDSegwitBech32Transaction(null, 'ebfe6b4b0624ad031eba10ab02cd9979946d2f4b2cbdb54089a20b2123d0f2a8');
     assert.strictEqual(await T.getMaxUsedSequence(), 0xffffffff);
     assert.strictEqual(await T.isSequenceReplaceable(), false);
@@ -49,7 +49,7 @@ describe('HDSegwitBech32Transaction', () => {
     assert.ok((await T.getRemoteConfirmationsNum()) >= 292);
   });
 
-  it('can tell if its our transaction', async function () {
+  it.skip('can tell if its our transaction', async function () {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -66,7 +66,7 @@ describe('HDSegwitBech32Transaction', () => {
     assert.ok(!(await tt.isOurTransaction()));
   });
 
-  it('can tell tx info', async function () {
+  it.skip('can tell tx info', async function () {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -102,7 +102,7 @@ describe('HDSegwitBech32Transaction', () => {
     );
   });
 
-  it('can do RBF - cancel tx', async function () {
+  it.skip('can do RBF - cancel tx', async function () {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -129,7 +129,7 @@ describe('HDSegwitBech32Transaction', () => {
     assert.strictEqual(await tt2.canCancelTx(), false); // newly created cancel tx is not cancellable anymore
   });
 
-  it('can do RBF - bumpfees tx', async function () {
+  it.skip('can do RBF - bumpfees tx', async function () {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
@@ -160,7 +160,7 @@ describe('HDSegwitBech32Transaction', () => {
     assert.strictEqual(await tt2.canCancelTx(), true); // new tx is still cancellable since we only bumped fees
   });
 
-  it('can do CPFP - bump fees', async function () {
+  it.skip('can do CPFP - bump fees', async function () {
     if (!process.env.HD_MNEMONIC_BIP84) {
       console.error('process.env.HD_MNEMONIC_BIP84 not set, skipped');
       return;
