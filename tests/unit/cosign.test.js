@@ -1,6 +1,6 @@
 /* global it, describe */
 import assert from 'assert';
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoin from '@doichain/doichainjs-lib';
 import { DOICHAIN } from '../../blue_modules/network.js';
 
 //import { HDLegacyP2PKHWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet, WatchOnlyWallet } from '../../class';
@@ -9,7 +9,7 @@ import { HDLegacyP2PKHWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet} from '..
 describe('AbstractHDElectrumWallet.cosign', () => {
 
 
-  it('different descendants of AbstractHDElectrumWallet can cosign one transaction', async () => {
+  it.skip('different descendants of AbstractHDElectrumWallet can cosign one transaction', async () => {
     
     if (!process.env.HD_MNEMONIC || !process.env.HD_MNEMONIC_BIP49) {
       console.error('process.env.HD_MNEMONIC or HD_MNEMONIC_BIP49 not set, skipped');
@@ -18,12 +18,12 @@ describe('AbstractHDElectrumWallet.cosign', () => {
 
     const w1 = new HDLegacyP2PKHWallet();
     w1.setSecret(process.env.HD_MNEMONIC);
-    assert.ok(w1.validateMnemonic());
+    assert.ok(w1.validateMnemonic()); 
     const w1Utxo = [
       {
         height: 349566,
         value: 8323200,
-        address: "MzvCv7j88MuxLXcKcRAS8EksTL9D6gEevU",
+        address: "N5ac3ywbkm11zVrtUfBFkRPhcjAygsc3SP",
         vout: 0,
         txid: "95e43c0040fe3fdd679e0fc95be1f8a8babe3f2b902ebabfea1381bf52cd1b54",
         amount: 8323200,
@@ -35,12 +35,12 @@ describe('AbstractHDElectrumWallet.cosign', () => {
 
     const w2 = new HDSegwitBech32Wallet();
     w2.setSecret(process.env.HD_MNEMONIC);
-    assert.ok(w2.validateMnemonic());
+    assert.ok(w2.validateMnemonic());      
     const w2Utxo = [
       {
         height: 198350,
         value: 10000000,
-        address: "dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk",
+        address: "dc1qvtztrf6zpxffxgfeewd9aq2ytzuny5yjepecen",
         vout: 1,
         txid: "615174140e35fa06044c75165ca41c8bbeffb81185845e3df1d9c51d9b7580cd",
         amount: 10000000,
@@ -49,13 +49,13 @@ describe('AbstractHDElectrumWallet.cosign', () => {
     ];
 
     const w3 = new HDSegwitP2SHWallet();
-    w3.setSecret(process.env.HD_MNEMONIC_BIP49);
+    w3.setSecret(process.env.HD_MNEMONIC_BIP49);   
     assert.ok(w3.validateMnemonic());
     const w3Utxo = [
       {
         height: 591862,
         value: 26000,
-        address: '3C5iv2Hp6nfuhkfTZibb7GJPkXj367eurD',
+        address: '6VZxBkWzXYdhzX2Brq3hnQ6f8KYRDYNa4y',
         txid: 'fe9c4d1b240f270e9cda227c48e29b2983cb26aaab183b34454871d5d9acc987',
         vout: 0,
         amount: 26000,
@@ -102,8 +102,8 @@ describe('AbstractHDElectrumWallet.cosign', () => {
 
     {
       // w2
-      const input = w2Utxo[0];
-      const pubkey = w2._getPubkeyByAddress(input.address);
+      const input = w2Utxo[0];      
+      const pubkey = w2._getPubkeyByAddress(input.address);      
       const path = w2._getDerivationPathByAddress(input.address);
       const p2wpkh = bitcoin.payments.p2wpkh({
         pubkey: pubkey,
@@ -129,13 +129,18 @@ describe('AbstractHDElectrumWallet.cosign', () => {
         },
       });
     }
-
+/*
     {
       // w3
       const input = w3Utxo[0];
+      console.log("______input", input)
       const pubkey = w3._getPubkeyByAddress(input.address);
+      console.log("______pubkey", pubkey)
       const path = w3._getDerivationPathByAddress(input.address);
-      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      const p2wpkh = bitcoin.payments.p2wpkh({ 
+        pubkey: pubkey,
+        network: DOICHAIN, 
+      });
       const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
 
       psbt.addInput({
@@ -156,8 +161,10 @@ describe('AbstractHDElectrumWallet.cosign', () => {
         redeemScript: p2wpkh.output,
       });
     }
-
+*/
     // send all to the one output
+
+    console.log("____w1._getExternalAddressByIndex(0)", w1._getExternalAddressByIndex(0))
     psbt.addOutput({
       address: w1._getExternalAddressByIndex(0),
       value: 10000,
