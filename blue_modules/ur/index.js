@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { URDecoder } from '@ngraveio/bc-ur';
 import b58 from 'bs58check';
 import {
@@ -12,7 +13,7 @@ import {
 } from '@keystonehq/bc-ur-registry/dist';
 import { decodeUR as origDecodeUr, encodeUR as origEncodeUR, extractSingleWorkload as origExtractSingleWorkload } from '../bc-ur/dist';
 import { MultisigCosigner, MultisigHDWallet } from '../../class';
-import { Psbt } from 'bitcoinjs-lib';
+import { Psbt } from '@doichain/doichainjs-lib';
 
 const USE_UR_V1 = 'USE_UR_V1';
 
@@ -220,7 +221,6 @@ function decodeUR(arg) {
 class BlueURDecoder extends URDecoder {
   toString() {
     const decoded = this.resultUR();
-    console.log("___decoded", decoded);
     if (decoded.type === 'crypto-psbt') {
       const cryptoPsbt = CryptoPSBT.fromCBOR(decoded.cbor);
       return cryptoPsbt.getPSBT().toString('base64');
