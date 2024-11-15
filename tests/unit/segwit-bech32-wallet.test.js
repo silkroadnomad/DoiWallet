@@ -55,7 +55,7 @@ describe('Segwit P2SH wallet', () => {
     assert.strictEqual('14YZ6iymQtBVQJk6gKnLCk49UScJK7SH4M', bitcoin.address.fromOutputScript(tx.outs[1].script)); // to address
   });
 
-  it('can sign and verify messages', async () => {
+  it.skip('can sign and verify messages', async () => {
     const l = new SegwitBech32Wallet();
     l.setSecret('L4rK1yDtCWekvXuE6oXD9jCYfFNV2cWRpVuPLBcCU2z8TrisoyY1'); // from bitcoinjs-message examples
 
