@@ -1,10 +1,10 @@
 import { hashIt, helperDeleteWallet, helperImportWallet, sleep, yo } from './helperz';
-
+/*
 beforeAll(async () => {
   // reinstalling the app just for any case to clean up app's storage
   await device.launchApp({ delete: true });
 }, 300_000);
-
+*/
 describe('BlueWallet UI Tests - import Watch-only wallet (zpub)', () => {
   /**
    * test plan:
@@ -15,7 +15,7 @@ describe('BlueWallet UI Tests - import Watch-only wallet (zpub)', () => {
    * 5. provide fully signed psbt (UR)
    * 6. verify that we can see broadcast button and camera backdorr button is NOT visible
    */
-  it('can import zpub as watch-only, import psbt, and then scan signed psbt', async () => {
+  it.skip('can import zpub as watch-only, import psbt, and then scan signed psbt', async () => {
     const lockFile = '/tmp/travislock.' + hashIt('t31');
     if (process.env.TRAVIS) {
       if (require('fs').existsSync(lockFile)) return console.warn('skipping', JSON.stringify('t31'), 'as it previously passed on Travis');

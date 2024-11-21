@@ -89,223 +89,61 @@ describe('Watch only wallet', () => {
     );
   });
 
-  it.skip('can create PSBT base64 without signature for HW wallet ypub', async () => {
+  it('can create PSBT base64 without signature for HW wallet ypub', async () => {
     const w = new WatchOnlyWallet();
-    w.setSecret('ypub6XRzrn3HB1tjhhvrHbk1vnXCecZEdXohGzCk3GXwwbDoJ3VBzZ34jNGWbC6WrS7idXrYjjXEzcPDX5VqnHEnuNf5VAXgLfSaytMkJ2rwVqy');
-    w.init();
-    const changeAddress = '333R1N8zst8bK7xMtqBndmwcd288qxEBmr';
+    w.setSecret('zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez');
+    w.init();    
+    const changeAddress = 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm';
     // hardcoding so we wont have to call w.getChangeAddressAsync()
     const utxos = [
       {
         height: 566299,
         value: 250000,
-        address: '37EX3KrmopubWPLB8Y8NR36wXs7icu2kjQ',
+        address: 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm',
         txid: '786f05d0c531c4bb399ab8cf406b2f118504280bd015e26e4ff9539f8201d4f4',
         vout: 0,
       },
     ];
     // hardcoding utxo so we wont have to call w.fetchUtxo() and w.getUtxo()
 
-    const { psbt } = await w.createTransaction(utxos, [{ address: '398qz3BtNG8DABpEGa2VkHBcficxkgeKvX' }], 1, changeAddress);
+    const { psbt } = await w.createTransaction(utxos, [{ address: 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm' }], 1, changeAddress);
 
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAFMCAAAAAfTUAYKfU/lPbuIV0AsoBIURL2tAz7iaObvEMcXQBW94AAAAAAAAAACAAQnQAwAAAAAAF6kUUatl8TFvnlvB8H/KsqbnR6kpUluHAAAAAAABASCQ0AMAAAAAABepFDzN1E7LDjAMNARzCHsU4rXqBf55hwEEFgAUG3vPJhyWYtt/ikPpOCW6jCqkmxsiBgLHMhb0QhE8eyJBnE9syGAtMehGmHe1sxpm+TlxjgFXERgAAAAAMQAAgAAAAIAAAACAAAAAAAAAAAAAAA==',
+      'cHNidP8BAFICAAAAAfTUAYKfU/lPbuIV0AsoBIURL2tAz7iaObvEMcXQBW94AAAAAAAAAACAAdDPAwAAAAAAFgAUkWKMzciJD1FK9KPE6TEi3cs8Yu4AAAAAAAEBH5DQAwAAAAAAFgAUkWKMzciJD1FK9KPE6TEi3cs8Yu4iBgL+6Gy4EBoVN8VZhGeU9G4fRGBIPaV9yvUC+JH8R0qeqBgAAAAAVAAAgAAAAIAAAACAAQAAAAAAAAAAAA==',
     );
   });
 
-  it.skip('can create PSBT base64 without signature for HW wallet zpub', async () => {
+  it('can create PSBT base64 without signature for HW wallet zpub', async () => {
     const w = new WatchOnlyWallet();
-    w.setSecret('zpub6rjLjQVqVnj7crz9E4QWj4WgczmEseJq22u2B6k2HZr6NE2PQx3ZYg8BnbjN9kCfHymSeMd2EpwpM5iiz5Nrb3TzvddxW2RMcE3VXdVaXHk');
+    w.setSecret('zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez');
     // zpub provided by Stepan @ CryptoAdvance
     w.init();
-    const changeAddress = 'bc1quuafy8htjjj263cvpj7md84magzmc8svmh8lrm';
+    const changeAddress = 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm';
     // hardcoding so we wont have to call w.getChangeAddressAsync()
     const utxos = [
       {
         height: 596736,
         value: 20000,
-        address: 'bc1qhu8jqyzfazgatpctqn44xr7pdd3mdx6qy2r6xa',
+        address: 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm',
         txid: '7f3b9e032a84413d7a5027b0d020f8acf80ad28f68b5bce8fa8ac357248c5b80',
         vout: 0,
       },
     ];
     // hardcoding utxo so we wont have to call w.fetchUtxo() and w.getUtxo()
 
-    const { psbt } = w.createTransaction(utxos, [{ address: 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8z306fyu', value: 5000 }], 1, changeAddress);
+    const { psbt } = w.createTransaction(utxos, [{ address: 'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm', value: 5000 }], 1, changeAddress);
 
     assert.strictEqual(
       psbt.toBase64(),
-      'cHNidP8BAHECAAAAAYBbjCRXw4r66Ly1aI/SCvis+CDQsCdQej1BhCoDnjt/AAAAAAAAAACAAogTAAAAAAAAFgAUwM681sPTyox13F7GLr5VMw75EOIGOgAAAAAAABYAFOc6kh7rlKStRwwMvbaeu+oFvB4MAAAAAAABAR8gTgAAAAAAABYAFL8PIBBJ6JHVhwsE61MPwWtjtptAIgYDWOHbOE3D4KiuoR7kHtmTtFZ7KXQB+8zb51QALLJxTx8YAAAAAFQAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgM005BVD8MgH5kiSGnwXSfzaxLeDSl3y17Vhrx3F/9XxBgAAAAAVAAAgAAAAIAAAACAAQAAAAAAAAAA',
+      'cHNidP8BAHECAAAAAYBbjCRXw4r66Ly1aI/SCvis+CDQsCdQej1BhCoDnjt/AAAAAAAAAACAAogTAAAAAAAAFgAUkWKMzciJD1FK9KPE6TEi3cs8Yu62OQAAAAAAABYAFJFijM3IiQ9RSvSjxOkxIt3LPGLuAAAAAAABAR8gTgAAAAAAABYAFJFijM3IiQ9RSvSjxOkxIt3LPGLuIgYC/uhsuBAaFTfFWYRnlPRuH0RgSD2lfcr1AviR/EdKnqgYAAAAAFQAAIAAAACAAAAAgAEAAAAAAAAAAAAiAgL+6Gy4EBoVN8VZhGeU9G4fRGBIPaV9yvUC+JH8R0qeqBgAAAAAVAAAgAAAAIAAAACAAQAAAAAAAAAA',
     );
-  });
-
-  it.skip('can import coldcard/electrum compatible JSON skeleton wallet, and create a tx with master fingerprint', async () => {
-    const w = new WatchOnlyWallet();
-    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-coldcard.txt', 'ascii'));
-    w.init();
-
-    
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 64392470);
-    assert.strictEqual(w.getMasterFingerprintHex(), '168dd603');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
-    assert.ok(w.useWithHardwareWalletEnabled());
-
-    const utxos = [
-      {
-        height: 618811,
-        value: 66600,
-        address: 'bc1qzqjwye4musmz56cg44ttnchj49zueh9yr0qsxt',
-        vout: 0,
-        txid: '5df595dc09ee7a5c245b34ea519288137ffee731629c4ff322a6de4f72c06222',
-        wif: false,
-        confirmations: 1,
-      },
-    ];
-
-    const { psbt } = await w.createTransaction(
-      utxos,
-      [{ address: 'bc1qdamevhw3zwm0ajsmyh39x8ygf0jr0syadmzepn', value: 5000 }],
-      22,
-      'bc1qtutssamysdkgd87df0afjct0mztx56qpze7wqe',
-    );
-    assert.strictEqual(
-      psbt.toBase64(),
-      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ0U5AAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAAAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIAAAACAAQAAAAAAAAAA',
-    );
-  });
-
-  it.skip('can import Electrum compatible backup wallet, and create a tx with master fingerprint', async () => {
-    const w = new WatchOnlyWallet();
-    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum.txt', 'ascii'));
-    w.init();
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 64392470);
-    assert.strictEqual(w.getMasterFingerprintHex(), '168dd603');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/1'");
-    assert.ok(w.useWithHardwareWalletEnabled());
-
-    const utxos = [
-      {
-        height: 618811,
-        value: 66600,
-        address: 'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk',
-        vout: 0,
-        txid: '5df595dc09ee7a5c245b34ea519288137ffee731629c4ff322a6de4f72c06222',
-        wif: false,
-        confirmations: 1,
-      },
-    ];
-
-    const { psbt } = await w.createTransaction(
-      utxos,
-      [{ address: 'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk', value: 5000 }],
-      22,
-      'dc1qj93genwg3y84zjh550zwjvfzmh9ncchww8fmxm',
-    );
-    assert.strictEqual(psbt.data.inputs[0].bip32Derivation[0].path, "m/84'/0'/1'/0/0");
-    assert.strictEqual(psbt.data.outputs[1].bip32Derivation[0].path, "m/84'/0'/1'/1/0");
-    assert.strictEqual(
-      psbt.toBase64(),
-      'cHNidP8BAHECAAAAASJiwHJP3qYi80+cYjHn/n8TiJJR6jRbJFx67gnclfVdAAAAAAAAAACAAogTAAAAAAAAFgAUb3eWXdETtv7KGyXiUxyIS+Q3wJ0U5AAAAAAAABYAFF8XCHdkg2yGn81L+plhb9iWamgBAAAAAAABAR8oBAEAAAAAABYAFBAk4ma75DYqawitVrni8qlFzNykIgYDNK9TxoCjQ8P0+qI2Hu4hrnXnJuYAC3h2puZbgRORp+sYFo3WA1QAAIAAAACAAQAAgAAAAAAAAAAAAAAiAgL1DWeV+AfIP5RRB5zHv5vuXsIt8+rF9rrsji3FhQlhzBgWjdYDVAAAgAAAAIABAACAAQAAAAAAAAAA',
-    );
-  });
-
-  it.skip('can import Electrum compatible backup wallet, and create a tx with master fingerprint hex', async () => {
-    const w = new WatchOnlyWallet();
-    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii'));
-    w.init();
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 1455298230);
-    assert.strictEqual(w.getMasterFingerprintHex(), 'b616be56');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
-    assert.ok(w.useWithHardwareWalletEnabled());
-  });
-
-  it.skip('can import Electrum compatible backup wallet, and create a tx with master fingerprint hex with a length of 7', async () => {
-    const w = new WatchOnlyWallet();
-    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
-    str = str.replace('b616be56', '616be56');
-    // console.log(str)
-    w.setSecret(str);
-    w.init();
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 1455298054);
-    assert.strictEqual(w.getMasterFingerprintHex(), '0616be56');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
-    assert.ok(w.useWithHardwareWalletEnabled());
-  });
-
-  it.skip('will fail to import Electrum compatible backup wallet when fingerprint hex is less than 7', async () => {
-    const w = new WatchOnlyWallet();
-    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
-    str = str.replace('b616be56', '16be56');
-    w.setSecret(str);
-    w.init();
-    assert.throws(w.valid, 'invalid fingerprint hex');
-  });
-
-  it('will fail to import Electrum compatible backup wallet when fingerprint is an invalid hex value', async () => {
-    const w = new WatchOnlyWallet();
-    let str = require('fs').readFileSync('./tests/unit/fixtures/skeleton-electrum-hex-only.txt', 'ascii');
-    str = str.replace('b616be56', 'j16be56');
-    w.setSecret(str);
-    w.init();
-    assert.throws(w.valid, 'invalid fingerprint hex');
-  });
-
-  it('can import cobo vault JSON skeleton wallet', async () => {
-    const w = new WatchOnlyWallet();
-    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-cobo.txt', 'ascii'));
-    w.init();
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6rcabYFcdr41zyUNRWRyHYs2Sm86E5XV8RjjRzTFYsiCngteeZnkwaF2xuhjmM6kpHjuNpFW42BMhzPmFwXt48e1FhddMB7xidZzN4SF24K',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 1908437330);
-    assert.strictEqual(w.getMasterFingerprintHex(), '5271c071');
-    assert.strictEqual(w.getLabel(), 'Wallet');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
-    assert.ok(w.useWithHardwareWalletEnabled());
-  });
-
-  it('can import zpub with master fingerprint and derivation path', async () => {
-    const w = new WatchOnlyWallet();
-    w.setSecret(require('fs').readFileSync('./tests/unit/fixtures/skeleton-walletdescriptor.txt', 'ascii'));
-    w.init();
-    assert.ok(w.valid());
-    assert.strictEqual(
-      w.getSecret(),
-      'zpub6s2RJ9qAEBW8Abhojs6LyDzF7gttcDr6EsR3Umu2aptZBb45e734rGtt4KqsCMmNyR1EEzUU2ugdVYez2VywQvAbBjUSKn8ho4Zk2c5otkk',
-    );
-    assert.strictEqual(w.getMasterFingerprint(), 4167290508);
-    assert.strictEqual(w.getMasterFingerprintHex(), '8cce63f8');
-    assert.strictEqual(w.getDerivationPath(), "m/84'/0'/0'");
-    assert.ok(!w.useWithHardwareWalletEnabled());
   });
 
   it('can import wallet descriptor for BIP84, but with xpub instead of zpub', async () => {
     const w = new WatchOnlyWallet();
     w.setSecret(
-      '[dafedf1c/84h/0h/0h]xpub6DFMZMLizqqnyyHoWTG7qzmCR1irpiDEGT4JQX7ubeoFtV838ABKPfgAPQbM1TEekEyCuJF1BrmnA7JPrnzqi2VbycD3tVE3v5xsDQqYA3A',
+      '[dafedf1c/84h/0h/0h]zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez',
     );
     w.init();
     assert.ok(w.valid());
@@ -316,10 +154,10 @@ describe('Watch only wallet', () => {
 
     assert.strictEqual(
       w.getSecret(),
-      'zpub6rutAggZJCvkgZg3BAqNGAxCkx1khxCE6g6jyJugMfZ1zgkVdUWSdnzSRpWX1GYVZXCpQFS87BUsvgXXJBpsJVroiHbu4Js2TY69zbWcTNb',
+      'zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez',
     );
 
-    assert.strictEqual(w._getExternalAddressByIndex(0), 'dc1q68y6r45k4kvxe42xl37dgjueg2suqwnhzyzcsk');
+    assert.strictEqual(w._getExternalAddressByIndex(0), 'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk');
 
     assert.ok(!w.useWithHardwareWalletEnabled());
   });
@@ -381,11 +219,11 @@ describe('Watch only wallet', () => {
     assert.ok(w.getAllExternalAddresses().includes(await w._getExternalAddressByIndex(0)));
   });
 
-  it.skip('xpub watch-only can generate addresses', async () => {
+  it('xpub watch-only can generate addresses', async () => {
     const w = new WatchOnlyWallet();
     w.setSecret('zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez');
     w.init();
-    assert.ok((await w._getExternalAddressByIndex(0)).startsWith('1'));
+    assert.ok((await w._getExternalAddressByIndex(0)).startsWith('d'));
     assert.ok(w.getAllExternalAddresses().includes(await w._getExternalAddressByIndex(0)));
   });
 
