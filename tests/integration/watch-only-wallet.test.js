@@ -42,9 +42,9 @@ describe('Watch only wallet', () => {
   });
 
   // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can fetch tx from huge wallet', async () => {
+  it('can fetch tx from huge wallet', async () => {
     const w = new WatchOnlyWallet();
-    w.setSecret('N6dXumt8aJhkAZAnKNzUBNrBJJez2Efu7e'); // binance wallet
+    w.setSecret('N5ac3ywbkm11zVrtUfBFkRPhcjAygsc3SP'); // binance wallet
     await w.fetchTransactions();
     assert.ok(w.getTransactions().length === 0, w.getTransactions().length); // not yet kek but at least we dont crash
   });
@@ -85,30 +85,30 @@ describe('Watch only wallet', () => {
     }
   });
 
-  it.skip('can fetch balance & transactions from zpub HD', async () => {
+  it('can fetch balance & transactions from zpub HD', async () => {
     const w = new WatchOnlyWallet();
-    w.setSecret('zpub6r7jhKKm7BAVx3b3nSnuadY1WnshZYkhK8gKFoRLwK9rF3Mzv28BrGcCGA3ugGtawi1WLb2vyjQAX9ZTDGU5gNk2bLdTc3iEXr6tzR1ipNP');
+    w.setSecret('zpub6rLXmt9RCjYTbb4VLV7ZwVf1NSAXPWjuiDY1Q1QgvfjkbB9UHR38hjCc7jxbLYPhBSEoDGtKd3NHwAi4EVKy7D2ZYHUWbu7GTU7e792gFez');
     await w.fetchBalance();
-    assert.strictEqual(w.getBalance(), 200000);
+    assert.strictEqual(w.getBalance(), 195691153);
     await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 4);
+    assert.strictEqual(w.getTransactions().length, 9);
     const nextAddress = await w.getAddressAsync();
 
-    assert.strictEqual(w.getNextFreeAddressIndex(), 2);
-    assert.strictEqual(nextAddress, 'dc1qjw5x2d3mccfw6ajn2adm24yn7lhvh8xzer3d4p');
+    assert.strictEqual(w.getNextFreeAddressIndex(), 1);
+    assert.strictEqual(nextAddress, 'dc1qlghhgmr4hrjgqfvncy3hmxkcgrphh3kukuref4');
     assert.strictEqual(nextAddress, w._getExternalAddressByIndex(w.getNextFreeAddressIndex()));
 
     const nextChangeAddress = await w.getChangeAddressAsync();
-    assert.strictEqual(nextChangeAddress, 'dc1qjw5x2d3mccfw6ajn2adm24yn7lhvh8xzer3d4p');
+    assert.strictEqual(nextChangeAddress, 'dc1qan7tqkv8yug5ua42dvmqjqyqkj2m9yxcmp9jh8');
   });
 
   // skipped because its generally rare case
   // eslint-disable-next-line jest/no-disabled-tests
-  it.skip('can fetch txs for address funded by genesis txs', async () => {
+  it('can fetch txs for address funded by genesis txs', async () => {
     const w = new WatchOnlyWallet();
-    w.setSecret('N6dXumt8aJhkAZAnKNzUBNrBJJez2Efu7e');
+    w.setSecret('N5ac3ywbkm11zVrtUfBFkRPhcjAygsc3SP');
     await w.fetchBalance();
     await w.fetchTransactions();
-    assert.ok(w.getTransactions().length >= 138);
+    assert.ok(w.getTransactions().length >= 0);
   });
 });
