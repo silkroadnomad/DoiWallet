@@ -110,12 +110,12 @@ describe('LegacyWallet', function () {
 });
 
 describe('SegwitP2SHWallet', function () {
-  it.skip('can generate segwit P2SH address from WIF', async () => {
+  it('can generate segwit P2SH address from WIF', async () => {
     const l = new SegwitP2SHWallet();
-    l.setSecret('Kxr9tQED9H44gCmp6HAdmemAzU3n84H3dGkuWTKvE23JgHMW8gct');
-    assert.ok(l.getAddress() === '34AgLJhwXrvmkZS1o5TrcdeevMt22Nar53', 'expected ' + l.getAddress());
+    l.setSecret('TkpCRCZ7tPwcHWjVHGrFdeYYL5sbQ5FzU4JmzUx3BDDMiKcw2yUG');
+    assert.ok(l.getAddress() === '6EWSDEnXSLHAeNwrtxnZpYWDicbzKjXdGz', 'expected ' + l.getAddress());
     assert.ok(l.getAddress() === (await l.getAddressAsync()));
-    assert.ok(l.weOwnAddress('34AgLJhwXrvmkZS1o5TrcdeevMt22Nar53'));
+    assert.ok(l.weOwnAddress('6EWSDEnXSLHAeNwrtxnZpYWDicbzKjXdGz'));
     assert.ok(!l.weOwnAddress('garbage'));
     // @ts-ignore wrong type on purpose
     assert.ok(!l.weOwnAddress(false));
@@ -135,9 +135,9 @@ describe('SegwitBech32Wallet', function () {
     assert.strictEqual(w.getBalance(), 0);
   });
 
-  it.skip('can fetch UTXO', async () => {
+  it('can fetch UTXO', async () => {
     const w = new SegwitBech32Wallet();
-    w._address = 'dc1qatsxhjdd3tud62lpl57sjry0qyluvv9ff3sgkt';
+    w._address = 'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk';
     await w.fetchUtxo();
     const l1 = w.getUtxo().length;
     assert.ok(w.getUtxo().length > 0, 'unexpected empty UTXO');
