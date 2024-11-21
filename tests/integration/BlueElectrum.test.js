@@ -108,7 +108,7 @@ describe('BlueElectrum', () => {
     assert.ok(await BlueElectrum.testConnection('electrum1.bluewallet.io', false, 443));
     assert.ok(await BlueElectrum.testConnection('electrum1.bluewallet.io', false, 443));
 */
-    assert.ok(await BlueElectrum.testConnection("itchy-jellyfish-89.doi.works",'', '50002'));
+   assert.ok(await BlueElectrum.testConnection("itchy-jellyfish-89.doi.works",'', '50002'));
     assert.ok(await BlueElectrum.testConnection('big-parrot-60.doi.works','', '50002'));
     assert.ok(await BlueElectrum.testConnection('ugly-bird-70.doi.works','', '50002'));
 
@@ -195,13 +195,13 @@ describe('BlueElectrum', () => {
       "N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D",
     ]);
 
-    assert.strictEqual(balances.balance, 752521152003);
-    assert.strictEqual(balances.unconfirmed_balance, -5000119855);
+    assert.strictEqual(balances.balance, 927515213093);
+    assert.strictEqual(balances.unconfirmed_balance, -7500000000);
    
     assert.strictEqual(balances.addresses.dc1q8nkcs8v7ad9qyjth3cgwwsdu255cpk8w2u7put.confirmed, 0);
     assert.strictEqual(balances.addresses.dc1q8nkcs8v7ad9qyjth3cgwwsdu255cpk8w2u7put.unconfirmed, 0);
-    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.confirmed, 752511152003);
-    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.unconfirmed, -5000119855);
+    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.confirmed, 927505213093);
+    assert.strictEqual(balances.addresses.dc1qszy3say7llzamvqy82q6260urg3uvpt3ast5ls.unconfirmed, -7500000000);
     assert.strictEqual(balances.addresses['N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D'].confirmed, 10000000);
     assert.strictEqual(balances.addresses['N32Ny2Fb4eTsLNAKoR1C7xbM2XRGntYN6D'].unconfirmed, 0);
     if (diableBatching) BlueElectrum.setBatchingEnabled();
