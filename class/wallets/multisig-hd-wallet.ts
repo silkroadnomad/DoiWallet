@@ -1,7 +1,7 @@
 import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as bip39 from 'bip39';
-import * as bitcoin from 'bitcoinjs-lib';
-import { Psbt, Transaction } from 'bitcoinjs-lib';
+import * as bitcoin from '@doichain/doichainjs-lib';
+import { Psbt, Transaction } from '@doichain/doichainjs-lib';
 import b58 from 'bs58check';
 import { CoinSelectReturnInput, CoinSelectTarget } from 'coinselect';
 import createHash from 'create-hash';
@@ -254,7 +254,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
   }
 
   static convertXprvToXpub(xprv: string) {
-    const restored = bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv));
+    const restored = bip32.fromBase58(MultisigHDWallet.convertMultisigXprvToRegularXprv(xprv),  DOICHAIN);
     return restored.neutered().toBase58();
   }
 
@@ -312,17 +312,19 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     if (this.isWrappedSegwit()) {
       const { address } = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+          network: DOICHAIN
         }),
+        network: DOICHAIN,
       });
       if (!address) {
         throw new Error('Internal error: could not make p2sh address');
       }
-
       return address;
     } else if (this.isNativeSegwit()) {
       const { address } = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys),network: DOICHAIN }),
+        network: DOICHAIN,
       });
       if (!address) {
         throw new Error('Internal error: could not make p2wsh address');
@@ -331,12 +333,12 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       return address;
     } else if (this.isLegacy()) {
       const { address } = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+        network: DOICHAIN,
       });
       if (!address) {
         throw new Error('Internal error: could not make p2sh address');
       }
-
       return address;
     } else {
       throw new Error('Dont know how to make address');
@@ -768,7 +770,8 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
 
     if (this.isNativeSegwit()) {
       const p2wsh = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+        network: DOICHAIN,
       });
       if (!p2wsh.redeem || !p2wsh.output) {
         throw new Error('Could not create p2wsh output');
@@ -792,8 +795,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     } else if (this.isWrappedSegwit()) {
       const p2shP2wsh = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+          network: DOICHAIN,
         }),
+        network: DOICHAIN,
       });
       if (!p2shP2wsh?.redeem?.redeem?.output || !p2shP2wsh?.redeem?.output || !p2shP2wsh.output) {
         throw new Error('Could not create p2sh-p2wsh output');
@@ -819,7 +824,8 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
       });
     } else if (this.isLegacy()) {
       const p2sh = bitcoin.payments.p2sh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+        network: DOICHAIN, 
       });
       if (!p2sh?.redeem?.output) {
         throw new Error('Could not create p2sh output');
@@ -872,7 +878,7 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     }
 
     if (this.isLegacy()) {
-      const p2sh = bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) });
+      const p2sh = bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN });
       if (!p2sh.output) {
         throw new Error('Could not create redeemScript');
       }
@@ -885,8 +891,10 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     if (this.isWrappedSegwit()) {
       const p2shP2wsh = bitcoin.payments.p2sh({
         redeem: bitcoin.payments.p2wsh({
-          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+          redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+          network: DOICHAIN, 
         }),
+        network: DOICHAIN, 
       });
       const witnessScript = p2shP2wsh?.redeem?.redeem?.output;
       const redeemScript = p2shP2wsh?.redeem?.output;
@@ -903,7 +911,8 @@ export class MultisigHDWallet extends AbstractHDElectrumWallet {
     if (this.isNativeSegwit()) {
       // not needed by coldcard, apparently..?
       const p2wsh = bitcoin.payments.p2wsh({
-        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys) }),
+        redeem: bitcoin.payments.p2ms({ m: this._m, pubkeys: MultisigHDWallet.sortBuffers(pubkeys), network: DOICHAIN }),
+        network: DOICHAIN,
       });
       const witnessScript = p2wsh?.redeem?.output;
       if (!witnessScript) {
