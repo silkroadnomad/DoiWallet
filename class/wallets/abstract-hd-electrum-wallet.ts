@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 import BIP32Factory, { BIP32Interface } from 'bip32';
 import * as bip39 from 'bip39';
 import * as bitcoin from '@doichain/doichainjs-lib';
-import { Psbt, Transaction as BTransaction } from 'bitcoinjs-lib';
+import { Psbt, Transaction as BTransaction } from '@doichain/doichainjs-lib';
 import b58 from 'bs58check';
 import { CoinSelectOutput, CoinSelectReturnInput } from 'coinselect';
 import { ECPairFactory } from 'ecpair';
@@ -1155,9 +1155,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     for (const t of targets) {
-      if (t.address && t.address.startsWith('bc1')) {
+      if (t.address && t.address.startsWith('dc1')) {
         // in case address is non-typical and takes more bytes than coinselect library anticipates by default
-        t.script = { length: bitcoin.address.toOutputScript(t.address).length + 3 };
+        t.script = { length: bitcoin.address.toOutputScript(t.address,  DOICHAIN).length + 3 };
       }
 
       if (t.script?.hex) {
