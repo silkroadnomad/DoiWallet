@@ -441,7 +441,7 @@ class DeeplinkSchemaMatch {
         delete options[key];
       }
     }    
-    return address // bip21.encode(address, options); 
+    return  bip21.encode(address, options, 'doichain'); 
   }
 
   static decodeBitcoinUri(uri: string) {
