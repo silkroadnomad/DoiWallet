@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as bitcoin from 'bitcoinjs-lib';
+import * as bitcoin from '@doichain/doichainjs-lib';
 import { DOICHAIN, VERSION } from '../../blue_modules/network.js';
 import { HDSegwitBech32Wallet, MultisigHDWallet } from "../../class";
 import { getNameOPStackScript } from "./getNameOPStackScript.js"

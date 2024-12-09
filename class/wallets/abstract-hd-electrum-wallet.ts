@@ -1532,10 +1532,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       }
       console.log('_____cc', cc);
       console.log('_____inputs[cc]', inputs[cc]);
-      const inputAddress = inputs[cc].address;
+      const inputAddress = inputs[cc]?.address;
       const allAddresses = this.getAllExternalAddresses();
 
-      let foundIndex = allAddresses.indexOf(inputAddress);
+      let foundIndex = allAddresses.indexOf(inputAddress || '');
       let internal = false;
 
       for (let c = 0; c < this.next_free_change_address_index + this.gap_limit; c++) {
@@ -1562,7 +1562,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           console.log('____psbt.data.inputs_2', psbt.data.inputs); 
         } catch (e) {
           console.log('___signInput__3', e);
-          throw new Error(e);
+          throw new Error(String(e));
         }
       } else console.log('address of input not found');
     }
