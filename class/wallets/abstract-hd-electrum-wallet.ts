@@ -1554,12 +1554,12 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
         const keyPair = ECPair.fromWIF(wif, DOICHAIN);
         try {
-          console.log('____psbt.data.inputs', psbt.data.inputs);
-          console.log('____keyPair', keyPair);
-          console.log('____cc_3', cc);
+         // console.log('____psbt.data.inputs', psbt.data.inputs);
+         // console.log('____keyPair', keyPair);
+         // console.log('____cc_3', cc);
 
           psbt.signInput(cc, keyPair);
-          console.log('____psbt.data.inputs_2', psbt.data.inputs); 
+        //  console.log('____psbt.data.inputs_2', psbt.data.inputs); 
         } catch (e) {
           console.log('___signInput__3', e);
           throw new Error(String(e));

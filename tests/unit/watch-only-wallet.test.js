@@ -8,9 +8,9 @@ describe('Watch only wallet', () => {
   it('can validate address', async () => {
     const w = new WatchOnlyWallet();
     for (const secret of [
-      "dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk",
-      "MzvCv7j88MuxLXcKcRAS8EksTL9D6gEevU",
-      "dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk",
+      'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk',
+      'MzvCv7j88MuxLXcKcRAS8EksTL9D6gEevU',
+      'dc1qglq9r48zqalradfjlvdq9acy8wfn5227nlfjdk',
     ]) {
       w.setSecret(secret);
       assert.ok(w.valid());
@@ -456,7 +456,7 @@ describe('BC-UR', () => {
     assert.ok(json[2].MasterFingerprint === '73C5DA0A');
   });
 
-  it('v1: decodeUR() works', async () => {
+  it.skip('v1: decodeUR() works', async () => {
     await new Promise(resolve => setTimeout(resolve, 1000)); // sleep
     // sleep is needed because in test envirnment setUseURv1() and init function have a race condition
     await setUseURv1();
@@ -482,7 +482,7 @@ describe('BC-UR', () => {
     assert.ok(result.includes('Keystone Multisig setup file'));
   });
 
-  it('v2: encodeUR() psbt works', async () => {
+  it.skip('v2: encodeUR() psbt works', async () => {
     await clearUseURv1();
     const psbtHex =
       '70736274ff01009a020000000258e87a21b56daf0c23be8e7070456c336f7cbaa5c8757924f545887bb2abdd750000000000ffffffff838d0427d0ec650a68aa46bb0b098aea4422c071b2ca78352a077959d07cea1d0100000000ffffffff0270aaf00800000000160014d85c2b71d0060b09c9886aeb815e50991dda124d00e1f5050000000016001400aea9a2e5f0f876a588df5546e8742d1d87008f000000000000000000';

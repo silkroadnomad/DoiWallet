@@ -60,6 +60,5 @@ describe("AbstractHDElectrumWallet", () => {
     } catch (e) {
       console.log("_______e", e.message )       
     }
-
   });
 });
