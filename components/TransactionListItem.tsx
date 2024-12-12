@@ -73,7 +73,6 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
       counterparty = counterpartyMetadata?.[item.counterparty]?.label ?? item.counterparty;
     }
 
-    console.log("___item",item)
     const txMemo = (counterparty ? `[${shortenContactName(counterparty)}] ` : '') + (txMetadata[item.hash]?.memo ?? '');
     const subtitle = useMemo(() => {
       let sub = '';

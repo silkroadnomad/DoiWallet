@@ -371,6 +371,26 @@ const TransactionStatus = () => {
     });
   };
 
+  const renderNameOps = () => {
+    if (tx.outputs) {
+      for (const output of tx.outputs) { 
+        if (output?.scriptPubKey?.nameOp) {
+          return (
+            <View style={styles.memo}>
+              <Text selectable style={styles.memoText}>
+                {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
+              </Text>
+              <Text selectable style={styles.memoText}>
+                {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
+              </Text>
+              <BlueSpacing20 />
+            </View>
+          );          
+        }
+      }
+    }
+  };
+
   const renderCPFP = () => {
     if (isCPFPPossible === ButtonStatus.Unknown) {
       return (
@@ -540,7 +560,7 @@ const TransactionStatus = () => {
               </BlueText>
             </View>
           )}
-
+          {renderNameOps()}
           <View style={styles.confirmations}>
             <Text style={styles.confirmationsText}>
               {loc.formatString(loc.transactions.confirmations_lowercase, {
