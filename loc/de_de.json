@@ -364,7 +364,9 @@
     "txid": "Transaktions-ID",
     "from": "Von: {counterparty}",
     "to": "Zu: {counterparty}",
-    "updating": "Aktualisiere...."
+    "updating": "Aktualisiere....",
+    "nameOps_name": "Name",
+    "nameOps_value": "Value"
   },
   "wallets": {
     "add_bitcoin": "Doi",

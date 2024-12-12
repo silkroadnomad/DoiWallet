@@ -72,9 +72,18 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
     if (item.counterparty) {
       counterparty = counterpartyMetadata?.[item.counterparty]?.label ?? item.counterparty;
     }
+
     const txMemo = (counterparty ? `[${shortenContactName(counterparty)}] ` : '') + (txMetadata[item.hash]?.memo ?? '');
     const subtitle = useMemo(() => {
-      let sub = Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
+      let sub = '';
+      for (const output of item.outputs) {
+        if (output?.scriptPubKey?.nameOp) {
+          sub = output?.scriptPubKey?.nameOp.name + ' '
+          
+        }
+        
+      }
+      sub += Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
       if (sub !== '') sub += ' ';
       sub += txMemo;
       if (item.memo) sub += item.memo;
