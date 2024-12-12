@@ -75,6 +75,7 @@ export type TransactionOutput = {
     reqSigs: number;
     type: string;
     addresses: string[];
+    nameOp: Map<string, number>;
   };
 };
 

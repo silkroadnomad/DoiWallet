@@ -351,7 +351,9 @@
     "to": "To: {counterparty}",
     "updating": "Updating...",
     "watchOnlyWarningTitle": "Security warning",
-    "watchOnlyWarningDescription": "Be cautious of scammers who often use “watch-only” wallets to deceive users. These wallets do not allow you to control or send funds; they only let you view the balance."
+    "watchOnlyWarningDescription": "Be cautious of scammers who often use “watch-only” wallets to deceive users. These wallets do not allow you to control or send funds; they only let you view the balance.",
+    "nameOps_name": "Name",
+    "nameOps_value": "Value"
   },
   "wallets": {
     "add_bitcoin": "Doi",
