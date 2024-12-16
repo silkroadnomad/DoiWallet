@@ -315,7 +315,14 @@ export class LegacyWallet extends AbstractWallet {
           const clonedTx: Transaction = {
             ...txRest,
             inputs: [...vin2],
-            outputs: [...vout],
+            //outputs: [...vout],
+            outputs: vout.map(output => ({
+              ...output,
+              scriptPubKey: {
+                ...output.scriptPubKey,
+                nameOp: new Map<string, number>(),
+              },
+            })),
           };
 
           _txsByExternalIndex.push(clonedTx);
@@ -328,7 +335,14 @@ export class LegacyWallet extends AbstractWallet {
           const clonedTx: Transaction = {
             ...txRest,
             inputs: [...vin],
-            outputs: [...vout2],
+            //outputs: [...vout2],
+            outputs: vout2.map(output => ({
+              ...output,
+              scriptPubKey: {
+                ...output.scriptPubKey,
+                nameOp: new Map<string, number>(),
+              },
+            })),
           };
 
           _txsByExternalIndex.push(clonedTx);
