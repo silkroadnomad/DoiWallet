@@ -163,6 +163,9 @@ const TransactionStatus = () => {
     [navigateToTransactionDetails],
   );
   const [isUrlAccessible, setIsUrlAccessible] = useState(false);
+  const [name, setName] = useState<string>('');
+  const [image, setImage] = useState<string>('');
+  const [description, setDescription] = useState<string>(''); 
 
   useEffect(() => {
     setOptions({
@@ -372,67 +375,111 @@ const TransactionStatus = () => {
     });
   };
 
-  const renderNameOps = () => {
-    
-  //  useEffect(() => {
-      const checkUrlAccessibility = async (url: string) => {
-        try {
-          const response = await fetch(url);
-          if (response.ok) {
-            setIsUrlAccessible(true);
-          } else {
-            setIsUrlAccessible(false);
-          }
-        } catch (error) {
-          console.error('Error checking URL:', error);
-          setIsUrlAccessible(false);
-        }
-      };
+  const checkUrlAccessibility = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      if (response.ok) {
+        setIsUrlAccessible(true);
+      } else {
+        setIsUrlAccessible(false);
+      }
+    } catch (error) {
+      console.error('Error checking URL:', error);
+      setIsUrlAccessible(false);
+    }
+  };
 
+  async function fetchJson(url: string) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        console.error('FetchJson error:', response.status);
+
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('FetchJson error:', error);
+    }
+  }
+
+  const renderNameOps = () => { 
+    
       if (tx.outputs) {
         for (const output of tx.outputs) {
           if (output?.scriptPubKey?.nameOp) {
+            //setName(output.scriptPubKey.nameOp.name)  
+            //setValue(output.scriptPubKey.nameOp.value)       
             //const nameOpValue = output.scriptPubKey.nameOp.value;
-            const nameOpValue = 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt';
-            const urlPattern = /(https?:\/\/[^\s]+)/g;
+            //const nameOpValue = 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt';
+            //const urlPattern = /(https?:\/\/[^\s]+)/g;
+            const nameOpValue = 'ipfs://bafkreidjj5xgyvlxcmuuaqphnsyiu4gnlyddfwmufazlea4xf6uckyr6qy';
+            const urlPattern = /(ipfs?:\/\/[^\s]+)/g;
             const containsUrl = urlPattern.test(nameOpValue);
             if (containsUrl) {
               //const ipfsGateway = 'https://ipfs.io/ipfs/';
-              //const ipfsHash = nameOpValue.replace('ipfs://', '');
-              //const imageUrl = `${ipfsGateway}${ipfsHash}`;
-              checkUrlAccessibility(nameOpValue);
-            }
-          }
-        }
-      }
-   // }, [tx.outputs]);
+              const ipfsGateway = 'https://ipfs.le-space.de/ipfs/';
+              const ipfsHash = nameOpValue.replace('ipfs://', '');
+              const jsonUrl = `${ipfsGateway}${ipfsHash}`;
 
-    const renderOutputs = () => {
-      if (tx.outputs) {
-        for (const output of tx.outputs) {
-          if (output?.scriptPubKey?.nameOp) {
+              console.log("__jsonUrl", jsonUrl)
+
+              fetchJson(jsonUrl).then(data => {
+                if(data){
+                  const imageHash = data.image.replace('ipfs://', '');
+                  const imageUrl = `${ipfsGateway}${imageHash}`;
+
+                  checkUrlAccessibility(imageUrl);
+                  setDescription(data.description)
+                  setImage(imageUrl)
+                  setName(data.name)
+
+
+                  console.log("__________description", data.description);
+                  console.log("__________image", data.image);
+                  //ipfs://bafkreihvhtwrjc3kpl273q7nwk2peiuhr7zr4vugzam4x3guoht66udjf4
+                  console.log("__________name", data.name);
+                  console.log("__________imageUrl", imageUrl);
+                  
+
+
+                }                
+              });
+            }
+
             return (
               <View style={styles.memo}>
-                <Text selectable style={styles.memoText}>
-                  {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
-                </Text>
 
                 {isUrlAccessible ? (
+                  <>
+                    <Text selectable style={styles.memoText}>
+                      {loc.transactions.nameOps_name}: {name}
+                    </Text>
+                    <Text selectable style={styles.memoText}>
+                      {loc.transactions.nameOps_description}: {description}
+                    </Text>
 
-                  <Image
-                    //source={{ uri: output.scriptPubKey.nameOp.value }}
+                    <Image  
+                      //source={{ uri: 'https://ipfs.le-space.de/ipfs/bafkreihvhtwrjc3kpl273q7nwk2peiuhr7zr4vugzam4x3guoht66udjf4' }}
+                      source={{ uri: image }}
+                      style={styles.image}
+                      resizeMode="contain"
+                      //source={require('../../img/coin1.png')} 
+                      //accessible={false} 
+                    />
+                  </>
 
-                    source={{ uri: 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt' }}
-
-
-                    style={styles.image}
-                    resizeMode="contain"
-                    //source={require('../../img/coin1.png')} 
-                    accessible={false} />
                 ) : (
-                  <Text selectable style={styles.memoText}>
-                    {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
-                  </Text>
+                  <>
+                      <Text selectable style={styles.memoText}>
+                        {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
+                      </Text>
+                    
+                      <Text selectable style={styles.memoText}>
+                        {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.value}
+                      </Text>
+
+                  </>
                 )}
                 <BlueSpacing20 />
               </View>
@@ -440,8 +487,7 @@ const TransactionStatus = () => {
           }
         }
       }
-    };
-    return renderOutputs();
+
   };
 
   const renderCPFP = () => {
@@ -726,6 +772,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   image: {
-
+    width: 200, 
+    height: 200,
+    margin:20,
   },
 });
