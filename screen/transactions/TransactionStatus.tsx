@@ -1,7 +1,7 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { ActivityIndicator, BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { Image, ActivityIndicator, BackHandler, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from '@rneui/themed';
 import * as BlueElectrum from '../../blue_modules/BlueElectrum';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
@@ -17,7 +17,7 @@ import TransactionPendingIcon from '../../components/icons/TransactionPendingIco
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
 import loc, { formatBalanceWithoutSuffix } from '../../loc';
-import { DoichainUnit} from '../../models/doichainUnits';
+import { DoichainUnit } from '../../models/doichainUnits';
 import { useStorage } from '../../hooks/context/useStorage';
 import { HandOffActivityType } from '../../components/types';
 import HeaderRightButton from '../../components/HeaderRightButton';
@@ -162,6 +162,7 @@ const TransactionStatus = () => {
     ),
     [navigateToTransactionDetails],
   );
+  const [isUrlAccessible, setIsUrlAccessible] = useState(false);
 
   useEffect(() => {
     setOptions({
@@ -372,23 +373,75 @@ const TransactionStatus = () => {
   };
 
   const renderNameOps = () => {
-    if (tx.outputs) {
-      for (const output of tx.outputs) { 
-        if (output?.scriptPubKey?.nameOp) {
-          return (
-            <View style={styles.memo}>
-              <Text selectable style={styles.memoText}>
-                {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
-              </Text>
-              <Text selectable style={styles.memoText}>
-                {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
-              </Text>
-              <BlueSpacing20 />
-            </View>
-          );          
+    
+  //  useEffect(() => {
+      const checkUrlAccessibility = async (url: string) => {
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            setIsUrlAccessible(true);
+          } else {
+            setIsUrlAccessible(false);
+          }
+        } catch (error) {
+          console.error('Error checking URL:', error);
+          setIsUrlAccessible(false);
+        }
+      };
+
+      if (tx.outputs) {
+        for (const output of tx.outputs) {
+          if (output?.scriptPubKey?.nameOp) {
+            //const nameOpValue = output.scriptPubKey.nameOp.value;
+            const nameOpValue = 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt';
+            const urlPattern = /(https?:\/\/[^\s]+)/g;
+            const containsUrl = urlPattern.test(nameOpValue);
+            if (containsUrl) {
+              //const ipfsGateway = 'https://ipfs.io/ipfs/';
+              //const ipfsHash = nameOpValue.replace('ipfs://', '');
+              //const imageUrl = `${ipfsGateway}${ipfsHash}`;
+              checkUrlAccessibility(nameOpValue);
+            }
+          }
         }
       }
-    }
+   // }, [tx.outputs]);
+
+    const renderOutputs = () => {
+      if (tx.outputs) {
+        for (const output of tx.outputs) {
+          if (output?.scriptPubKey?.nameOp) {
+            return (
+              <View style={styles.memo}>
+                <Text selectable style={styles.memoText}>
+                  {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
+                </Text>
+
+                {isUrlAccessible ? (
+
+                  <Image
+                    //source={{ uri: output.scriptPubKey.nameOp.value }}
+
+                    source={{ uri: 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt' }}
+
+
+                    style={styles.image}
+                    resizeMode="contain"
+                    //source={require('../../img/coin1.png')} 
+                    accessible={false} />
+                ) : (
+                  <Text selectable style={styles.memoText}>
+                    {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
+                  </Text>
+                )}
+                <BlueSpacing20 />
+              </View>
+            );
+          }
+        }
+      }
+    };
+    return renderOutputs();
   };
 
   const renderCPFP = () => {
@@ -671,5 +724,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  image: {
+
   },
 });
