@@ -13,6 +13,8 @@ import HandOffComponent from '../../components/HandOffComponent';
 import TransactionIncomingIcon from '../../components/icons/TransactionIncomingIcon';
 import TransactionOutgoingIcon from '../../components/icons/TransactionOutgoingIcon';
 import TransactionPendingIcon from '../../components/icons/TransactionPendingIcon';
+import ToolTipMenu from '../../components/TooltipMenu';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import SafeArea from '../../components/SafeArea';
 import { useTheme } from '../../components/themes';
@@ -403,82 +405,77 @@ const TransactionStatus = () => {
     }
   }
 
+  const actions = [
+    {
+      id: 'copyToClipboard',
+      text: loc.transactions.details_copy,
+      icon: { iconValue: 'doc.on.doc' }, 
+    }
+  ];
+
+  const onPressMenuItem = (key: string) => {    
+    Clipboard.setString(key);        
+  };
+
   const renderNameOps = () => { 
     
       if (tx.outputs) {
         for (const output of tx.outputs) {
           if (output?.scriptPubKey?.nameOp) {
-            //setName(output.scriptPubKey.nameOp.name)  
-            //setValue(output.scriptPubKey.nameOp.value)       
-            //const nameOpValue = output.scriptPubKey.nameOp.value;
-            //const nameOpValue = 'https://ipfs.le-space.de/ipfs/QmRWBFhz1H5sovicYcsxwLN14R4dCgmZQbhZcg5uqhWdxt';
-            //const urlPattern = /(https?:\/\/[^\s]+)/g;
-            const nameOpValue = 'ipfs://bafkreidjj5xgyvlxcmuuaqphnsyiu4gnlyddfwmufazlea4xf6uckyr6qy';
+            const nameOpValue = output.scriptPubKey.nameOp.value;
+            //const nameOpValue = 'ipfs://bafkreidjj5xgyvlxcmuuaqphnsyiu4gnlyddfwmufazlea4xf6uckyr6qy';
             const urlPattern = /(ipfs?:\/\/[^\s]+)/g;
             const containsUrl = urlPattern.test(nameOpValue);
             if (containsUrl) {
-              //const ipfsGateway = 'https://ipfs.io/ipfs/';
               const ipfsGateway = 'https://ipfs.le-space.de/ipfs/';
-              const ipfsHash = nameOpValue.replace('ipfs://', '');
-              const jsonUrl = `${ipfsGateway}${ipfsHash}`;
-
-              console.log("__jsonUrl", jsonUrl)
-
+              const jsonUrl = nameOpValue.replace('ipfs://', ipfsGateway);
               fetchJson(jsonUrl).then(data => {
                 if(data){
-                  const imageHash = data.image.replace('ipfs://', '');
-                  const imageUrl = `${ipfsGateway}${imageHash}`;
-
+                  const imageUrl = data.image.replace('ipfs://', ipfsGateway);
                   checkUrlAccessibility(imageUrl);
                   setDescription(data.description)
                   setImage(imageUrl)
                   setName(data.name)
-
-
-                  console.log("__________description", data.description);
-                  console.log("__________image", data.image);
-                  //ipfs://bafkreihvhtwrjc3kpl273q7nwk2peiuhr7zr4vugzam4x3guoht66udjf4
-                  console.log("__________name", data.name);
-                  console.log("__________imageUrl", imageUrl);
-                  
-
-
                 }                
               });
             }
-
             return (
               <View style={styles.memo}>
 
                 {isUrlAccessible ? (
-                  <>
-                    <Text selectable style={styles.memoText}>
-                      {loc.transactions.nameOps_name}: {name}
-                    </Text>
-                    <Text selectable style={styles.memoText}>
-                      {loc.transactions.nameOps_description}: {description}
-                    </Text>
-
+                  <>  
+                    <Text selectable style={styles.title}>{name}</Text>
+                    <Text selectable style={styles.description}>{description}</Text>
                     <Image  
                       //source={{ uri: 'https://ipfs.le-space.de/ipfs/bafkreihvhtwrjc3kpl273q7nwk2peiuhr7zr4vugzam4x3guoht66udjf4' }}
                       source={{ uri: image }}
                       style={styles.image}
-                      resizeMode="contain"
-                      //source={require('../../img/coin1.png')} 
-                      //accessible={false} 
-                    />
-                  </>
+                      resizeMode="contain"                      
+                    />   
+                    <BlueSpacing20 />
 
+                    {/* <ToolTipMenu key={'name'} isButton title={""} actions={actions} onPressMenuItem={onPressMenuItem}>
+                      <Text selectable style={styles.memoText}>
+                        {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
+                      </Text>
+                    </ToolTipMenu>             */}
+
+                    <Text selectable style={styles.memoText}>
+                      {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
+                    </Text>
+
+                    <Text selectable style={styles.memoText}>
+                      {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
+                    </Text>
+                  </>
                 ) : (
                   <>
                       <Text selectable style={styles.memoText}>
                         {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.name}
-                      </Text>
-                    
+                      </Text>                    
                       <Text selectable style={styles.memoText}>
-                        {loc.transactions.nameOps_name}: {output.scriptPubKey.nameOp.value}
+                        {loc.transactions.nameOps_value}: {output.scriptPubKey.nameOp.value}
                       </Text>
-
                   </>
                 )}
                 <BlueSpacing20 />
@@ -487,7 +484,6 @@ const TransactionStatus = () => {
           }
         }
       }
-
   };
 
   const renderCPFP = () => {
@@ -606,8 +602,9 @@ const TransactionStatus = () => {
 
       <View style={styles.container}>
         <BlueCard>
+          {renderNameOps()}
           <View style={styles.center}>
-            <Text style={[styles.value, stylesHook.value]} selectable>
+            <Text style={isUrlAccessible ? [styles.valueSmall, stylesHook.value] : [styles.value, stylesHook.value]} selectable>
               {formatBalanceWithoutSuffix(tx.value, wallet.current.preferredBalanceUnit, true)}{' '}
 
               {wallet.current.preferredBalanceUnit !== DoichainUnit.LOCAL_CURRENCY && (
@@ -620,9 +617,9 @@ const TransactionStatus = () => {
           {renderTXMetadata()}
           {renderTXCounterparty()}
 
-          <View style={[styles.iconRoot, stylesHook.iconRoot]}>
+          <View style={isUrlAccessible ? [styles.iconRootSmall, stylesHook.iconRoot] :[styles.iconRoot, stylesHook.iconRoot]}>
             <View>
-              <Icon name="check" size={50} type="font-awesome" color={colors.successCheck} />
+              <Icon name="check" size={isUrlAccessible ? 25 : 50} type="font-awesome" color={colors.successCheck} />
             </View>
             <View style={[styles.iconWrap, styles.margin]}>
               {(() => {
@@ -659,7 +656,6 @@ const TransactionStatus = () => {
               </BlueText>
             </View>
           )}
-          {renderNameOps()}
           <View style={styles.confirmations}>
             <Text style={styles.confirmationsText}>
               {loc.formatString(loc.transactions.confirmations_lowercase, {
@@ -698,6 +694,10 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: '600',
   },
+  valueSmall:{
+    fontSize: 26,
+    fontWeight: '600',
+  },
   valueUnit: {
     fontSize: 16,
     fontWeight: '600',
@@ -709,6 +709,8 @@ const styles = StyleSheet.create({
   memoText: {
     color: '#9aa0aa',
     fontSize: 14,
+    alignSelf: 'flex-start',
+    marginBottom: 5,
   },
   iconRoot: {
     width: 120,
@@ -718,6 +720,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 43,
     marginBottom: 53,
+  },
+  iconRootSmall: {
+    width: 60,
+    height: 60,
+    borderRadius: 60,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    marginTop: 25,
+    marginBottom: 25,
   },
   iconWrap: {
     minWidth: 30,
@@ -772,8 +783,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   image: {
-    width: 200, 
-    height: 200,
-    margin:20,
+    width: '100%', 
+    height: 300,
+    margin:10,
   },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    elevation: 4, 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 4 }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 8,
+    overflow: 'hidden',
+
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#9aa0aa',
+    marginBottom: 5,
+  },
+  description:{
+    color: '#9aa0aa',
+    fontSize: 14,
+    alignSelf: 'center',
+    marginBottom: 10,
+  }
 });
