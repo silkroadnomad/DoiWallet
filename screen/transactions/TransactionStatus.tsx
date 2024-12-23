@@ -423,6 +423,7 @@ const TransactionStatus = () => {
         for (const output of tx.outputs) {
           if (output?.scriptPubKey?.nameOp) {
             const nameOpValue = output.scriptPubKey.nameOp.value;
+            //const nameOpValue = 'ipfs://bafkreiewupt5xwng6jjn3xpewq2q6tta32zohkvad3rqnhiatlklhv3gha';
             //const nameOpValue = 'ipfs://bafkreidjj5xgyvlxcmuuaqphnsyiu4gnlyddfwmufazlea4xf6uckyr6qy';
             const urlPattern = /(ipfs?:\/\/[^\s]+)/g;
             const containsUrl = urlPattern.test(nameOpValue);

@@ -79,9 +79,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
       for (const output of item.outputs) {
         if (output?.scriptPubKey?.nameOp) {
           sub = output?.scriptPubKey?.nameOp.name + ' '
-          
         }
-        
       }
       sub += Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
       if (sub !== '') sub += ' ';
