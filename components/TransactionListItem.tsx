@@ -145,7 +145,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
     }, [item, colors.foregroundColor, colors.successColor]);
 
     const [ipfsImageUrl, setIpfsImageUrl] = useState<string | null>(null);
-    const [isLoadingImage, setIsLoadingImage] = useState(false);
+    const [isLoadingImage, setIsLoadingImage] = useState<boolean>(false);
     const [imageError, setImageError] = useState<Error | null>(null);
 
     useEffect(() => {
@@ -153,7 +153,7 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
         if (!item.outputs) return;
         
         for (const output of item.outputs) {
-          const scriptPubKey = (output as NameOpOutput)?.scriptPubKey;
+          const scriptPubKey = output?.scriptPubKey;
           if (scriptPubKey?.nameOp?.value?.startsWith('ipfs://')) {
             try {
               setIsLoadingImage(true);
@@ -178,8 +178,8 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
 
     const determineTransactionTypeAndAvatar = () => {
       // Check for nameOp transactions with IPFS images
-      const hasNameOpWithIpfs = item.outputs?.some(output => {
-        const scriptPubKey = (output as NameOpOutput)?.scriptPubKey;
+      const hasNameOpWithIpfs = (item as NameOpTransaction)?.outputs?.some(output => {
+        const scriptPubKey = output?.scriptPubKey;
         return scriptPubKey?.nameOp?.value?.startsWith('ipfs://');
       });
 
