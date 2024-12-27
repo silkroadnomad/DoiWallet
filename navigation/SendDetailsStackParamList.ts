@@ -2,6 +2,12 @@ import { Psbt } from '@doichain/doichainjs-lib';
 import { CreateTransactionTarget, CreateTransactionUtxo, TWallet } from '../class/wallets/types';
 import { DoichainUnit, Chain } from '../models/doichainUnits';
 
+export interface NameOpParams {
+  nameId: string;
+  nameValue: string;
+  sendTo: string;
+}
+
 export type SendDetailsParams = {
   memo?: string;
   address?: string;
@@ -18,6 +24,7 @@ export type SendDetailsParams = {
     amount?: number;
     memo?: string;
   };
+  nameOp?: NameOpParams;
 };
 
 export type SendDetailsStackParamList = {

@@ -1,6 +1,18 @@
 import bitcoin from '@doichain/doichainjs-lib';
 import { CoinSelectOutput, CoinSelectReturnInput, CoinSelectUtxo } from 'coinselect';
 
+export interface ExtendedCoinSelectOutput extends CoinSelectOutput {
+  script?: {
+    hex?: string;
+    length?: number;
+  };
+  nameOp?: {
+    nameId: string;
+    nameValue: string;
+    sendTo: string;
+  };
+}
+
 import { DoichainUnit} from '../../models/doichainUnits';
 import { HDAezeedWallet } from './hd-aezeed-wallet';
 import { HDLegacyBreadwalletWallet } from './hd-legacy-breadwallet-wallet';
@@ -45,6 +57,11 @@ export type CreateTransactionTarget = {
     length?: number; // either length or hex should be present
     hex?: string;
   };
+  nameOp?: {
+    nameId: string;
+    nameValue: string;
+    sendTo: string;
+  };
 };
 
 export type CreateTransactionResult = {
@@ -75,7 +92,10 @@ export type TransactionOutput = {
     reqSigs: number;
     type: string;
     addresses: string[];
-    
+    nameOp?: {
+      name: string;
+      value: string;
+    };
   };
 };
 

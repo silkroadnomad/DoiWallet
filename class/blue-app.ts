@@ -31,6 +31,10 @@ let savingInProgress = 0; // its both a flag and a counter of attempts to write 
 export type TTXMetadata = {
   [txid: string]: {
     memo?: string;
+    nameOp?: {
+      nameId: string;
+      nameValue: string;
+    };
   };
 };
 
