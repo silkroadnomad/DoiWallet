@@ -4,6 +4,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { Linking, View, ViewStyle } from 'react-native';
 import Lnurl from '../class/lnurl';
 import { LightningTransaction, Transaction } from '../class/wallets/types';
+import { NameOpTransaction } from '../types/transaction';
 import TransactionExpiredIcon from '../components/icons/TransactionExpiredIcon';
 import TransactionIncomingIcon from '../components/icons/TransactionIncomingIcon';
 import TransactionOffchainIcon from '../components/icons/TransactionOffchainIcon';
@@ -28,7 +29,7 @@ import { pop } from '../NavigationService';
 interface TransactionListItemProps {
   itemPriceUnit: DoichainUnit;
   walletID: string;
-  item: Transaction & LightningTransaction; // using type intersection to have less issues with ts
+  item: Transaction & LightningTransaction & Partial<NameOpTransaction>; // using type intersection to have less issues with ts
   searchQuery?: string;
   style?: ViewStyle;
   renderHighlightedText?: (text: string, query: string) => JSX.Element;
@@ -76,10 +77,19 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
     const subtitle = useMemo(() => {
       let sub = Number(item.confirmations) < 7 ? loc.formatString(loc.transactions.list_conf, { number: item.confirmations }) : '';
       if (sub !== '') sub += ' ';
+      
+      // Check for nameOp with IPFS URL
+      for (const output of item.outputs || []) {
+        if (output?.scriptPubKey?.nameOp?.value?.startsWith('ipfs://')) {
+          sub += `[${output.scriptPubKey.nameOp.name}] `;
+          break;
+        }
+      }
+      
       sub += txMemo;
       if (item.memo) sub += item.memo;
       return sub || undefined;
-    }, [txMemo, item.confirmations, item.memo]);
+    }, [txMemo, item.confirmations, item.memo, item.outputs]);
 
     const rowTitle = useMemo(() => {
       if (item.type === 'user_invoice' || item.type === 'payment_request') {
