@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Clipboard from '@react-native-clipboard/clipboard';
-import { Linking, View, ViewStyle } from 'react-native';
+import { Image, Linking, View, ViewStyle } from 'react-native';
 import Lnurl from '../class/lnurl';
 import { LightningTransaction, Transaction } from '../class/wallets/types';
 import { NameOpTransaction } from '../types/transaction';
@@ -25,6 +25,7 @@ import { useStorage } from '../hooks/context/useStorage';
 import ToolTipMenu from './TooltipMenu';
 import { CommonToolTipActions } from '../typings/CommonToolTipActions';
 import { pop } from '../NavigationService';
+import { getIPFSImageUrl } from '../utils/ipfs';
 
 interface TransactionListItemProps {
   itemPriceUnit: DoichainUnit;
@@ -143,7 +144,38 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
       };
     }, [item, colors.foregroundColor, colors.successColor]);
 
+    const [ipfsImageUrl, setIpfsImageUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+      const fetchIPFSImage = async () => {
+        if (!item.outputs) return;
+        
+        for (const output of item.outputs) {
+          if (output?.scriptPubKey?.nameOp?.value?.startsWith('ipfs://')) {
+            try {
+              const imageUrl = await getIPFSImageUrl(output.scriptPubKey.nameOp.value);
+              if (imageUrl) {
+                setIpfsImageUrl(imageUrl);
+                break;
+              }
+            } catch (error) {
+              console.warn('Error fetching IPFS image:', error);
+            }
+          }
+        }
+      };
+
+      fetchIPFSImage();
+    }, [item.outputs]);
+
     const determineTransactionTypeAndAvatar = () => {
+      if (ipfsImageUrl) {
+        return {
+          label: loc.transactions.onchain,  // Using onchain label since nameOp transactions are on-chain
+          icon: <Image source={{ uri: ipfsImageUrl }} style={{ width: 32, height: 32, borderRadius: 16 }} />,
+        };
+      }
+
       if (item.category === 'receive' && item.confirmations! < 3) {
         return {
           label: loc.transactions.pending_transaction,
