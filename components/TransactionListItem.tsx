@@ -4,7 +4,7 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import { Image, Linking, View, ViewStyle } from 'react-native';
 import Lnurl from '../class/lnurl';
 import { LightningTransaction, Transaction } from '../class/wallets/types';
-import { NameOpTransaction } from '../types/transaction';
+import { NameOpTransaction, NameOpOutput } from '../types/transaction';
 import TransactionExpiredIcon from '../components/icons/TransactionExpiredIcon';
 import TransactionIncomingIcon from '../components/icons/TransactionIncomingIcon';
 import TransactionOffchainIcon from '../components/icons/TransactionOffchainIcon';
@@ -145,21 +145,29 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
     }, [item, colors.foregroundColor, colors.successColor]);
 
     const [ipfsImageUrl, setIpfsImageUrl] = useState<string | null>(null);
+    const [isLoadingImage, setIsLoadingImage] = useState(false);
+    const [imageError, setImageError] = useState<Error | null>(null);
 
     useEffect(() => {
       const fetchIPFSImage = async () => {
         if (!item.outputs) return;
         
         for (const output of item.outputs) {
-          if (output?.scriptPubKey?.nameOp?.value?.startsWith('ipfs://')) {
+          const scriptPubKey = (output as NameOpOutput)?.scriptPubKey;
+          if (scriptPubKey?.nameOp?.value?.startsWith('ipfs://')) {
             try {
-              const imageUrl = await getIPFSImageUrl(output.scriptPubKey.nameOp.value);
+              setIsLoadingImage(true);
+              setImageError(null);
+              const imageUrl = await getIPFSImageUrl(scriptPubKey.nameOp.value);
               if (imageUrl) {
                 setIpfsImageUrl(imageUrl);
                 break;
               }
             } catch (error) {
               console.warn('Error fetching IPFS image:', error);
+              setImageError(error instanceof Error ? error : new Error('Failed to fetch IPFS image'));
+            } finally {
+              setIsLoadingImage(false);
             }
           }
         }
@@ -169,10 +177,36 @@ export const TransactionListItem: React.FC<TransactionListItemProps> = React.mem
     }, [item.outputs]);
 
     const determineTransactionTypeAndAvatar = () => {
-      if (ipfsImageUrl) {
+      // Check for nameOp transactions with IPFS images
+      const hasNameOpWithIpfs = item.outputs?.some(output => {
+        const scriptPubKey = (output as NameOpOutput)?.scriptPubKey;
+        return scriptPubKey?.nameOp?.value?.startsWith('ipfs://');
+      });
+
+      if (hasNameOpWithIpfs) {
+        if (isLoadingImage) {
+          return {
+            label: loc.transactions.onchain,
+            icon: <TransactionPendingIcon />, // Use pending icon while loading
+          };
+        }
+
+        if (imageError || !ipfsImageUrl) {
+          return {
+            label: loc.transactions.onchain,
+            icon: <TransactionOnchainIcon />, // Fallback to onchain icon on error
+          };
+        }
+
         return {
-          label: loc.transactions.onchain,  // Using onchain label since nameOp transactions are on-chain
-          icon: <Image source={{ uri: ipfsImageUrl }} style={{ width: 32, height: 32, borderRadius: 16 }} />,
+          label: loc.transactions.onchain,
+          icon: (
+            <Image
+              source={{ uri: ipfsImageUrl }}
+              style={{ width: 32, height: 32, borderRadius: 16 }}
+              onError={() => setImageError(new Error('Failed to load image'))}
+            />
+          ),
         };
       }
 
