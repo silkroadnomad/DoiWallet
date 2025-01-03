@@ -3,6 +3,7 @@ package org.doichain.doiwallet
 import android.content.Context
 import android.util.Log
 import org.json.JSONObject
+import org.json.JSONArray
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
@@ -43,8 +44,12 @@ object MarketAPI {
             while (reader.read(buffer).also { read = it } != -1) {
                 jsonResponse.append(buffer, 0, read)
             }
+           var jsonResponseString = jsonResponse.toString().trim()           
 
-            parseJSONBasedOnSource(jsonResponse.toString(), source, endPointKey)
+            if (jsonResponseString.startsWith("[") && jsonResponseString.endsWith("]")) {               
+                jsonResponseString = jsonResponseString.removePrefix("[").removeSuffix("]")                
+            }
+            parseJSONBasedOnSource(jsonResponseString, source, endPointKey)
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching price", e)
             null
@@ -60,9 +65,10 @@ object MarketAPI {
                 "YadioConvert" -> "https://api.yadio.io/convert/1/BTC/$endPointKey"
                 "Exir" -> "https://api.exir.io/v1/ticker?symbol=btc-irt"
                 "coinpaprika" -> "https://api.coinpaprika.com/v1/tickers/btc-bitcoin?quotes=INR"
+                "Coinpaprika" -> "https://api.coinpaprika.com/v1/coins/doi-doicoin/ohlcv/latest"                
                 "Bitstamp" -> "https://www.bitstamp.net/api/v2/ticker/btc${endPointKey.lowercase()}"
                 "Coinbase" -> "https://api.coinbase.com/v2/prices/BTC-${endPointKey.uppercase()}/buy"
-                "CoinGecko" -> "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${endPointKey.lowercase()}"
+                "CoinGecko" -> "https://api.coingecko.com/api/v3/simple/price?ids=doichain&vs_currencies=${endPointKey.lowercase()}"
                 "BNR" -> "https://www.bnr.ro/nbrfxrates.xml"
                 "Kraken" -> "https://api.kraken.com/0/public/Ticker?pair=XXBTZ${endPointKey.uppercase()}"
                 else -> "https://api.coindesk.com/v1/bpi/currentprice/$endPointKey.json"
@@ -76,10 +82,10 @@ object MarketAPI {
             when (source) {
                 "Yadio" -> json.getJSONObject(endPointKey).getString("price")
                 "YadioConvert" -> json.getString("rate")
-                "CoinGecko" -> json.getJSONObject("bitcoin").getString(endPointKey.lowercase())
+                "CoinGecko" -> json.getJSONObject("doichain").getString(endPointKey.lowercase())
                 "Exir" -> json.getString("last")
                 "Bitstamp" -> json.getString("last")
-                "coinpaprika" -> json.getJSONObject("quotes").getJSONObject("INR").getString("price")
+                "Coinpaprika" -> json.getString("close")
                 "Coinbase" -> json.getJSONObject("data").getString("amount")
                 "Kraken" -> json.getJSONObject("result").getJSONObject("XXBTZ${endPointKey.uppercase()}").getJSONArray("c").getString(0)
                 else -> null
