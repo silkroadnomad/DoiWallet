@@ -71,19 +71,26 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
     ) {
         val isPriceFetched = fetchedPrice != null
         val isPriceCached = previousPrice != null
+        val lastUpdateTime = sharedPref.getLong("last_successful_update", 0)
+        val currentTimeMillis = System.currentTimeMillis()
+        val isCacheStale = currentTimeMillis - lastUpdateTime > TimeUnit.MINUTES.toMillis(30) // Cache expires after 30 minutes
 
         if (error != null || !isPriceFetched) {
             Log.e(TAG, "Error fetching price: $error")
-            if (!isPriceCached) {
+            if (!isPriceCached || isCacheStale) {
+                Log.d(TAG, "No valid cache available, showing error state")
                 showLoadingError(views)
             } else {
+                Log.d(TAG, "Using cached price from ${Date(lastUpdateTime)}")
                 displayCachedPrice(views, previousPrice, currentTime, preferredCurrencyLocale)
             }
         } else {
+            Log.d(TAG, "Successfully updated price: $fetchedPrice")
             displayFetchedPrice(
                 views, fetchedPrice!!, previousPrice, currentTime, preferredCurrencyLocale
             )
             savePrice(sharedPref, fetchedPrice)
+            sharedPref.edit().putLong("last_successful_update", currentTimeMillis).apply()
         }
 
         appWidgetManager.updateAppWidget(appWidgetIds, views)
@@ -91,10 +98,13 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
 
     private fun showLoadingError(views: RemoteViews) {
         views.apply {
-            setViewVisibility(R.id.loading_indicator, View.VISIBLE)
-            setViewVisibility(R.id.price_value, View.GONE)
-            setViewVisibility(R.id.last_updated_label, View.GONE)
-            setViewVisibility(R.id.last_updated_time, View.GONE)
+            setViewVisibility(R.id.loading_indicator, View.GONE)
+            setViewVisibility(R.id.price_value, View.VISIBLE)
+            setTextViewText(R.id.price_value, "N/A")
+            setViewVisibility(R.id.last_updated_label, View.VISIBLE)
+            setViewVisibility(R.id.last_updated_time, View.VISIBLE)
+            setTextViewText(R.id.last_updated_label, "Error")
+            setTextViewText(R.id.last_updated_time, "Price unavailable")
             setViewVisibility(R.id.price_arrow_container, View.GONE)
         }
     }
@@ -154,10 +164,13 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
     }
 
     private fun fetchPrice(currency: String?, callback: (String?, String?) -> Unit) {
+        Log.d(TAG, "Fetching price for currency: ${currency ?: "USD"}")
         val price = MarketAPI.fetchPrice(applicationContext, currency ?: "USD")
         if (price == null) {
+            Log.e(TAG, "Price fetch failed: received null from MarketAPI")
             callback(null, "Failed to fetch price")
         } else {
+            Log.d(TAG, "Successfully fetched price: $price")
             callback(price, null)
         }
     }
