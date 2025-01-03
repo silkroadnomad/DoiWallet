@@ -137,10 +137,12 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
         currentTime: String,
         preferredCurrencyLocale: String?
     ) {
-        val currentPrice = fetchedPrice.toDouble().let { it.toInt() } // Remove cents
+        val currentPrice =  fetchedPrice.toDouble() // Remove cents
+        Log.d(TAG, "Current price: $currentPrice")
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.forLanguageTag(preferredCurrencyLocale!!)).apply {
-            maximumFractionDigits = 0
+            maximumFractionDigits = 2
         }
+        Log.d(TAG, "Current currencyFormat: $currencyFormat")
 
         views.apply {
             setViewVisibility(R.id.loading_indicator, View.GONE)
@@ -152,7 +154,7 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
 
             if (previousPrice != null) {
                 setViewVisibility(R.id.price_arrow_container, View.VISIBLE)
-                setTextViewText(R.id.previous_price, currencyFormat.format(previousPrice.toDouble().toInt()))
+                setTextViewText(R.id.previous_price, currencyFormat.format(previousPrice.toDouble()))
                 setImageViewResource(
                     R.id.price_arrow,
                     if (currentPrice > previousPrice.toDouble().toInt()) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float
@@ -164,8 +166,9 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
     }
 
     private fun fetchPrice(currency: String?, callback: (String?, String?) -> Unit) {
-        Log.d(TAG, "Fetching price for currency: ${currency ?: "USD"}")
+        Log.d(TAG, "Fetching price for currency: ${currency ?: "USD"}")        
         val price = MarketAPI.fetchPrice(applicationContext, currency ?: "USD")
+        Log.d(TAG, "pricefetchPrice: $price")  
         if (price == null) {
             Log.e(TAG, "Price fetch failed: received null from MarketAPI")
             callback(null, "Failed to fetch price")

@@ -32,7 +32,7 @@ class MarketAPI {
        case "Coinbase":
            return "https://api.coinbase.com/v2/prices/BTC-\(endPointKey.uppercased())/buy"
        case "CoinGecko":
-           return "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=\(endPointKey.lowercased())"
+           return "https://api.coingecko.com/api/v3/simple/price?ids=doichain&vs_currencies=\(endPointKey.lowercased())"
        case "BNR":
            return "https://www.bnr.ro/nbrfxrates.xml"
        case "Kraken":
@@ -157,7 +157,7 @@ class MarketAPI {
       let delegate = BNRXMLParserDelegate()
       parser.delegate = delegate
       if parser.parse(), let usdToRonRate = delegate.usdRate {
-          let coinGeckoUrl = URL(string: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")!
+          let coinGeckoUrl = URL(string: "https://api.coingecko.com/api/v3/simple/price?ids=doichain&vs_currencies=usd")!
           URLSession.shared.dataTask(with: coinGeckoUrl) { data, _, error in
               guard let data = data, error == nil else {
                   completion(nil, error ?? CurrencyError())
