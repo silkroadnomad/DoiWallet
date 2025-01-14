@@ -12,6 +12,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
+import org.json.JSONObject
 
 class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
@@ -35,23 +36,34 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
 
     override fun doWork(): Result {
         Log.d(TAG, "Widget update worker running")
-
         val appWidgetManager = AppWidgetManager.getInstance(applicationContext)
         val thisWidget = ComponentName(applicationContext, BitcoinPriceWidget::class.java)
         val appWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
         val views = RemoteViews(applicationContext.packageName, R.layout.widget_layout)
 
         val sharedPref = applicationContext.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-        val preferredCurrency = sharedPref.getString("preferredCurrency", "USD")
-        val preferredCurrencyLocale = sharedPref.getString("preferredCurrencyLocale", "en-US")
+        val sharedPrefDoiwallet = applicationContext.getSharedPreferences("group.org.doichain.doiwallet", Context.MODE_PRIVATE)
+
+        val allEntries: Map<String, *> = sharedPrefDoiwallet.all
+        val allEntriesDoiwallet: Map<String, *> = sharedPref.all 
+
+        val preferredCurrency = sharedPrefDoiwallet.getString("preferredCurrency", "USD")
+
+        val fiatUnitsJson = applicationContext.assets.open("fiatUnits.json").bufferedReader().use { it.readText() }
+        val json = JSONObject(fiatUnitsJson)
+        val currencyInfo = json.getJSONObject(preferredCurrency)
+        val locale = currencyInfo.getString("locale")
+        val preferredCurrencyLocale = currencyInfo.getString("locale") // sharedPrefDoiwallet.getString("preferredCurrencyLocale", "en-US")
         val previousPrice = sharedPref.getString("previous_price", null)
-
         val currentTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date())
-
-        fetchPrice(preferredCurrency) { fetchedPrice, error ->
+        fetchPrice(preferredCurrency) { priceData, error ->
+            val jsonPriceData = JSONObject(priceData)                      
+            val fetchedPrice = jsonPriceData.optString("price", null)
+            val volume = jsonPriceData.optString("volume", null)
+            val percent = jsonPriceData.optString("percent", null)          
             handlePriceResult(
                 appWidgetManager, appWidgetIds, views, sharedPref,
-                fetchedPrice, previousPrice, currentTime, preferredCurrencyLocale, error
+                fetchedPrice, previousPrice, currentTime, preferredCurrencyLocale, error, volume, percent
             )
         }
 
@@ -67,7 +79,9 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
         previousPrice: String?,
         currentTime: String,
         preferredCurrencyLocale: String?,
-        error: String?
+        error: String?,
+        volume: String?,
+        percent: String?
     ) {
         val isPriceFetched = fetchedPrice != null
         val isPriceCached = previousPrice != null
@@ -82,12 +96,12 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
                 showLoadingError(views)
             } else {
                 Log.d(TAG, "Using cached price from ${Date(lastUpdateTime)}")
-                displayCachedPrice(views, previousPrice, currentTime, preferredCurrencyLocale)
+                displayCachedPrice(views, previousPrice, currentTime, preferredCurrencyLocale, volume!!, percent!!)
             }
         } else {
             Log.d(TAG, "Successfully updated price: $fetchedPrice")
             displayFetchedPrice(
-                views, fetchedPrice!!, previousPrice, currentTime, preferredCurrencyLocale
+                views, fetchedPrice!!, previousPrice, currentTime, preferredCurrencyLocale, volume!!, percent!!
             )
             savePrice(sharedPref, fetchedPrice)
             sharedPref.edit().putLong("last_successful_update", currentTimeMillis).apply()
@@ -105,7 +119,12 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
             setViewVisibility(R.id.last_updated_time, View.VISIBLE)
             setTextViewText(R.id.last_updated_label, "Error")
             setTextViewText(R.id.last_updated_time, "Price unavailable")
-            setViewVisibility(R.id.price_arrow_container, View.GONE)
+           // setViewVisibility(R.id.percent_container, View.GONE)
+            setTextViewText(R.id.coin_name, "DOI:")
+            setTextViewText(R.id.volume_title, "Volume 24h: ")
+            setTextViewText(R.id.change_title, "Change 24h: ")
+            setViewVisibility(R.id.volume, View.VISIBLE)
+            setTextViewText(R.id.volume, "N/A")
         }
     }
 
@@ -113,20 +132,27 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
         views: RemoteViews,
         previousPrice: String?,
         currentTime: String,
-        preferredCurrencyLocale: String?
+        preferredCurrencyLocale: String?,
+        volume: String?,
+        percent: String?,
     ) {
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.forLanguageTag(preferredCurrencyLocale!!)).apply {
-            maximumFractionDigits = 0
+            maximumFractionDigits = 3
         }
 
         views.apply {
             setViewVisibility(R.id.loading_indicator, View.GONE)
-            setTextViewText(R.id.price_value, currencyFormat.format(previousPrice?.toDouble()?.toInt()))
+            setTextViewText(R.id.price_value, currencyFormat.format(previousPrice?.toDouble()))
             setTextViewText(R.id.last_updated_time, currentTime)
             setViewVisibility(R.id.price_value, View.VISIBLE)
             setViewVisibility(R.id.last_updated_label, View.VISIBLE)
             setViewVisibility(R.id.last_updated_time, View.VISIBLE)
-            setViewVisibility(R.id.price_arrow_container, View.GONE)
+            //setViewVisibility(R.id.percent_container, View.VISIBLE)
+            setTextViewText(R.id.coin_name, "DOI:")
+            setTextViewText(R.id.volume_title, "Volume 24h: ")
+            setTextViewText(R.id.change_title, "Change 24h: ")
+            setViewVisibility(R.id.volume, View.VISIBLE)
+            setTextViewText(R.id.volume, "volume")
         }
     }
 
@@ -135,15 +161,21 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
         fetchedPrice: String,
         previousPrice: String?,
         currentTime: String,
-        preferredCurrencyLocale: String?
-    ) {
-        val currentPrice =  fetchedPrice.toDouble() // Remove cents
-        Log.d(TAG, "Current price: $currentPrice")
+        preferredCurrencyLocale: String?,
+        volume: String,
+        percent: String
+    ) {        
+        val currentPrice =  fetchedPrice.toDouble() // Remove cents  
+        val currentVolume =  volume.toDouble().let { it.toInt() }
+        Log.d(TAG, "Current price: $currentPrice")       
+        
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.forLanguageTag(preferredCurrencyLocale!!)).apply {
-            maximumFractionDigits = 2
+            maximumFractionDigits = 3
+        }      
+        val currencyFormatVolume = NumberFormat.getCurrencyInstance(Locale.forLanguageTag(preferredCurrencyLocale!!)).apply {
+            maximumFractionDigits = 0
         }
-        Log.d(TAG, "Current currencyFormat: $currencyFormat")
-
+        
         views.apply {
             setViewVisibility(R.id.loading_indicator, View.GONE)
             setTextViewText(R.id.price_value, currencyFormat.format(currentPrice))
@@ -151,16 +183,26 @@ class WidgetUpdateWorker(context: Context, workerParams: WorkerParameters) : Wor
             setViewVisibility(R.id.price_value, View.VISIBLE)
             setViewVisibility(R.id.last_updated_label, View.VISIBLE)
             setViewVisibility(R.id.last_updated_time, View.VISIBLE)
-
-            if (previousPrice != null) {
-                setViewVisibility(R.id.price_arrow_container, View.VISIBLE)
-                setTextViewText(R.id.previous_price, currencyFormat.format(previousPrice.toDouble()))
-                setImageViewResource(
-                    R.id.price_arrow,
-                    if (currentPrice > previousPrice.toDouble().toInt()) android.R.drawable.arrow_up_float else android.R.drawable.arrow_down_float
+            setTextViewText(R.id.coin_name, "DOI:")
+            setTextViewText(R.id.volume_title, "Volume 24h: ")
+            setTextViewText(R.id.change_title, "Change 24h: ")
+            
+            setViewVisibility(R.id.volume, View.VISIBLE)
+            setTextViewText(R.id.volume, currencyFormatVolume.format(currentVolume))
+            setViewVisibility(R.id.percent_container, View.VISIBLE)
+            
+            if (percent != null) {
+                setTextViewText(R.id.percent, percent + "%")
+                setTextViewText(
+                    R.id.percent_arrow, 
+                    if (percent.toDouble() > 0) "↑" else "↓"
                 )
-            } else {
-                setViewVisibility(R.id.price_arrow_container, View.GONE)
+                setTextColor(
+                    R.id.percent_arrow,
+                    if (percent.toDouble() > 0) android.graphics.Color.GREEN else android.graphics.Color.RED
+                )
+            }else {
+                setViewVisibility(R.id.percent_container, View.GONE)
             }
         }
     }

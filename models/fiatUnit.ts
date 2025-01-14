@@ -206,16 +206,17 @@ const RateExtractors = {
     if (!(rate >= 0)) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
     return rate;
 */
-    let json; 
+    let json;
+    
     try {
-      const res = await fetch(`https://api.coinpaprika.com/v1/coins/doi-doicoin/ohlcv/latest`);
+      const res = await fetch(`https://api.coinpaprika.com/v1/tickers/doi-doicoin?quotes=${ticker}`);
       json = await res.json();
-      //let aaa = json.body.map((p: TFiatUnits) => p.close);
       
     } catch (e: any) {
       throw new Error(`Could not update rate  ${e.message}`);
     }
-    let rate = json[0].close;    
+    let rate = json.quotes[ticker]?.price
+   
     if (!rate) throw new Error(`Could not update rate for ${ticker}: data is wrong`);
 
     rate = Number(rate);
