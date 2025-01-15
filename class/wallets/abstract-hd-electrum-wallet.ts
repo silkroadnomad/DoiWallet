@@ -412,6 +412,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             this._txs_by_external_index[c] = this._txs_by_external_index[c] || [];
             const { vin: txVin, vout: txVout, ...txRest } = tx;
             const clonedTx = { ...txRest, inputs: txVin.slice(0), outputs: txVout.slice(0) };
+           
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -430,6 +431,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             this._txs_by_external_index[c] = this._txs_by_external_index[c] || [];
             const { vin: txVin, vout: txVout, ...txRest } = tx;
             const clonedTx = { ...txRest, inputs: txVin.slice(0), outputs: txVout.slice(0) };
+                   
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -453,6 +455,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             this._txs_by_internal_index[c] = this._txs_by_internal_index[c] || [];
             const { vin: txVin, vout: txVout, ...txRest } = tx;
             const clonedTx = { ...txRest, inputs: txVin.slice(0), outputs: txVout.slice(0) };
+         
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -471,6 +474,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             this._txs_by_internal_index[c] = this._txs_by_internal_index[c] || [];
             const { vin: txVin, vout: txVout, ...txRest } = tx;
             const clonedTx = { ...txRest, inputs: txVin.slice(0), outputs: txVout.slice(0) };
+         
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -497,6 +501,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
               this._txs_by_payment_code_index[pc][c] = this._txs_by_payment_code_index[pc][c] || [];
               const { vin: txVin, vout: txVout, ...txRest } = tx;
               const clonedTx = { ...txRest, inputs: txVin.slice(0), outputs: txVout.slice(0) };
+           
 
               // trying to replace tx if it exists already (because it has lower confirmations, for example)
               let replaced = false;
