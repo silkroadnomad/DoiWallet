@@ -86,12 +86,29 @@ export const ELECTRUM_SERVER_HISTORY = 'electrum_server_history';
 const ELECTRUM_CONNECTION_DISABLED = 'electrum_disabled';
 const storageKey = 'ELECTRUM_PEERS';
 
-const defaultPeer = { host: 'itchy-jellyfish-89.doi.works', ssl: '50002' };
-export const hardcodedPeers: Peer[] = [
+import { BITCOIN_ELECTRUM_SERVERS, NAMECOIN_ELECTRUM_SERVERS } from './networkServers';
+import { Chain } from '../models/doichainUnits';
+
+const DOICHAIN_ELECTRUM_SERVERS: Peer[] = [
   { host: "itchy-jellyfish-89.doi.works", ssl: "50002" },
   { host: "big-parrot-60.doi.works", ssl: "50002" },
   { host: "ugly-bird-70.doi.works", ssl: "50002" },
 ];
+
+const defaultPeer = { host: 'itchy-jellyfish-89.doi.works', ssl: '50002' };
+
+export function getServersForChain(chain: Chain): Peer[] {
+  switch (chain) {
+    case Chain.BTC:
+      return BITCOIN_ELECTRUM_SERVERS;
+    case Chain.NMC:
+      return NAMECOIN_ELECTRUM_SERVERS;
+    default:
+      return DOICHAIN_ELECTRUM_SERVERS;
+  }
+}
+
+export const hardcodedPeers = DOICHAIN_ELECTRUM_SERVERS;
 
 
 
@@ -189,12 +206,19 @@ async function getSavedPeer(): Promise<Peer | null> {
   return null;
 }
 
-export async function connectMain(): Promise<void> {
+export async function connectMain(chain: Chain = Chain.DOI): Promise<void> {
   if (await isDisabled()) {
     console.log('Electrum connection disabled by user. Skipping connectMain call');
     return;
   }
-  let usingPeer = getNextPeer();
+  
+  // Update hardcodedPeers based on chain
+  const servers = getServersForChain(chain);
+  currentPeerIndex = Math.floor(Math.random() * servers.length);
+  
+  let usingPeer = servers[currentPeerIndex];
+  currentPeerIndex = (currentPeerIndex + 1) % servers.length;
+  
   const savedPeer = await getSavedPeer();
   if (savedPeer && savedPeer.host && (savedPeer.tcp || savedPeer.ssl)) {
     usingPeer = savedPeer;
@@ -397,9 +421,23 @@ async function getRandomDynamicPeer(): Promise<Peer> {
   }
 }
 
-export const getBalanceByAddress = async function (address: string): Promise<{ confirmed: number; unconfirmed: number }> {
+import { BITCOIN_MAINNET, NAMECOIN_MAINNET, DOICHAIN_MAINNET } from './network';
+
+function getNetworkForChain(chain: Chain) {
+  switch (chain) {
+    case Chain.BTC:
+      return BITCOIN_MAINNET;
+    case Chain.NMC:
+      return NAMECOIN_MAINNET;
+    default:
+      return DOICHAIN_MAINNET;
+  }
+}
+
+export const getBalanceByAddress = async function (address: string, chain: Chain = Chain.DOI): Promise<{ confirmed: number; unconfirmed: number }> {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
+  const network = getNetworkForChain(chain);
+  const script = bitcoin.address.toOutputScript(address, network);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   const balance = await mainClient.blockchainScripthash_getBalance(reversedHash.toString('hex'));
@@ -421,9 +459,10 @@ export const getSecondsSinceLastRequest = function () {
   return mainClient && mainClient.timeLastCall ? (+new Date() - mainClient.timeLastCall) / 1000 : -1;
 };
 
-export const getTransactionsByAddress = async function (address: string): Promise<ElectrumHistory[]> {
+export const getTransactionsByAddress = async function (address: string, chain: Chain = Chain.DOI): Promise<ElectrumHistory[]> {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
+  const network = getNetworkForChain(chain);
+  const script = bitcoin.address.toOutputScript(address, network);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   const history = await mainClient.blockchainScripthash_getHistory(reversedHash.toString('hex'));
@@ -434,9 +473,10 @@ export const getTransactionsByAddress = async function (address: string): Promis
   return history;
 };
 
-export const getMempoolTransactionsByAddress = async function (address: string): Promise<MempoolTransaction[]> {
+export const getMempoolTransactionsByAddress = async function (address: string, chain: Chain = Chain.DOI): Promise<MempoolTransaction[]> {
   if (!mainClient) throw new Error('Electrum client is not connected');
-  const script = bitcoin.address.toOutputScript(address, DOICHAIN);
+  const network = getNetworkForChain(chain);
+  const script = bitcoin.address.toOutputScript(address, network);
   const hash = bitcoin.crypto.sha256(script);
   const reversedHash = Buffer.from(hash).reverse();
   return mainClient.blockchainScripthash_getMempool(reversedHash.toString('hex'));
