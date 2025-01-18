@@ -11,7 +11,8 @@ import { Transaction, TWallet } from '../../class/wallets/types';
 import presentAlert from '../../components/Alert';
 import CopyToClipboardButton from '../../components/CopyToClipboardButton';
 
-import { DoichainUnit } from "../../models/doichainUnits";
+import { DoichainUnit, Chain } from "../../models/doichainUnits";
+import { NameOp, NamecoinNameOp, DoichainNameOp, ScriptPubKey } from "../../models/nameOp";
 
 import HandOffComponent from '../../components/HandOffComponent';
 import HeaderRightButton from '../../components/HeaderRightButton';
@@ -68,7 +69,7 @@ const TransactionDetails = () => {
   const { saveToDisk, txMetadata, counterpartyMetadata, wallets, getTransactions } = useStorage();
   const [from, setFrom] = useState<string[]>([]);
   const [to, setTo] = useState<string[]>([]);
-  const [nameOps, setNameOps] = useState<{ name: string; value: string }[]>([]);  
+  const [nameOps, setNameOps] = useState<{ name: string; value: string; operation?: string }[]>([]);  
   const [isLoading, setIsLoading] = useState(true);
   const [tx, setTX] = useState<Transaction>();
   const [memo, setMemo] = useState<string>('');
@@ -120,7 +121,7 @@ const TransactionDetails = () => {
         let foundTx: Transaction | false = false;
         let newFrom: string[] = [];
         let newTo: string[] = [];
-        let newNameOps: string[] = [];        
+        let newNameOps: NameOp[] = [];        
         for (const transaction of getTransactions(undefined, Infinity, true)) {
           if (transaction.hash === hash) {
             foundTx = transaction;
@@ -130,11 +131,32 @@ const TransactionDetails = () => {
             for (const output of foundTx.outputs) {
               if (output?.scriptPubKey?.addresses) newTo = newTo.concat(output.scriptPubKey.addresses);
               
-              if (output?.scriptPubKey?.nameOp){
-                const nameOpArray = output.scriptPubKey.nameOp;
-                //const nameOpArray = Object.keys(output.scriptPubKey.nameOp.entries());
-                //const nameOpArray = Array.from(output.scriptPubKey.nameOp.keys());
-                newNameOps = newNameOps.concat(nameOpArray);
+              if (output?.scriptPubKey?.nameOp) {
+                const scriptPubKey = output.scriptPubKey;
+                const nameOp = scriptPubKey.nameOp;
+                const wallet = wallets.find(w => w.getID() === walletID);
+                
+                if (wallet?.chain === Chain.NMC && nameOp instanceof Map) {
+                  // Handle Namecoin nameOp format
+                  const name = nameOp.get('name')?.toString() || '';
+                  const value = nameOp.get('value')?.toString() || '';
+                  const op = nameOp.get('op')?.toString() || '';
+                  
+                  if (name && value && op) {
+                    newNameOps.push({
+                      name,
+                      value,
+                      operation: op
+                    });
+                  }
+                } else if (Array.isArray(nameOp)) {
+                  // Handle Doichain nameOp format
+                  const doiOps = nameOp as DoichainNameOp[];
+                  newNameOps.push(...doiOps.map(op => ({
+                    name: op.name,
+                    value: op.value
+                  })));
+                }
               }
             }
           }
@@ -360,10 +382,12 @@ const TransactionDetails = () => {
 
         {nameOps.length > 0 && (
           <>            
-            {nameOps.map((nameOp: { name: string, value: string }, index: number) => (
+            {nameOps.map((nameOp: { name: string; value: string; operation?: string }, index: number) => (
               <React.Fragment key={index}>
+                {nameOp.operation && (
+                  <BlueText style={styles.rowCaption}>{loc.transactions.nameOps_operation}: {nameOp.operation}</BlueText>
+                )}
                 <BlueText style={styles.rowCaption}>{loc.transactions.nameOps_name}: {nameOp.name}</BlueText>
-                
                 <BlueText style={styles.rowCaption}>{loc.transactions.nameOps_value}: {nameOp.value}</BlueText>
                 <BlueText style={styles.rowValue}> </BlueText>
               </React.Fragment>

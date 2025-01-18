@@ -366,7 +366,8 @@
     "to": "Zu: {counterparty}",
     "updating": "Aktualisiere....",
     "nameOps_name": "Name",
-    "nameOps_value": "Value"
+    "nameOps_value": "Value",
+    "nameOps_operation": "Operation"
   },
   "wallets": {
     "add_bitcoin": "Doi",
