@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useReducer } from 'react';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React, { useCallback, useEffect, useReducer, ReactElement } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -111,10 +112,22 @@ const walletReducer = (state: State, action: Action): State => {
   }
 };
 
-const WalletsAdd: React.FC<{}> = () => {
-  const { colors } = useTheme();
+type RootStackParamList = {
+  PleaseBackup: { walletID: string };
+  ProvideEntropy: { onGenerated: (entropy: Buffer) => void; words: number };
+  ImportWallet: undefined;
+  WalletsAddMultisig: { walletLabel: string };
+};
 
-  // State
+
+
+
+
+function WalletsAdd(): JSX.Element {
+  const { colors } = useTheme();
+  const { navigate, goBack, setOptions } = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // State management and hooks
   const [state, dispatch] = useReducer(walletReducer, initialState);
   const isLoading = state.isLoading;
   const walletBaseURI = state.walletBaseURI;
@@ -128,7 +141,7 @@ const WalletsAdd: React.FC<{}> = () => {
   const colorScheme = useColorScheme();
   const { addWallet, saveToDisk } = useStorage();
   const { isAdvancedModeEnabled } = useSettings();
-  const { navigate, goBack, setOptions } = useNavigation();
+  // Navigation options already defined above
   const stylesHook = {
     advancedText: {
       color: colors.feeText,
@@ -164,7 +177,21 @@ const WalletsAdd: React.FC<{}> = () => {
     });
   }, [colorScheme, setOptions]);
 
-  const entropyGenerated = (newEntropy: Buffer) => {
+
+
+  const setIsLoading = (value: boolean) => {
+    dispatch({ type: 'SET_LOADING', payload: value });
+  };
+
+  const setEntropy = (value: Buffer) => {
+    dispatch({ type: 'SET_ENTROPY', payload: value });
+  };
+
+  const setEntropyButtonText = (value: string) => {
+    dispatch({ type: 'SET_ENTROPY_BUTTON_TEXT', payload: value });
+  };
+
+  const entropyGenerated = useCallback((newEntropy: Buffer) => {
     let entropyTitle;
     if (!newEntropy) {
       entropyTitle = loc.wallets.add_entropy_provide;
@@ -175,11 +202,7 @@ const WalletsAdd: React.FC<{}> = () => {
     }
     setEntropy(newEntropy);
     setEntropyButtonText(entropyTitle);
-  };
-
-  const setIsLoading = (value: boolean) => {
-    dispatch({ type: 'SET_LOADING', payload: value });
-  };
+  }, []);
 
   const setWalletBaseURI = (value: string) => {
     dispatch({ type: 'SET_WALLET_BASE_URI', payload: value });
@@ -205,13 +228,59 @@ const WalletsAdd: React.FC<{}> = () => {
     dispatch({ type: 'INCREMENT_BACKDOOR_PRESSED', payload: value });
   };
 
-  const setEntropy = (value: Buffer) => {
-    dispatch({ type: 'SET_ENTROPY', payload: value });
-  };
 
-  const setEntropyButtonText = (value: string) => {
-    dispatch({ type: 'SET_ENTROPY_BUTTON_TEXT', payload: value });
-  };
+
+  const handleOnVaultButtonPressed = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Keyboard.dismiss();
+    dispatch({ type: ActionTypes.SET_SELECTED_WALLET_TYPE, payload: ButtonSelected.VAULT });
+  }, [dispatch]);
+
+  const handleOnBitcoinButtonPressed = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    Keyboard.dismiss();
+    dispatch({ type: ActionTypes.SET_SELECTED_WALLET_TYPE, payload: ButtonSelected.ONCHAIN });
+  }, [dispatch]);
+
+  const handleOnLightningButtonPressed = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    dispatch({ type: ActionTypes.INCREMENT_BACKDOOR_PRESSED });
+    Keyboard.dismiss();
+    dispatch({ type: ActionTypes.SET_SELECTED_WALLET_TYPE, payload: ButtonSelected.OFFCHAIN });
+  }, [dispatch]);
+
+  const navigateToEntropy = useCallback(() => {
+    Alert.alert(
+      loc.wallets.add_wallet_seed_length,
+      loc.wallets.add_wallet_seed_length_message,
+      [
+        {
+          text: loc._.cancel,
+          onPress: () => {},
+          style: 'default',
+        },
+        {
+          text: loc.wallets.add_wallet_seed_length_12,
+          onPress: () => {
+            navigate('ProvideEntropy', { onGenerated: entropyGenerated, words: 12 });
+          },
+          style: 'default',
+        },
+        {
+          text: loc.wallets.add_wallet_seed_length_24,
+          onPress: () => {
+            navigate('ProvideEntropy', { onGenerated: entropyGenerated, words: 24 });
+          },
+          style: 'default',
+        },
+      ],
+      { cancelable: true },
+    );
+  }, [navigate, entropyGenerated]);
+
+  const navigateToImportWallet = useCallback(() => {
+    navigate('ImportWallet');
+  }, [navigate]);
 
   const createWallet = async () => {
     setIsLoading(true);
@@ -270,7 +339,6 @@ const WalletsAdd: React.FC<{}> = () => {
         goBack();
       }
     }
-    }
     
     if (selectedWalletType === ButtonSelected.VAULT) {
       setIsLoading(false);
@@ -319,63 +387,7 @@ const WalletsAdd: React.FC<{}> = () => {
   //   });
   // };
 
-  const navigateToEntropy = () => {
-    Alert.alert(
-      loc.wallets.add_wallet_seed_length,
-      loc.wallets.add_wallet_seed_length_message,
-      [
-        {
-          text: loc._.cancel,
-          onPress: () => {},
-          style: 'default',
-        },
-        {
-          text: loc.wallets.add_wallet_seed_length_12,
-          onPress: () => {
-            // @ts-ignore: Return later to update
-            navigate('ProvideEntropy', { onGenerated: entropyGenerated, words: 12 });
-          },
-          style: 'default',
-        },
-        {
-          text: loc.wallets.add_wallet_seed_length_24,
-          onPress: () => {
-            // @ts-ignore: Return later to update
-            navigate('ProvideEntropy', { onGenerated: entropyGenerated, words: 24 });
-          },
-          style: 'default',
-        },
-      ],
-      { cancelable: true },
-    );
-  };
 
-  const navigateToImportWallet = () => {
-    // @ts-ignore: Return later to update
-    navigate('ImportWallet');
-  };
-
-  const handleOnVaultButtonPressed = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    Keyboard.dismiss();
-    setSelectedWalletType(ButtonSelected.VAULT);
-  };
-
-  const handleOnBitcoinButtonPressed = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    Keyboard.dismiss();
-    setSelectedWalletType(ButtonSelected.ONCHAIN);
-  };
-
-  const handleOnLightningButtonPressed = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    // @ts-ignore: Return later to update
-    setBackdoorPressed((prevState: number) => {
-      return prevState + 1;
-    });
-    Keyboard.dismiss();
-    setSelectedWalletType(ButtonSelected.OFFCHAIN);
-  };
 
   return (
     <ScrollView style={stylesHook.root} testID="ScrollView" automaticallyAdjustKeyboardInsets>
@@ -537,7 +549,7 @@ const styles = StyleSheet.create({
     height: 44,
     marginHorizontal: 20,
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 8,
     borderRadius: 4,
   },
   textInputCommon: {
@@ -546,15 +558,14 @@ const styles = StyleSheet.create({
     color: '#81868e',
   },
   buttons: {
-    flexDirection: 'column',
-    marginHorizontal: 20,
-    marginTop: 16,
-    borderWidth: 0,
-    minHeight: 100,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginTop: 10,
   },
   button: {
-    width: '100%',
-    height: 'auto',
+    width: '30%',
+    height: 48,
   },
   advanced: {
     marginHorizontal: 20,
@@ -569,11 +580,13 @@ const styles = StyleSheet.create({
     minHeight: 44,
     height: 44,
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 8,
     borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 0,
   },
   import: {
-    marginVertical: 24,
+    marginVertical: 16,
   },
   noPadding: {
     paddingHorizontal: 0,
