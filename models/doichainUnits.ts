@@ -9,5 +9,8 @@ export type DoichainUnit = typeof DoichainUnit[keyof typeof DoichainUnit];
 export const Chain = {
   ONCHAIN: 'ONCHAIN',
   OFFCHAIN: 'OFFCHAIN',
+  BTC: 'BTC',
+  NMC: 'NMC',
+  DOI: 'DOI',
 } as const;
 export type Chain = (typeof Chain)[keyof typeof Chain];

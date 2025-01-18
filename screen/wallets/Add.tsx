@@ -18,7 +18,7 @@ import {
 import A from '../../blue_modules/analytics';
 import triggerHapticFeedback, { HapticFeedbackTypes } from '../../blue_modules/hapticFeedback';
 import { BlueButtonLink, BlueFormLabel, BlueSpacing20, BlueSpacing40, BlueText } from '../../BlueComponents';
-import { BlueApp, HDSegwitBech32Wallet, HDSegwitP2SHWallet, SegwitP2SHWallet } from '../../class';
+import { BlueApp, HDSegwitBech32Wallet, HDSegwitP2SHWallet, SegwitP2SHWallet, AbstractWallet } from '../../class';
 import presentAlert from '../../components/Alert';
 import Button from '../../components/Button';
 import ListItem from '../../components/ListItem';
@@ -29,14 +29,19 @@ import loc from '../../loc';
 import { Chain } from '../../models/doichainUnits';
 import { useStorage } from '../../hooks/context/useStorage';
 import { useSettings } from '../../hooks/context/useSettings';
+import { BITCOIN_MAINNET, NAMECOIN_MAINNET, DOICHAIN_MAINNET } from '../../blue_modules/network';
 
 
 enum ButtonSelected {
-  // @ts-ignore: Return later to update
-  ONCHAIN = Chain.ONCHAIN,
-  // @ts-ignore: Return later to update
-  OFFCHAIN = Chain.OFFCHAIN,
+  ONCHAIN = 'ONCHAIN',
+  OFFCHAIN = 'OFFCHAIN',
   VAULT = 'VAULT',
+}
+
+enum CoinType {
+  BTC = 'BTC',
+  NMC = 'NMC',
+  DOI = 'DOI',
 }
 
 interface State {
@@ -45,6 +50,7 @@ interface State {
   selectedIndex: number;
   label: string;
   selectedWalletType: ButtonSelected;
+  selectedCoinType: CoinType;
   backdoorPressed: number;
   entropy: Buffer | undefined;
   entropyButtonText: string;
@@ -56,6 +62,7 @@ const ActionTypes = {
   SET_SELECTED_INDEX: 'SET_SELECTED_INDEX',
   SET_LABEL: 'SET_LABEL',
   SET_SELECTED_WALLET_TYPE: 'SET_SELECTED_WALLET_TYPE',
+  SET_SELECTED_COIN_TYPE: 'SET_SELECTED_COIN_TYPE',
   INCREMENT_BACKDOOR_PRESSED: 'INCREMENT_BACKDOOR_PRESSED',
   SET_ENTROPY: 'SET_ENTROPY',
   SET_ENTROPY_BUTTON_TEXT: 'SET_ENTROPY_BUTTON_TEXT',
@@ -73,6 +80,7 @@ const initialState: State = {
   selectedIndex: 0,
   label: '',
   selectedWalletType: ButtonSelected.ONCHAIN,
+  selectedCoinType: CoinType.DOI,
   backdoorPressed: 1,
   entropy: undefined,
   entropyButtonText: loc.wallets.add_entropy_provide,
@@ -90,6 +98,8 @@ const walletReducer = (state: State, action: Action): State => {
       return { ...state, label: action.payload };
     case ActionTypes.SET_SELECTED_WALLET_TYPE:
       return { ...state, selectedWalletType: action.payload };
+    case ActionTypes.SET_SELECTED_COIN_TYPE:
+      return { ...state, selectedCoinType: action.payload };
     case ActionTypes.INCREMENT_BACKDOOR_PRESSED:
       return { ...state, backdoorPressed: state.backdoorPressed + 1 };
     case ActionTypes.SET_ENTROPY:
@@ -101,7 +111,7 @@ const walletReducer = (state: State, action: Action): State => {
   }
 };
 
-const WalletsAdd: React.FC = () => {
+const WalletsAdd: React.FC<{}> = () => {
   const { colors } = useTheme();
 
   // State
@@ -111,6 +121,7 @@ const WalletsAdd: React.FC = () => {
   const selectedIndex = state.selectedIndex;
   const label = state.label;
   const selectedWalletType = state.selectedWalletType;
+  const selectedCoinType = state.selectedCoinType;
   const entropy = state.entropy;
   const entropyButtonText = state.entropyButtonText;
   //
@@ -186,6 +197,10 @@ const WalletsAdd: React.FC = () => {
     dispatch({ type: 'SET_SELECTED_WALLET_TYPE', payload: value });
   };
 
+  const setSelectedCoinType = (value: CoinType) => {
+    dispatch({ type: 'SET_SELECTED_COIN_TYPE', payload: value });
+  };
+
   const setBackdoorPressed = (value: number) => {
     dispatch({ type: 'INCREMENT_BACKDOOR_PRESSED', payload: value });
   };
@@ -220,33 +235,44 @@ const WalletsAdd: React.FC = () => {
         w = new HDSegwitBech32Wallet();
         w.setLabel(label || loc.wallets.details_title);
       }
-      if (selectedWalletType === ButtonSelected.ONCHAIN) {
-        if (entropy) {
-          try {
-            await w.generateFromEntropy(entropy);
-          } catch (e: any) {
-            console.log(e.toString());
-            presentAlert({ message: e.toString() });
-            goBack();
-            return;
-          }
-        } else {
-          await w.generate();
-        }
-        addWallet(w);
-        await saveToDisk();
-        A(A.ENUM.CREATED_WALLET);
-        triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
-        if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
-          // @ts-ignore: Return later to update
-          navigate('PleaseBackup', {
-            walletID: w.getID(),
-          });
-        } else {
-          goBack();
-        }
+
+      // Set chain based on selected coin type
+      if (selectedCoinType === CoinType.BTC) {
+        w.chain = selectedCoinType as Chain;
+      } else if (selectedCoinType === CoinType.NMC) {
+        w.chain = selectedCoinType as Chain;
+      } else {
+        w.chain = selectedCoinType as Chain;
       }
-    } else if (selectedWalletType === ButtonSelected.VAULT) {
+
+      if (entropy) {
+        try {
+          await w.generateFromEntropy(entropy);
+        } catch (e: any) {
+          console.log(e.toString());
+          presentAlert({ message: e.toString() });
+          goBack();
+          return;
+        }
+      } else {
+        await w.generate();
+      }
+      addWallet(w);
+      await saveToDisk();
+      A(A.ENUM.CREATED_WALLET);
+      triggerHapticFeedback(HapticFeedbackTypes.NotificationSuccess);
+      if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
+        // @ts-ignore: Return later to update
+        navigate('PleaseBackup', {
+          walletID: w.getID(),
+        });
+      } else {
+        goBack();
+      }
+    }
+    }
+    
+    if (selectedWalletType === ButtonSelected.VAULT) {
       setIsLoading(false);
       // @ts-ignore: Return later to update
       navigate('WalletsAddMultisig', { walletLabel: label.trim().length > 0 ? label : loc.multisig.default_label });
@@ -384,6 +410,35 @@ const WalletsAdd: React.FC = () => {
           size={styles.button}
         />
       </View>
+
+      {selectedWalletType === ButtonSelected.ONCHAIN && (
+        <View>
+          <BlueFormLabel>Select Cryptocurrency</BlueFormLabel>
+          <View style={styles.buttons}>
+            <WalletButton
+              buttonType="DOI"
+              testID="SelectDOIButton"
+              active={selectedCoinType === CoinType.DOI}
+              onPress={() => setSelectedCoinType(CoinType.DOI)}
+              size={styles.button}
+            />
+            <WalletButton
+              buttonType="BTC"
+              testID="SelectBTCButton"
+              active={selectedCoinType === CoinType.BTC}
+              onPress={() => setSelectedCoinType(CoinType.BTC)}
+              size={styles.button}
+            />
+            <WalletButton
+              buttonType="NMC"
+              testID="SelectNMCButton"
+              active={selectedCoinType === CoinType.NMC}
+              onPress={() => setSelectedCoinType(CoinType.NMC)}
+              size={styles.button}
+            />
+          </View>
+        </View>
+      )}
 
       <View style={styles.advanced}>
         {(() => {
