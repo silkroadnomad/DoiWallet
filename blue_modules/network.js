@@ -1,5 +1,31 @@
 export const VERSION = 0x7100;
 
+export const BITCOIN_MAINNET = {
+  name: 'bitcoin-mainnet',
+  messagePrefix: '\x18Bitcoin Signed Message:\n',
+  bech32: 'bc',
+  bip32: {
+    public: 0x0488b21e,
+    private: 0x0488ade4,
+  },
+  pubKeyHash: 0,
+  scriptHash: 5,
+  wif: 128,
+};
+
+export const NAMECOIN_MAINNET = {
+  name: 'namecoin-mainnet',
+  messagePrefix: '\x18Namecoin Signed Message:\n',
+  bech32: 'nc',
+  bip32: {
+    public: 0x0488b21e,
+    private: 0x0488ade4,
+  },
+  pubKeyHash: 52,
+  scriptHash: 13,
+  wif: 180,
+};
+
 export const DOICHAIN_MAINNET = {
   name: 'mainnet',
   messagePrefix: '\x19Doichain Signed Message:\n',
