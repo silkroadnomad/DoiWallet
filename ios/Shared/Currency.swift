@@ -15,10 +15,29 @@ struct CurrencyError: LocalizedError {
 class Currency {
   
   static func getUserPreferredCurrency() -> String {
+    
+    if let userDefaults2 = UserDefaults(suiteName: UserDefaultsGroupKey.GroupName.rawValue) {
+        // Zeigt nur die Existenz des Objekts
+        print("__________UserDefaults Object: \(userDefaults2)") // <NSUserDefaults: Speicheradresse>
+        
+        // Zeigt den gesamten Inhalt des Objekts
+        print("Complete UserDefaults Content: \(userDefaults2.dictionaryRepresentation())")
+    }
+    
+    if let userDefaults2 = UserDefaults(suiteName: UserDefaultsGroupKey.GroupName.rawValue) {
+        // Zeigt nur die Existenz des Objekts
+      print("_______AppleLocale \(userDefaults2.string(forKey:"AppleLocale") )")
+        
+        // Zeigt den gesamten Inhalt des Objekts
+        print("Complete UserDefaults Content: \(userDefaults2.dictionaryRepresentation())")
+    }
+    
+    
 
     guard let userDefaults = UserDefaults(suiteName: UserDefaultsGroupKey.GroupName.rawValue),
           let preferredCurrency = userDefaults.string(forKey: "preferredCurrency")
     else {
+     
       return "USD"
     }
 
