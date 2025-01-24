@@ -13,13 +13,13 @@ struct MarketWidgetProvider: TimelineProvider {
   static var lastSuccessfulEntry: MarketWidgetEntry?
 
   func placeholder(in context: Context) -> MarketWidgetEntry {
-    return MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: ""))
+    return MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: "", percent: 0.00))
   }
   
   func getSnapshot(in context: Context, completion: @escaping (MarketWidgetEntry) -> ()) {
     let entry: MarketWidgetEntry
     if (context.isPreview) {
-      entry = MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: ""))
+      entry = MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: "", percent: 0.00))
     } else {
       entry = MarketWidgetEntry(date: Date(), marketData: emptyMarketData)
     }
@@ -29,7 +29,7 @@ struct MarketWidgetProvider: TimelineProvider {
   func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
       var entries: [MarketWidgetEntry] = []
       if context.isPreview {
-        let entry = MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: ""))
+        let entry = MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10 000", rate: 10000, volume: "", percent: 0.00))
         entries.append(entry)
         let timeline = Timeline(entries: entries, policy: .atEnd)
         completion(timeline)
@@ -102,7 +102,7 @@ struct MarketWidget: Widget {
 
 struct MarketWidget_Previews: PreviewProvider {
   static var previews: some View {
-    MarketWidgetEntryView(entry: MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10,000", rate: 0, volume: "")))
+    MarketWidgetEntryView(entry: MarketWidgetEntry(date: Date(), marketData: MarketData(nextBlock: "26", sats: "9 134", price: "$10,000", rate: 0, volume: "", percent: 0.00)))
       .previewContext(WidgetPreviewContext(family: .systemSmall))
   }
 }

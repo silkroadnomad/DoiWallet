@@ -182,14 +182,14 @@ struct PriceView: View {
 struct PriceView_Previews: PreviewProvider {
   static var previews: some View {
     Group {
-      PriceView(entry: PriceWidgetEntry(date: Date(), family: .systemSmall, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "", dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
+      PriceView(entry: PriceWidgetEntry(date: Date(), family: .systemSmall, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "", percent: 0.00, dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
         .previewContext(WidgetPreviewContext(family: .systemSmall)).padding()
-      if #available(iOSApplicationExtension 16.0, *) {
-        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryCircular, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "", dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
+      if #available(iOSApplicationExtension 17.0, *) {
+        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryCircular, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "",percent: 0.00, dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
           .previewContext(WidgetPreviewContext(family: .accessoryCircular))
-        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryInline, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "", dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
+        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryInline, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "",percent: 0.00, dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
           .previewContext(WidgetPreviewContext(family: .accessoryInline))
-        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryRectangular, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "", dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
+        PriceView(entry: PriceWidgetEntry(date: Date(), family: .accessoryRectangular, currentMarketData: MarketData(nextBlock: "", sats: "", price: "$10,000", rate: 10000, volume: "",percent: 0.00,dateString: "2019-09-18T17:27:00+00:00"), previousMarketData: emptyMarketData))
           .previewContext(WidgetPreviewContext(family: .accessoryRectangular))
       }
     }

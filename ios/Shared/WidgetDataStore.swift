@@ -36,10 +36,7 @@ struct WidgetDataStore: Codable {
       return volumeString
     }
     return String(volume)
-  }
-  var formattedPercent: String? {   
-    return String(percent) + "%"
-  }
+  } 
   var formattedRateForSmallComplication: String? {
     return rateDouble.abbreviated
   }
