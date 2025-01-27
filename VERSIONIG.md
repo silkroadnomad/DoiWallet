@@ -23,12 +23,12 @@ dc7.0.8120
 ### Android
 - Each new version for Android includes a unique build number that does not conform to the standard semantic versioning format (`X.Y.Z`).
 - The build number ensures that every Android release has a distinct version for distribution.
-- To solve the issue to keep the base version visible until next BlueWallet rease, we just add the buildnumber to the baseversion like so(`X.Y.Z${ANDROIDBUILDNO}`).
+- To solve the issue to keep the base version visible until next BlueWallet release, we just add the buildnumber to the baseversion like so(`X.Y.Z${ANDROIDBUILDNO}`).
 
 ### App Store (iOS)
 - Apple App Store does NOT require the version number to be incremented with each submission.
 - It can increment the build number for each release
-- Therefore we use the Bndroid build number also in the iOS version no matter which build number like so: (`X.Y.Z${ANDROIDBUILDNO}`) 
+- Therefore, we use the Android build number also in the iOS version no matter which build number iOS a has like so: (`X.Y.Z${ANDROIDBUILDNO}`) 
 
 ## 🏷️ Tagging System
 - Each version tag provides a clear mapping to the original project version, the Android release, and the iOS release.
