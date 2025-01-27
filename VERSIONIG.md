@@ -23,21 +23,23 @@ dc7.0.8120
 ### Android
 - Each new version for Android includes a unique build number that does not conform to the standard semantic versioning format (`X.Y.Z`).
 - The build number ensures that every Android release has a distinct version for distribution.
+- To solve the issue to keep the base version visible until next BlueWallet rease, we just add the buildnumber to the baseversion like so(`X.Y.Z${ANDROIDBUILDNO}`).
 
 ### App Store (iOS)
-- Apple App Store requires the version number to be incremented with each submission. This may result in discrepancies between the forked base project’s version and the published iOS version.
-- To address this, the Android release number is appended to the version to maintain clarity and traceability across platforms.
+- Apple App Store does NOT require the version number to be incremented with each submission.
+- It can increment the build number for each release
+- Therefore we use the Bndroid build number also in the iOS version no matter which build number like so: (`X.Y.Z${ANDROIDBUILDNO}`) 
 
 ## 🏷️ Tagging System
 - Each version tag provides a clear mapping to the original project version, the Android release, and the iOS release.
-- Tags in the GitHub repository reflect the versioning structure and include both the base project version and the platform-specific identifiers.
+- Tags in GitHub reflect the versioning of both Android & iOS.
 
 ## 💡 Example
-- **Version**: `dc7.0.8120`
+- **Git Tag**: `dc7.0.8120` 
   - `dc`: Doichain prefix
   - `7.0.8`: Original project version from BlueWallet
   - `120`: Android build number
-  - `7.0.8120`: iOS build number
+  - `7.0.8120`: The version for iOS and Android 
 
 ## 📝 Summary
-This versioning approach ensures traceability and platform-specific version control while maintaining a clear connection to the base project. If you have further questions, please refer to the tagging information in the GitHub repository or contact the maintainers.
+This versioning approach maintains a clear connection to the base project BlueWallet while respecting mobile platform specific versioning standard. 
